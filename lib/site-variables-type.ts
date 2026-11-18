@@ -12,9 +12,18 @@ export type ThemeId =
   | "night-patrol"
   | "old-glory"
   | "brass-leather"
-  | "clean-dispatch";
+  | "clean-dispatch"
+  | "thin-blue-line"
+  | "black-gold"
+  | "desert-camo"
+  | "woodland-camo"
+  | "yellow-ribbon"
+  | "americana"
+  | "burnt-birch"
+  | "etched-slate"
+  | "maple-walnut";
 
-export type LayoutId = "garrison" | "field-manual" | "showroom" | "quartermaster";
+export type LayoutId = "garrison" | "field-manual" | "showroom" | "quartermaster" | "workshop" | "tribute";
 
 export type VariableProduct = {
   slug: string;
@@ -29,6 +38,7 @@ export type VariableProduct = {
   featured?: boolean;
   visible?: boolean;
   choice?: { label: string; options: string[] } | null;
+  engraving?: { label: string; maxLength: number; required: boolean } | null;
   photos?: string[];
 };
 

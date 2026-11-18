@@ -23,7 +23,9 @@ function List({ s, items }: { s: SiteSettings; items: Product[] }) {
           <div className="qm-buy">
             <Price p={p} currency={s.currency} />
             <StockNote p={p} low={s.lowStockAlert} />
-            {p.option ? (
+            {p.personalize ? (
+              <Link href={`/product/${p.slug}`} className="btn btn-sm btn-ghost">Personalize</Link>
+            ) : p.option ? (
               <Link href={`/product/${p.slug}`} className="btn btn-sm btn-ghost">Choose {p.option.label.toLowerCase()}</Link>
             ) : (
               <AddToCart compact productId={p.id} soldOut={p.stock === 0} storeOpen={s.storeOpen} />

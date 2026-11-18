@@ -14,7 +14,7 @@ type Draft = Omit<Product, "price" | "compareAtPrice" | "stock" | "id" | "slug" 
   optionValues: string;
 };
 
-const blank: Draft = { stripeProductId: undefined, name: "", price: "", compareAtPrice: "", summary: "", description: "", category: "", images: [], stock: "", madeToOrder: false, featured: false, active: true, option: null, optionValues: "" };
+const blank: Draft = { stripeProductId: undefined, name: "", price: "", compareAtPrice: "", summary: "", description: "", category: "", images: [], stock: "", madeToOrder: false, featured: false, active: true, option: null, personalize: null, optionValues: "" };
 
 function toDraft(p: Product): Draft {
   return {
@@ -126,6 +126,21 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
             <p className="hint">Let customers pick a size, color, wood, etc.</p>
             <label className="f"><span>Choice name</span><input value={editing.option?.label ?? ""} onChange={(e) => set({ option: { label: e.target.value, values: [] } })} placeholder="e.g. Color" /></label>
             <label className="f"><span>Options, separated by commas</span><input value={editing.optionValues} onChange={(e) => set({ optionValues: e.target.value })} placeholder="Black, Brown, Natural" /></label>
+            <h2>Personalization</h2>
+            <label className="check">
+              <input type="checkbox" checked={Boolean(editing.personalize)} onChange={(e) => set({ personalize: e.target.checked ? { label: "Engraving text", maxLength: 40, required: false } : null })} />
+              Customers can type text to engrave or add
+            </label>
+            {editing.personalize ? (
+              <>
+                <div className="row2">
+                  <label className="f"><span>Box label</span><input value={editing.personalize.label} onChange={(e) => set({ personalize: { ...editing.personalize!, label: e.target.value } })} placeholder="e.g. Name and dates to engrave" /></label>
+                  <label className="f"><span>Most characters</span><input inputMode="numeric" value={editing.personalize.maxLength} onChange={(e) => set({ personalize: { ...editing.personalize!, maxLength: Number(e.target.value.replace(/\D/g, "")) || 0 } })} /></label>
+                </div>
+                <label className="check"><input type="checkbox" checked={editing.personalize.required} onChange={(e) => set({ personalize: { ...editing.personalize!, required: e.target.checked } })} /> Required (they can&apos;t add it to the cart without it)</label>
+                <p className="hint">Their text shows on the order, highlighted, so you can copy it straight into your engraving software.</p>
+              </>
+            ) : null}
             <h2>Visibility</h2>
             <label className="check"><input type="checkbox" checked={editing.active} onChange={(e) => set({ active: e.target.checked })} /> Show in the shop</label>
             <label className="check"><input type="checkbox" checked={editing.featured} onChange={(e) => set({ featured: e.target.checked })} /> Feature at the top</label>

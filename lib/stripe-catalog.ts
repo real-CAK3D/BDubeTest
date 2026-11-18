@@ -20,6 +20,9 @@ import type { Product } from "./types";
  *    made_to_order   true
  *    choice_label    e.g. Color
  *    choice_options  e.g. Black, Brown, Natural
+ *    engraving_label    e.g. Name to engrave  (adds a text box on the item page)
+ *    engraving_max      e.g. 30  (most characters allowed)
+ *    engraving_required true  (customer must fill it in)
  *  Anything not set in Stripe can be set in the dashboard instead.
  */
 
@@ -63,6 +66,8 @@ function applyProduct(list: Product[], sp: Stripe.Product, currency: string): "a
   if ("featured" in m) patch.featured = yes(m.featured);
   if ("made_to_order" in m) patch.madeToOrder = yes(m.made_to_order);
   if (m.choice_label && m.choice_options) patch.option = { label: m.choice_label, values: m.choice_options.split(",").map((x) => x.trim()).filter(Boolean) };
+  if (m.engraving_label || m.engraving_max)
+    patch.personalize = { label: m.engraving_label || "Engraving text", maxLength: parseInt(m.engraving_max || "40", 10) || 40, required: yes(m.engraving_required) };
   // Stock: the shop counts it down after sales, so only take Stripe's number when it changes there.
   const stockNow = m.stock ?? null;
   if (stockNow !== (existing?.stripeStockSeen ?? null)) {

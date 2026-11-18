@@ -184,7 +184,7 @@ export const SETUP_STEPS: SetupStep[] = [
           "**In site-variables.ts on GitHub**: handy with ChatGPT. See Help > Editing with ChatGPT.",
         ],
       },
-      { p: "Extra details for Stripe products go in the product's **Metadata** (bottom of the product page in Stripe): `category`, `stock`, `summary`, `featured` = true, `made_to_order` = true, `choice_label` = Color and `choice_options` = Black, Brown." },
+      { p: "Extra details for Stripe products go in the product's **Metadata** (bottom of the product page in Stripe): `category`, `stock`, `summary`, `featured` = true, `made_to_order` = true, `choice_label` = Color and `choice_options` = Black, Brown, and for engraving `engraving_label` = Name to engrave and `engraving_max` = 30." },
     ],
     links: [
       { label: "Stripe: add a product", url: "https://dashboard.stripe.com/products/create" },

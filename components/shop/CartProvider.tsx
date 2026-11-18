@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-export type CartLine = { productId: string; quantity: number; option?: string };
+export type CartLine = { productId: string; quantity: number; option?: string; custom?: string };
 export type CartProduct = { id: string; name: string; price: number; image?: string; slug: string; stock: number | null };
 
 type Ctx = {
@@ -10,7 +10,7 @@ type Ctx = {
   count: number;
   subtotal: number;
   add: (l: CartLine) => void;
-  setQty: (productId: string, option: string | undefined, qty: number) => void;
+  setQty: (line: CartLine, qty: number) => void;
   clear: () => void;
   lastAdded: number;
 };
@@ -37,7 +37,8 @@ export function CartProvider({ products, children }: { products: CartProduct[]; 
   }, []);
 
   const value = useMemo<Ctx>(() => {
-    const same = (a: CartLine, id: string, opt?: string) => a.productId === id && (a.option ?? "") === (opt ?? "");
+    // same item + same choice + same engraving text = one cart line
+    const same = (a: CartLine, b: CartLine) => a.productId === b.productId && (a.option ?? "") === (b.option ?? "") && (a.custom ?? "") === (b.custom ?? "");
     return {
       lines,
       products,
@@ -45,7 +46,7 @@ export function CartProvider({ products, children }: { products: CartProduct[]; 
       count: lines.reduce((n, l) => n + l.quantity, 0),
       subtotal: lines.reduce((n, l) => n + (products.find((p) => p.id === l.productId)?.price ?? 0) * l.quantity, 0),
       add(l) {
-        const existing = lines.find((x) => same(x, l.productId, l.option));
+        const existing = lines.find((x) => same(x, l));
         persist(
           existing
             ? lines.map((x) => (x === existing ? { ...x, quantity: Math.min(99, x.quantity + l.quantity) } : x))
@@ -53,8 +54,8 @@ export function CartProvider({ products, children }: { products: CartProduct[]; 
         );
         setLastAdded(Date.now());
       },
-      setQty(id, opt, qty) {
-        persist(qty <= 0 ? lines.filter((x) => !same(x, id, opt)) : lines.map((x) => (same(x, id, opt) ? { ...x, quantity: Math.min(99, qty) } : x)));
+      setQty(line, qty) {
+        persist(qty <= 0 ? lines.filter((x) => !same(x, line)) : lines.map((x) => (same(x, line) ? { ...x, quantity: Math.min(99, qty) } : x)));
       },
       clear() {
         persist([]);

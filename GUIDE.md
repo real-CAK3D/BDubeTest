@@ -141,8 +141,9 @@ Orders show up here automatically when a customer pays. Tap one to open it.
 #### Shipping an order
 
 1. Buy and print the label wherever you like (Pirate Ship, USPS, UPS...).
-2. Open the order, choose the **Carrier** and paste the **Tracking number**.
-3. Tap **Mark shipped & email customer**. The customer gets an email with a tracking link. Without email set up, the button opens your own mail app with the message written for you.
+2. Open the order. Any engraving text is highlighted in yellow under the item, exactly as the customer typed it; copy it straight into your engraving software.
+3. Choose the **Carrier** and paste the **Tracking number**.
+4. Tap **Mark shipped & email customer**. The customer gets an email with a tracking link. Without email set up, the button opens your own mail app with the message written for you.
 
 The filter buttons at the top show only orders waiting to ship, shipped, or delivered. **Download spreadsheet** saves every order for your records or taxes. Discounts, promo codes and sales tax show on each order when used.
 
@@ -163,6 +164,7 @@ Tap **Add item**, or tap an existing item to edit it. The switch on the right of
 - **Photos**: tap **Add photos**. Big phone photos are shrunk automatically. The first photo (gold outline) is the cover; use the arrows to reorder.
 - **Stock**: how many you have. Leave it empty for unlimited. It goes down by itself when someone buys. **Made to order** shows that label instead.
 - **Choices**: one pick-list for customers, like Color with Black, Brown, Natural.
+- **Personalization**: turn on to give customers a box for engraving text (a name, date, unit or message). Set the label, the most characters, and whether it's required.
 - **Show in the shop** and **Feature at the top**.
 
 #### Items from Stripe
@@ -219,13 +221,11 @@ Tap a **theme** (colors and fonts) and a **page layout**. The preview at the bot
 
 #### Themes
 
-- **Military Police**: MP green and gold with a black armband-style header.
-- **Olive Drab**, **OCP Field**: field greens and coyote browns.
-- **Dress Blues**: Army blue and gold, formal lettering.
-- **Night Patrol**: dark background.
-- **Old Glory**: flag navy and red on white.
-- **Brass & Leather**: warm workshop browns.
-- **Clean Dispatch**: plain and modern, no military look.
+- **Military**: Olive Drab, OCP Field, Dress Blues, Black & Gold (Army colors with stars), Desert Camo and Woodland Camo.
+- **Police**: Military Police (MP green and gold with a black armband-style header), Thin Blue Line, and Night Patrol (dark).
+- **USA & support**: Old Glory (flag navy and red), Americana (faded denim and barn red with stripes) and Yellow Ribbon (Support Our Troops yellow and navy).
+- **Workshop**: Burnt Birch (plywood and laser-burn brown), Maple & Walnut, Etched Slate (slate and copper) and Brass & Leather.
+- **Plain**: Clean Dispatch, for a modern look with no theme.
 
 #### Layouts
 
@@ -233,6 +233,8 @@ Tap a **theme** (colors and fonts) and a **page layout**. The preview at the bot
 - **Field Manual**: a sidebar with your categories on every page.
 - **Showroom**: full-width photo on top and large rows for each item. Upload a welcome photo for this one.
 - **Quartermaster**: compact list with add-to-cart buttons. Best with lots of items.
+- **Workshop**: a photo wall of your work and a "how custom orders work" section. Made for engraving and crafts.
+- **Tribute**: centered and formal, with shadow-box frames. Suits memorial and honor pieces.
 
 Every layout splits the shop into pages instead of one long scroll: a home page (welcome, featured items, categories, a short about), a **Shop** page with category tabs and page numbers, plus **About** and **Contact** pages.
 
@@ -374,6 +376,7 @@ _Make products in Stripe and they appear in the shop._
 - `featured`: true
 - `made_to_order`: true
 - `choice_label` and `choice_options`: e.g. Color and Black, Brown, Natural
+- `engraving_label`, `engraving_max` and `engraving_required`: e.g. Name to engrave, 30 and true
 
 Archiving or deleting a product in Stripe hides it in the shop. Past orders keep their details.
 

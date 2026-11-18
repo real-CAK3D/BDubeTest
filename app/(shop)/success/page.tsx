@@ -27,7 +27,10 @@ export default async function Success({ searchParams }: { searchParams: Promise<
           <ul className="receipt">
             {order.items.map((i, n) => (
               <li key={n}>
-                <span>{i.quantity} × {i.name}</span>
+                <span>
+                  {i.quantity} × {i.name}
+                  {i.custom ? <em className="custom-line">Engraving: &ldquo;{i.custom}&rdquo;</em> : null}
+                </span>
                 <span>{money(i.unitAmount * i.quantity, order!.currency)}</span>
               </li>
             ))}

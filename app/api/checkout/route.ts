@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { getActiveProducts, getSettings } from "@/lib/db";
 import { siteUrl, stripe } from "@/lib/stripe";
 
-type CartLine = { productId: string; quantity: number; option?: string };
+type CartLine = { productId: string; quantity: number; option?: string; custom?: string };
 
 export async function POST(req: Request) {
   const s = await stripe();
@@ -23,6 +23,8 @@ export async function POST(req: Request) {
     if (p.stock !== null) qty = Math.min(qty, p.stock);
     if (qty <= 0) return NextResponse.json({ error: `${p.name} is sold out.` }, { status: 400 });
     const option = p.option && it.option && p.option.values.includes(it.option) ? it.option : "";
+    const custom = p.personalize ? String(it.custom ?? "").replace(/\s+/g, " ").trim().slice(0, p.personalize.maxLength) : "";
+    if (p.personalize?.required && !custom) return NextResponse.json({ error: `${p.name} needs "${p.personalize.label}" filled in. Remove it from the cart and add it again.` }, { status: 400 });
     subtotal += p.price * qty;
     const absImages = p.images
       .slice(0, 1)
@@ -33,7 +35,7 @@ export async function POST(req: Request) {
     lines.push({
       quantity: qty,
       price_data:
-        p.stripeProductId && !option
+        p.stripeProductId && !option && !custom
           ? // Items made in Stripe are charged against that Stripe product, so Stripe's reports line up.
             { currency: settings.currency, unit_amount: p.price, product: p.stripeProductId, ...tax }
           : {
@@ -42,9 +44,10 @@ export async function POST(req: Request) {
               ...tax,
               product_data: {
                 name: option ? `${p.name} (${option})` : p.name,
-                description: p.summary || undefined,
+                // shows on the Stripe checkout page and the receipt
+                description: custom ? `${p.personalize!.label}: "${custom}"` : p.summary || undefined,
                 images: absImages.length ? absImages : undefined,
-                metadata: { productId: p.id, option },
+                metadata: { productId: p.id, option, custom },
               },
             },
     });

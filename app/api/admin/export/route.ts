@@ -13,9 +13,9 @@ export async function GET(req: Request) {
   const type = new URL(req.url).searchParams.get("type");
   let rows: unknown[][] = [];
   if (type === "orders") {
-    rows = [["Order", "Date", "Status", "Name", "Email", "Phone", "Items", "Subtotal", "Discount", "Promo code", "Shipping", "Tax", "Total", "Paid with", "Carrier", "Tracking", "Ship to", "Note"]];
+    rows = [["Order", "Date", "Status", "Name", "Email", "Phone", "Items", "Engraving", "Subtotal", "Discount", "Promo code", "Shipping", "Tax", "Total", "Paid with", "Carrier", "Tracking", "Ship to", "Note"]];
     for (const o of await getOrders())
-      rows.push([o.number, o.createdAt.slice(0, 10), o.status, o.name, o.email, o.phone, o.items.map((i) => `${i.quantity} x ${i.name}`).join("; "), money(o.subtotal), money(o.discount), o.promoCode, money(o.shipping), money(o.tax), money(o.total), o.paymentMethod, o.carrier, o.trackingNumber, (o.shippingAddress ?? "").replace(/\n/g, ", "), o.note]);
+      rows.push([o.number, o.createdAt.slice(0, 10), o.status, o.name, o.email, o.phone, o.items.map((i) => `${i.quantity} x ${i.name}`).join("; "), o.items.filter((i) => i.custom).map((i) => `${i.name}: ${i.custom}`).join("; "), money(o.subtotal), money(o.discount), o.promoCode, money(o.shipping), money(o.tax), money(o.total), o.paymentMethod, o.carrier, o.trackingNumber, (o.shippingAddress ?? "").replace(/\n/g, ", "), o.note]);
   } else if (type === "expenses") {
     rows = [["Date", "Description", "Category", "Amount"]];
     for (const e of await getExpenses()) rows.push([e.date, e.description, e.category, money(e.amount)]);

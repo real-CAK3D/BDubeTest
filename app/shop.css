@@ -479,3 +479,58 @@ body:has(.shop) { background: var(--bg); }
 .shop a.btn-ghost { color: var(--ink); }
 .shop .hero-show a.btn { color: var(--band); }
 .shop .hero-show.has-img a.btn { color: #111; }
+
+/* ---------- theme textures (see textureCss in lib/themes.ts) ---------- */
+.band, .footer { background-image: var(--tex-band, none); background-size: var(--tex-size, auto); }
+.hero-garrison, .qm-head, .fm-intro, .hero-workshop, .hero-tribute { position: relative; isolation: isolate; }
+.hero-garrison::before, .qm-head::before, .fm-intro::before, .hero-workshop::before, .hero-tribute::before {
+  content: ""; position: absolute; inset: 0 -100vmax; z-index: -1;
+  background-image: var(--tex-hero, none); background-size: var(--tex-size, auto);
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent);
+}
+.hero-show:not(.has-img) { background-image: var(--tex-band, none); background-size: var(--tex-size, auto); }
+
+/* ---------- Workshop layout ---------- */
+.hero-workshop { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(1.5rem, 5vw, 4rem); align-items: center; padding: clamp(2.5rem, 6vw, 4.5rem) 0 1.5rem; }
+.hw-copy { display: grid; gap: 1rem; justify-items: start; }
+.hw-copy h1, .hw-copy .lede { margin: 0; }
+.hw-media { aspect-ratio: 4 / 3.2; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); display: grid; place-items: center; border: 1px solid var(--line); }
+.hw-media img, .hw-media .pimg { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px) { .hero-workshop { grid-template-columns: 1fr; } .hw-media { order: -1; } }
+.steps-row { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.steps-row li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; display: grid; gap: 0.35rem; align-content: start; }
+.steps-row li::before { content: counter(s); width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 700; margin-bottom: 0.3rem; }
+.steps-row span { color: var(--muted); font-size: 0.95rem; }
+@media (max-width: 860px) { .steps-row { grid-template-columns: 1fr 1fr; } }
+.gallery-wall { columns: 3 260px; column-gap: 1rem; }
+.wall-item { display: block; break-inside: avoid; margin-bottom: 1rem; text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; position: relative; }
+.wall-item .pimg { height: auto; aspect-ratio: auto; }
+.wall-item .pimg-empty { aspect-ratio: 1; }
+.wall-item:nth-child(3n+2) .pimg-empty { aspect-ratio: 4 / 5; }
+.wall-cap { display: flex; justify-content: space-between; gap: 0.6rem; padding: 0.7rem 0.85rem; align-items: baseline; }
+.wall-cap strong { font-weight: 700; }
+.wall-item:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+.wall-tag { position: absolute; top: 0.6rem; left: 0.6rem; background: var(--band); color: var(--band-ink); font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; }
+@media (max-width: 560px) { .gallery-wall { columns: 2; column-gap: 0.6rem; } .wall-item { margin-bottom: 0.6rem; } .wall-cap { flex-direction: column; gap: 0.1rem; padding: 0.5rem 0.6rem; font-size: 0.9rem; } }
+
+/* ---------- Tribute layout ---------- */
+.hero-tribute { display: grid; justify-items: center; text-align: center; gap: 1.1rem; padding: clamp(2.5rem, 7vw, 5rem) 0 2rem; }
+.hero-tribute h1 { max-width: 18ch; margin: 0.6rem 0 0; }
+.hero-tribute .lede { margin: 0 auto; }
+.tribute-section > h2, .tribute-section .catalog-head { text-align: center; justify-content: center; }
+.tribute-section > h2::after { content: ""; display: block; width: 64px; height: 3px; background: var(--stitch); margin: 0.6rem auto 0; }
+.grid.framed { gap: 1.8rem; }
+.grid.framed .card { border: 0; background: var(--band); padding: 10px; border-radius: 2px; box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.5); }
+.grid.framed .card-media { border: 2px solid var(--stitch); border-radius: 1px; }
+.grid.framed .card-body { background: var(--surface); margin-top: 10px; border-radius: 1px; text-align: center; align-items: center; }
+.grid.framed .card-foot { justify-content: center; }
+.tribute-section .cat-tabs { justify-content: center; }
+
+/* ---------- personalization (engraving text) ---------- */
+.buy .personalize { grid-column: 1 / -1; position: relative; }
+.buy .personalize textarea { font: inherit; font-weight: 400; padding: 0.6rem 0.7rem; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--radius); resize: vertical; }
+.buy .personalize .count { font-style: normal; font-weight: 400; color: var(--muted); font-size: 0.8rem; justify-self: end; }
+.custom-text { font-size: 0.9rem; color: var(--ink); background: var(--surface-2); border-radius: 4px; padding: 0.1rem 0.4rem; justify-self: start; margin-top: 0.15rem; overflow-wrap: anywhere; }
+.personal-note { display: inline-block; font-size: 0.82rem; font-weight: 600; color: var(--accent); }
+.custom-line { display: block; font-style: normal; font-size: 0.9rem; color: var(--muted); }

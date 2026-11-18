@@ -1,4 +1,6 @@
 export type ProductOption = { label: string; values: string[] };
+// Lets the customer type text for the item, e.g. a name to engrave.
+export type Personalize = { label: string; maxLength: number; required: boolean };
 
 export type Product = {
   id: string;
@@ -15,6 +17,7 @@ export type Product = {
   featured: boolean;
   active: boolean; // visible to customers
   option?: ProductOption | null;
+  personalize?: Personalize | null;
   // Set when the item comes from Stripe (Stripe > Product catalog)
   stripeProductId?: string;
   stripeStockSeen?: string | null;
@@ -26,6 +29,7 @@ export type OrderItem = {
   productId: string;
   name: string;
   option?: string;
+  custom?: string; // engraving / personalization text
   quantity: number;
   unitAmount: number; // cents
 };

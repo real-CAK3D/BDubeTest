@@ -68,6 +68,7 @@ export function OrderList({ initial, openId, status, canEmail }: { initial: Orde
                 <strong>#{o.number}</strong>
                 <span>{o.name || o.email}</span>
                 <span className="muted">{shortDate(o.createdAt)}</span>
+                {o.items.some((i) => i.custom) ? <span className="pill engrave-pill">Engraving</span> : null}
                 <span className={`pill s-${o.status}`}>{STATUSES.find((s) => s.id === o.status)?.label}</span>
                 <strong>{money(o.total, o.currency)}</strong>
               </button>
@@ -78,7 +79,10 @@ export function OrderList({ initial, openId, status, canEmail }: { initial: Orde
                       <h3>Items</h3>
                       <ul className="plain">
                         {o.items.map((i, n) => (
-                          <li key={n}>{i.quantity} × {i.name}{i.option && !i.name.includes(i.option) ? ` (${i.option})` : ""} <span className="muted">{money(i.unitAmount * i.quantity, o.currency)}</span></li>
+                          <li key={n}>
+                            {i.quantity} × {i.name}{i.option && !i.name.includes(i.option) ? ` (${i.option})` : ""} <span className="muted">{money(i.unitAmount * i.quantity, o.currency)}</span>
+                            {i.custom ? <div className="engrave">Engrave: <strong>&ldquo;{i.custom}&rdquo;</strong></div> : null}
+                          </li>
                         ))}
                         {o.discount ? <li className="muted">Discount{o.promoCode ? ` (${o.promoCode})` : ""} −{money(o.discount, o.currency)}</li> : null}
                         {o.shipping ? <li className="muted">Shipping {money(o.shipping, o.currency)}</li> : null}

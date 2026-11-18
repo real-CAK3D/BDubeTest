@@ -54,7 +54,7 @@ export function variablesToSettings(v: SiteVariables): SiteSettings {
   };
 }
 
-export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option"> & { images?: string[] };
+export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize"> & { images?: string[] };
 
 // duplicate slugs: first one wins
 export function variablesToProducts(v: SiteVariables): FileProduct[] {
@@ -80,6 +80,7 @@ export function variablesToProducts(v: SiteVariables): FileProduct[] {
       featured: p.featured ?? false,
       active: p.visible ?? true,
       option: p.choice && p.choice.label && p.choice.options.length ? { label: p.choice.label, values: p.choice.options } : null,
+      personalize: p.engraving ? { label: p.engraving.label, maxLength: p.engraving.maxLength, required: p.engraving.required } : null,
     };
     if (p.photos) fp.images = p.photos;
     out.push(fp);

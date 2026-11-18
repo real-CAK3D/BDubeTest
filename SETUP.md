@@ -144,7 +144,7 @@ Either way works, and you can mix them:
 - **In Stripe**: Product catalog > **+ Add product**. Give it a name, description, photos and a **one-off** price. It appears in the shop within seconds.
 - **In site-variables.ts on GitHub**: handy with ChatGPT. See Help > Editing with ChatGPT.
 
-Extra details for Stripe products go in the product's **Metadata** (bottom of the product page in Stripe): `category`, `stock`, `summary`, `featured` = true, `made_to_order` = true, `choice_label` = Color and `choice_options` = Black, Brown.
+Extra details for Stripe products go in the product's **Metadata** (bottom of the product page in Stripe): `category`, `stock`, `summary`, `featured` = true, `made_to_order` = true, `choice_label` = Color and `choice_options` = Black, Brown, and for engraving `engraving_label` = Name to engrave and `engraving_max` = 30.
 
 Links: [Stripe: add a product](https://dashboard.stripe.com/products/create), Open Products (dashboard, `/admin/products`)
 

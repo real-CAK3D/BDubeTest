@@ -2,6 +2,8 @@ import { FieldManualCatalog, FieldManualHome } from "./FieldManual";
 import { GarrisonCatalog, GarrisonHome } from "./Garrison";
 import { QuartermasterCatalog, QuartermasterHome } from "./Quartermaster";
 import { ShowroomCatalog, ShowroomHome } from "./Showroom";
+import { TributeCatalog, TributeHome } from "./Tribute";
+import { WorkshopCatalog, WorkshopHome } from "./Workshop";
 import type { CatalogProps, HomeProps } from "./types";
 
 // To add a layout: write a FooHome and FooCatalog, add them here, and list it in LAYOUTS (lib/themes.ts).
@@ -10,6 +12,8 @@ const VIEWS: Record<string, { Home: (p: HomeProps) => React.ReactNode; Catalog: 
   "field-manual": { Home: FieldManualHome, Catalog: FieldManualCatalog },
   showroom: { Home: ShowroomHome, Catalog: ShowroomCatalog },
   quartermaster: { Home: QuartermasterHome, Catalog: QuartermasterCatalog },
+  workshop: { Home: WorkshopHome, Catalog: WorkshopCatalog },
+  tribute: { Home: TributeHome, Catalog: TributeCatalog },
 };
 
 export const viewsFor = (layout: string) => VIEWS[layout] ?? VIEWS.garrison;

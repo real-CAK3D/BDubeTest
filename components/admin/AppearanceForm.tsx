@@ -1,6 +1,9 @@
 "use client";
-import type { Layout, Theme } from "@/lib/themes";
+import type { Layout, Theme, ThemeGroup } from "@/lib/themes";
+
+const GROUPS: ThemeGroup[] = ["Military", "Police", "USA & support", "Workshop", "Plain"];
 import type { SiteSettings } from "@/lib/types";
+import { Tabs } from "./Tabs";
 import { useSettings } from "./useSettings";
 
 export function AppearanceForm({ initial, themes, layouts }: { initial: SiteSettings; themes: Theme[]; layouts: Layout[] }) {
@@ -12,26 +15,37 @@ export function AppearanceForm({ initial, themes, layouts }: { initial: SiteSett
         <h1>Look & layout</h1>
         <a className="b b-ghost" href={previewUrl} target="_blank" rel="noreferrer">Open preview</a>
       </div>
+      <Tabs
+        label="Look and layout"
+        tabs={[
+          { id: "theme", label: "Theme", badge: themes.find((t) => t.id === s.theme)?.name, content: (
       <section className="panel">
         <div className="panel-head"><h2>Theme</h2></div>
-        <div className="theme-grid" role="radiogroup" aria-label="Theme">
-          {themes.map((t) => (
-            <button key={t.id} role="radio" aria-checked={s.theme === t.id} className={`theme-card ${s.theme === t.id ? "on" : ""}`} onClick={() => set({ theme: t.id })}>
-              <span className="theme-swatch" style={{ background: t.colors.bg }}>
-                <span style={{ background: t.colors.band, color: t.colors.bandInk, borderBottom: `3px solid ${t.colors.stitch}`, fontFamily: t.fonts.display }}>Aa</span>
-                <span className="sw-row">
-                  <i style={{ background: t.colors.accent }} />
-                  <i style={{ background: t.colors.stitch }} />
-                  <i style={{ background: t.colors.surface2 }} />
-                  <i style={{ background: t.colors.ink }} />
-                </span>
-              </span>
-              <strong>{t.name}</strong>
-              <span className="muted">{t.description}</span>
-            </button>
-          ))}
-        </div>
+        {GROUPS.map((g) => (
+          <div key={g} className="theme-group">
+            <h3>{g}</h3>
+            <div className="theme-grid" role="radiogroup" aria-label={`${g} themes`}>
+              {themes.filter((t) => t.group === g).map((t) => (
+                <button key={t.id} role="radio" aria-checked={s.theme === t.id} className={`theme-card ${s.theme === t.id ? "on" : ""}`} onClick={() => set({ theme: t.id })}>
+                  <span className="theme-swatch" style={{ background: t.colors.bg }}>
+                    <span style={{ background: t.colors.band, color: t.colors.bandInk, borderBottom: `3px solid ${t.colors.stitch}`, fontFamily: t.fonts.display }}>Aa</span>
+                    <span className="sw-row">
+                      <i style={{ background: t.colors.accent }} />
+                      <i style={{ background: t.colors.stitch }} />
+                      <i style={{ background: t.colors.surface2 }} />
+                      <i style={{ background: t.colors.ink }} />
+                    </span>
+                  </span>
+                  <strong>{t.name}</strong>
+                  <span className="muted">{t.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
+          ) },
+          { id: "layout", label: "Layout", badge: layouts.find((l) => l.id === s.layout)?.name, content: (
       <section className="panel">
         <div className="panel-head"><h2>Page layout</h2></div>
         <div className="theme-grid" role="radiogroup" aria-label="Layout">
@@ -44,10 +58,15 @@ export function AppearanceForm({ initial, themes, layouts }: { initial: SiteSett
           ))}
         </div>
       </section>
+          ) },
+          { id: "preview", label: "Preview", content: (
       <section className="panel preview">
         <div className="panel-head"><h2>Preview</h2><span className="muted small">Customers keep seeing the saved look until you save.</span></div>
         <iframe key={previewUrl} src={previewUrl} title="Shop preview" loading="lazy" />
       </section>
+          ) },
+        ]}
+      />
       {bar}
     </>
   );

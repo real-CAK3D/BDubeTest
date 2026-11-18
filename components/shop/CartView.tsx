@@ -45,7 +45,7 @@ export function CartView(props: { currency: string; shippingFlat: number; freeOv
         {cart.lines.map((l) => {
           const p = cart.products.find((x) => x.id === l.productId)!;
           return (
-            <li key={l.productId + (l.option ?? "")} className="cart-line">
+            <li key={`${l.productId}|${l.option ?? ""}|${l.custom ?? ""}`} className="cart-line">
               <Link href={`/product/${p.slug}`} className="cart-thumb">
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -57,11 +57,12 @@ export function CartView(props: { currency: string; shippingFlat: number; freeOv
               <div className="cart-name">
                 <Link href={`/product/${p.slug}`}>{p.name}</Link>
                 {l.option ? <span className="muted">{l.option}</span> : null}
+                {l.custom ? <span className="custom-text">&ldquo;{l.custom}&rdquo;</span> : null}
               </div>
               <div className="stepper" role="group" aria-label={`Quantity of ${p.name}`}>
-                <button onClick={() => cart.setQty(l.productId, l.option, l.quantity - 1)} aria-label="One fewer">−</button>
+                <button onClick={() => cart.setQty(l, l.quantity - 1)} aria-label="One fewer">−</button>
                 <span>{l.quantity}</span>
-                <button onClick={() => cart.setQty(l.productId, l.option, l.quantity + 1)} aria-label="One more" disabled={p.stock !== null && l.quantity >= p.stock}>+</button>
+                <button onClick={() => cart.setQty(l, l.quantity + 1)} aria-label="One more" disabled={p.stock !== null && l.quantity >= p.stock}>+</button>
               </div>
               <span className="cart-amt">{money(p.price * l.quantity, props.currency)}</span>
             </li>

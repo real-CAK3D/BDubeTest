@@ -29,9 +29,14 @@
  *    the slug of an existing item unless asked.
  *  - Removing a product from the list removes it from the shop. To hide it but
  *    keep it, set visible: false.
- *  - theme must be one of: "military-police", "olive-drab", "ocp-field",
- *    "dress-blues", "night-patrol", "old-glory", "brass-leather", "clean-dispatch".
- *  - layout must be one of: "garrison", "field-manual", "showroom", "quartermaster".
+ *  - theme must be one of:
+ *      military: "olive-drab", "ocp-field", "dress-blues", "black-gold", "desert-camo", "woodland-camo"
+ *      police: "military-police", "thin-blue-line", "night-patrol"
+ *      USA & support our troops: "old-glory", "americana", "yellow-ribbon"
+ *      workshop & crafts: "burnt-birch", "maple-walnut", "etched-slate", "brass-leather"
+ *      plain: "clean-dispatch"
+ *  - layout must be one of: "garrison", "field-manual", "showroom", "quartermaster",
+ *    "workshop", "tribute".
  *  - Photos: never invent links. Use photos the owner uploaded to the
  *    public/images folder on GitHub, written as "/images/file-name.jpg",
  *    or leave photos out and he adds them in the dashboard.
@@ -51,15 +56,15 @@ export const SITE_VARIABLES = {
   // Brand
   brand: {
     businessName: "Your Business Name", // header, footer, browser tab
-    tagline: "Veteran-owned. Handmade with discipline.", // search results and the Field Manual sidebar
-    announcement: "Veteran owned and operated. Every order packed by hand.", // thin banner on top of every page; "" hides it
+    tagline: "Handcrafted, laser-engraved gifts from a veteran's workshop.", // search results and the Field Manual sidebar
+    announcement: "Veteran owned and operated. Custom engraving on most items.", // thin banner on top of every page; "" hides it
   },
 
   // Home page
   homePage: {
-    headline: "Built to standard. Made by hand.", // big headline; best under 8 words
+    headline: "Handcrafted. Engraved. Built to last.", // big headline; best under 8 words
     intro:
-      "Small-batch goods made in a home workshop by a U.S. Army Military Police veteran. Every piece gets the same attention to detail as a pre-inspection.",
+      "Engraved keepsakes, shadow boxes and gifts, cut and finished by hand by a U.S. Army Military Police veteran. Most pieces can carry a name, a date or a unit. Just tell us what to engrave.",
     featuredHeading: "Featured", // above items marked featured: true
     allItemsHeading: "Shop", // heading on the Shop page (the page with every item)
   },
@@ -126,8 +131,8 @@ export const SITE_VARIABLES = {
 
   // Look
   look: {
-    theme: "military-police", // military-police | olive-drab | ocp-field | dress-blues | night-patrol | old-glory | brass-leather | clean-dispatch
-    layout: "garrison", // garrison | field-manual | showroom | quartermaster
+    theme: "military-police", // see the list at the top of this file
+    layout: "garrison", // garrison | field-manual | showroom | quartermaster | workshop | tribute
   },
 
   // Store
@@ -165,50 +170,101 @@ export const SITE_VARIABLES = {
   //   madeToOrder  shows "Made to order"     featured: shows in the Featured row
   //   visible      false hides it without deleting it
   //   choice       one pick-list for customers, or null
+  //   engraving    a text box for the customer (name, date, unit...), or null
+  //                maxLength = most characters, required = must be filled in
   //   photos       leave out to keep photos added in the dashboard
   products: [
+    {
+      slug: "engraved-walnut-cutting-board",
+      name: "Engraved Walnut Cutting Board",
+      price: 55,
+      wasPrice: null,
+      summary: "Solid walnut board, laser engraved with your name or message.",
+      description:
+        "Edge-grain walnut, sanded smooth and finished with food-safe oil. The engraving goes on the face so it can hang on the wall or go to work in the kitchen.\n\nA good wedding, housewarming or retirement gift. This is a sample item. Change or delete it.",
+      category: "Laser engraved",
+      stock: null,
+      madeToOrder: true,
+      featured: true,
+      visible: true,
+      choice: { label: "Size", options: ["11 x 8 in", "15 x 10 in"] },
+      engraving: { label: "Name or message to engrave", maxLength: 40, required: false },
+    },
     {
       slug: "challenge-coin-display",
       name: "Challenge Coin Display",
       price: 65,
       wasPrice: null,
-      summary: "Hardwood rack that holds 24 coins, finished by hand.",
+      summary: "Hardwood rack for 24 coins, with your unit or name engraved on the top rail.",
       description:
-        "Solid walnut with routed slots for 24 standard coins. Sanded to 320 grit and finished with three coats of oil.\n\nThis is a sample item. Change or delete it.",
+        "Solid hardwood with routed slots for 24 standard coins, finished with three coats of oil. Leave the engraving box empty for a plain rail.\n\nThis is a sample item.",
       category: "Woodwork",
       stock: 5,
       madeToOrder: false,
       featured: true,
       visible: true,
       choice: { label: "Wood", options: ["Walnut", "Oak", "Cherry"] },
+      engraving: { label: "Unit, rank or name for the top rail", maxLength: 30, required: false },
     },
     {
-      slug: "flag-case",
+      slug: "memorial-flag-case",
       name: "Memorial Flag Case",
       price: 120,
       wasPrice: 140,
-      summary: "Triangle case for a 5' x 9.5' burial flag.",
-      description: "Glass-front triangle case with a hand-cut mitered frame. Engraving available on request.\n\nThis is a sample item.",
-      category: "Woodwork",
+      summary: "Glass-front case for a 5' x 9.5' burial flag, with an engraved plate.",
+      description: "Hand-cut mitered frame with a glass front. The plate is laser engraved with the name, rank and dates you give us.\n\nThis is a sample item.",
+      category: "Tributes",
       stock: null,
       madeToOrder: true,
       featured: true,
       visible: true,
       choice: null,
+      engraving: { label: "Name, rank and service dates", maxLength: 80, required: true },
+    },
+    {
+      slug: "slate-coaster-set",
+      name: "Engraved Slate Coaster Set",
+      price: 32,
+      wasPrice: null,
+      summary: "Four natural slate coasters with a flag, star or family name.",
+      description: "Natural slate with felt feet. Choose a design, and add a family name if you like.\n\nThis is a sample item.",
+      category: "Laser engraved",
+      stock: 12,
+      madeToOrder: false,
+      featured: false,
+      visible: true,
+      choice: { label: "Design", options: ["American flag", "Thin blue line", "Army star", "Family name only"] },
+      engraving: { label: "Family name (optional)", maxLength: 20, required: false },
+    },
+    {
+      slug: "dog-tag-ornament",
+      name: "Dog Tag Ornament",
+      price: 16,
+      wasPrice: null,
+      summary: "Engraved dog tag ornament on a ball chain. Made for each order.",
+      description: "Stainless dog tag, engraved with the name and year you choose. Comes on a ball chain with a ribbon for hanging.\n\nThis is a sample item.",
+      category: "Gifts",
+      stock: null,
+      madeToOrder: true,
+      featured: false,
+      visible: true,
+      choice: null,
+      engraving: { label: "Name and year", maxLength: 24, required: true },
     },
     {
       slug: "leather-keychain",
       name: "Leather Keychain",
       price: 18,
       wasPrice: null,
-      summary: "Stitched leather fob with a solid brass ring.",
-      description: "Veg-tan leather, saddle stitched, edges burnished.\n\nThis is a sample item.",
+      summary: "Stitched leather fob with a solid brass ring and your initials.",
+      description: "Veg-tan leather, saddle stitched, edges burnished. Initials are laser engraved.\n\nThis is a sample item.",
       category: "Leather",
       stock: 20,
       madeToOrder: false,
       featured: false,
       visible: true,
       choice: { label: "Color", options: ["Natural", "Brown", "Black"] },
+      engraving: { label: "Initials", maxLength: 4, required: false },
     },
   ],
 } satisfies SiteVariables;

@@ -35,7 +35,7 @@ export default async function ProductPage({ params }: Params) {
             <StockNote p={p} low={s.lowStockAlert} />
           </div>
           {p.summary ? <p className="lede">{p.summary}</p> : null}
-          <AddToCart productId={p.id} option={p.option} soldOut={p.stock === 0} storeOpen={s.storeOpen} />
+          <AddToCart productId={p.id} option={p.option} personalize={p.personalize} soldOut={p.stock === 0} storeOpen={s.storeOpen} />
           <div className="prose">
             {paragraphs(p.description).map((x, i) => (
               <p key={i}>{x}</p>

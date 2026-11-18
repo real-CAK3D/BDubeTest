@@ -67,7 +67,9 @@ function redisKV(): KV {
 }
 
 function fileKV(): KV {
-  const dir = path.join(process.cwd(), ".data");
+  // On Vercel the app folder is read-only, so before a database is connected we
+  // keep data in /tmp. It works for a first look but is wiped regularly.
+  const dir = process.env.VERCEL ? "/tmp/shop-data" : path.join(process.cwd(), ".data");
   const file = path.join(dir, "db.json");
   let queue: Promise<unknown> = Promise.resolve();
 

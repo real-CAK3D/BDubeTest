@@ -38,7 +38,10 @@ export async function getStatus() {
   return {
     github: { ok: Boolean(process.env.VERCEL_GIT_REPO_SLUG || settings.githubRepo), detail: process.env.VERCEL_GIT_REPO_OWNER ? `${process.env.VERCEL_GIT_REPO_OWNER}/${process.env.VERCEL_GIT_REPO_SLUG}` : settings.githubRepo || "Not linked" },
     vercel: { ok: Boolean(process.env.VERCEL), detail: process.env.VERCEL ? `Running on Vercel (${process.env.VERCEL_ENV})` : "Running on this computer" },
-    database: { ok: db.ok && storageMode !== "file", detail: storageMode === "file" ? "Not connected (saving to this computer only)" : db.message },
+    database: {
+      ok: db.ok && storageMode !== "file",
+      detail: storageMode !== "file" ? db.message : process.env.VERCEL ? "Not connected yet. Changes are temporary until you connect Supabase" : "Not connected (saving to this computer only)",
+    },
     photos: { ok: imageStorage() !== "local", detail: imageStorage() === "supabase" ? "Supabase Storage" : imageStorage() === "blob" ? "Vercel Blob" : "Not connected" },
     password: { ok: Boolean(pwHash || process.env.ADMIN_PASSWORD), detail: pwHash ? "Set in the dashboard" : process.env.ADMIN_PASSWORD ? "Set in Vercel (ADMIN_PASSWORD)" : "Using the practice password" },
     secret: { ok: strongEncryption(), detail: strongEncryption() ? "Keys are encrypted with a private secret" : "Add AUTH_SECRET in Vercel" },

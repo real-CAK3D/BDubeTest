@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { POLICY_PAGES } from "@/lib/policy-text";
+import { resolveMenu } from "@/lib/site-structure";
 import type { SiteSettings } from "@/lib/types";
 import { Logo } from "./Logo";
 import { Newsletter } from "./Newsletter";
@@ -10,14 +11,8 @@ export function Footer({ s }: { s: SiteSettings }) {
     Object.entries(POLICY_PAGES)
       .filter(([, p]) => p.group === group && s[p.field])
       .map(([slug, p]) => ({ href: `/policies/${slug}`, label: p.title }));
-  const help = [
-    ...s.extraPages.filter((p) => p.inFooter).map((p) => ({ href: `/pages/${p.slug}`, label: p.title })),
-    ...policy("Help"),
-    { href: "/order-status", label: "Order status" },
-    ...(s.showCustomOrders ? [{ href: "/custom-order", label: "Custom order form" }] : []),
-    ...(s.showReviews ? [{ href: "/review", label: "Leave a review" }] : []),
-    { href: "/contact", label: "Contact" },
-  ];
+  // order and choice of links come from Dashboard > Pages & menu
+  const help = [...resolveMenu(s).filter((m) => m.footer && !m.off).map((m) => ({ href: m.href, label: m.label })), ...policy("Help")];
   const legal = policy("Legal");
   return (
     <footer className="footer">

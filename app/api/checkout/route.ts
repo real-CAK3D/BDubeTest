@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getActiveProducts, getSettings } from "@/lib/db";
+import { choiceLabel, unitPrice } from "@/lib/pricing";
 import { cleanZip, quoteShipping } from "@/lib/shipping";
 import { siteUrl, stripe } from "@/lib/stripe";
 
-type CartLine = { productId: string; quantity: number; option?: string; custom?: string };
+type CartLine = { productId: string; quantity: number; option?: string; custom?: string; size?: string; design?: string };
 
 export async function POST(req: Request) {
   const s = await stripe();
@@ -21,14 +22,21 @@ export async function POST(req: Request) {
   for (const it of Array.isArray(items) ? items.slice(0, 50) : []) {
     const p = products.find((x) => x.id === it.productId);
     if (!p) continue;
-    if (p.price < 50) return NextResponse.json({ error: `${p.name} doesn't have a price yet. Please contact us to order it.` }, { status: 400 });
+    const size = p.sizes?.length ? String(it.size ?? "") : "";
+    const designId = p.designs ? String(it.design ?? "") : "";
+    const each = unitPrice(p, size || undefined, designId || undefined, settings.designs);
+    if (each === null) return NextResponse.json({ error: `The size or design picked for ${p.name} isn't available any more. Remove it from the cart and choose again.` }, { status: 400 });
+    if (each < 50) return NextResponse.json({ error: `${p.name}${size ? ` (${size})` : ""} doesn't have a price yet. Please contact us to order it.` }, { status: 400 });
+    const design = designId ? settings.designs.find((d) => d.id === designId) : undefined;
     let qty = Math.max(1, Math.min(99, Math.floor(Number(it.quantity) || 1)));
     if (p.stock !== null) qty = Math.min(qty, p.stock);
     if (qty <= 0) return NextResponse.json({ error: `${p.name} is sold out.` }, { status: 400 });
-    const option = p.option && it.option && p.option.values.includes(it.option) ? it.option : "";
+    const picked = p.option && it.option && p.option.values.includes(it.option) ? it.option : "";
+    // one line describing every choice: "30 oz · Black · Design: American flag"
+    const option = choiceLabel({ size, option: picked, design: design?.name });
     const custom = p.personalize ? String(it.custom ?? "").replace(/\s+/g, " ").trim().slice(0, p.personalize.maxLength) : "";
     if (p.personalize?.required && !custom) return NextResponse.json({ error: `${p.name} needs "${p.personalize.label}" filled in. Remove it from the cart and add it again.` }, { status: 400 });
-    subtotal += p.price * qty;
+    subtotal += each * qty;
     const absImages = p.images
       .slice(0, 1)
       .map((u) => (u.startsWith("http") ? u : siteUrl(req) + u))
@@ -40,10 +48,10 @@ export async function POST(req: Request) {
       price_data:
         p.stripeProductId && !option && !custom
           ? // Items made in Stripe are charged against that Stripe product, so Stripe's reports line up.
-            { currency: settings.currency, unit_amount: p.price, product: p.stripeProductId, ...tax }
+            { currency: settings.currency, unit_amount: each, product: p.stripeProductId, ...tax }
           : {
               currency: settings.currency,
-              unit_amount: p.price,
+              unit_amount: each,
               ...tax,
               product_data: {
                 name: option ? `${p.name} (${option})` : p.name,

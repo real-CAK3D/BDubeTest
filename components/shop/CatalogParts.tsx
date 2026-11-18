@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { pageOn } from "@/lib/site-structure";
 import { paragraphs } from "@/lib/format";
 import { slugify } from "@/lib/format-slug";
 import type { Product, SiteSettings } from "@/lib/types";
@@ -59,7 +60,7 @@ export function AboutTeaser({ s }: { s: SiteSettings }) {
         <h2>{s.aboutTitle}</h2>
         <p className="lede">{first}</p>
         <div className="hero-actions">
-          <Link href="/about" className="btn btn-ghost">{s.aboutButton}</Link>
+          {pageOn(s, "about") ? <Link href="/about" className="btn btn-ghost">{s.aboutButton}</Link> : null}
           <VeteranBadge s={s} />
         </div>
       </div>

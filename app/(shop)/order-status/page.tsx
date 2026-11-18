@@ -1,9 +1,13 @@
+import { notFound } from "next/navigation";
+import { getSettings } from "@/lib/db";
+import { pageOn } from "@/lib/site-structure";
 import Link from "next/link";
 import { OrderLookup } from "@/components/shop/OrderLookup";
 
 export const metadata = { title: "Order status" };
 
-export default function OrderStatusPage() {
+export default async function OrderStatusPage() {
+  if (!pageOn(await getSettings(), "status")) notFound();
   return (
     <section className="section review-page">
       <h1>Check on an order</h1>

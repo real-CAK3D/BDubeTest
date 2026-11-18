@@ -40,6 +40,8 @@ export type VariableProduct = {
   visible?: boolean;
   choice?: { label: string; options: string[] } | null;
   engraving?: { label: string; maxLength: number; required: boolean } | null;
+  sizes?: { name: string; price: number }[] | null;
+  designs?: { label: string; required: boolean; bySize: Record<string, string[]> } | null;
   photos?: string[];
 };
 
@@ -73,6 +75,9 @@ export type SiteVariables = {
     state: string;
   };
   extraPages: { slug: string; title: string; body: string; inFooter: boolean }[];
+  menu: { page: string; label: string; link?: string; inMenu: boolean; inFooter: boolean; on: boolean }[];
+  categories: string[];
+  designs: { id: string; name: string; image: string; group: string; extraPrice: number; show: boolean }[];
   footer: { note: string };
   gallery: {
     heading: string;

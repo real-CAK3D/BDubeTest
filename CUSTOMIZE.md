@@ -57,14 +57,16 @@ Find one by searching the repository for `EDIT-POINT: NAME` (on GitHub press `/`
 | `LAYOUTS` | `lib/themes.ts` | The four layouts for the home and Shop pages |
 | `STOREFRONT-STYLES` | `app/shop.css` | Shape, spacing and sizes on the shop |
 | `HOME-PAGE-SECTIONS` | `components/shop/Sections.tsx` | The About and Contact pages |
-| `NAV-LINKS` | `components/shop/NavLinks.tsx` | Menu links in the shop's top bar (and the phone menu) |
 | `FOOTER` | `components/shop/Footer.tsx` | Small print at the bottom |
 | `EMBLEM` | `components/shop/Emblem.tsx` | Built-in badge shown before a logo is uploaded |
 | `SOCIAL-NETWORKS` | `components/shop/Social.tsx` | Which social sites can be linked |
 | `CHECKOUT` | `app/api/checkout/route.ts` | Stripe checkout options |
 | `SHIPPING` | `lib/shipping.ts` | How shipping is priced by distance (the prices themselves are in Settings > Store) |
 | `NOTIFICATION-TEXT` | `lib/orders.ts` | Wording of new-order phone alerts |
-| `ADMIN-MENU` | `components/admin/AdminNav.tsx` | Owner dashboard menu |
+| `ADMIN-MENU` | `lib/admin-pages.ts` | Owner dashboard pages (the owner orders and hides them in Customize dashboard) |
+| `ADMIN-DEFAULTS` | `lib/site-structure.ts` | How the dashboard looks before it's customized; dashboard home sections |
+| `PAGES` | `lib/site-structure.ts` | The shop's built-in pages (ordered and switched on/off in Pages & menu) |
+| `PRICING` | `lib/pricing.ts` | How size and design choices set an item's price |
 | `APP-ICON` | `app/api/manifest/route.ts` | Home-screen app name and icon |
 | `LOGIN` | `lib/auth.ts` | How long the owner stays logged in |
 | `VARIABLES-FILE` | `lib/variables-file.ts` | How the dashboard writes site-variables.ts (and its comments) |
@@ -78,7 +80,7 @@ Find one by searching the repository for `EDIT-POINT: NAME` (on GitHub press `/`
 ### Getting ChatGPT to help with a code change
 
 1. Open the file on GitHub and find the `EDIT-POINT` block.
-2. Copy the code under it into ChatGPT: *"Here is the NAV-LINKS section of my site. Add a link called Gift Ideas that goes to /pages/gift-ideas. Give me the full replacement."*
+2. Copy the code under it into ChatGPT: *"Here is the PRICING section of my site. Add a 10% discount when someone orders 5 or more of the same item. Give me the full replacement."*
 3. On GitHub, click the pencil, swap in the new code, and click **Commit changes**. Vercel rebuilds automatically.
 
 Passwords and keys never go in any file. They live in Vercel > Settings > Environment Variables.

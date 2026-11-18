@@ -27,7 +27,10 @@ There's a Deploy to Vercel button in [SETUP.md, step 2](SETUP.md#copy).
 | **Shop** (`/`) | 6 page layouts × 18 themes, product pages with photo galleries and choices, cart with shipping priced by distance or local pickup, Stripe checkout with promo codes, gift messages and optional sales tax, thank-you page, custom order request form, order status lookup, shop search, contact form, email sign-up, shipping / returns / privacy / terms pages, sitemap |
 | **Dashboard** | Sales, orders, profit, visitors, conversion, charts, best sellers, most viewed, traffic sources, setup progress |
 | **Orders** | Items, address, payment method, discounts and tax, status, carrier and tracking number, one-tap "shipped" email, private notes, spreadsheet download |
-| **Products** | Add/edit/hide items with up to 12 photos, stock, choices, sale prices. Items made in Stripe sync in automatically |
+| **Products** | Add/edit/hide items with up to 12 photos, stock, sizes with their own prices, choices, sale prices; categories you name and order. Items made in Stripe sync in automatically |
+| **Designs** | A library of decals and engravings; each item and size offers only the designs that fit it |
+| **Pages & menu** | Add, remove, rename, reorder and switch off pages; menu and footer links; outside links |
+| **Customize dashboard** | Colors, dark mode, text size, home screen sections, quick links, menu order, phone bottom bar, start page |
 | **Money** | Income vs. expenses, profit, margin, spreadsheets for taxes |
 | **Customers** | Buyers, repeat customers, email sign-ups, downloads |
 | **Inbox** | Messages from the shop's contact form |

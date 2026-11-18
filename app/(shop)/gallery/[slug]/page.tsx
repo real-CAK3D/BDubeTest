@@ -1,3 +1,4 @@
+import { pageOn } from "@/lib/site-structure";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,6 +18,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function GalleryItemPage({ params }: Params) {
   const { slug } = await params;
   const [s, products] = await Promise.all([getSettings(), getActiveProducts()]);
+  if (!pageOn(s, "gallery")) notFound();
   const g = s.gallery.find((x) => x.slug === slug);
   if (!g) notFound();
   const product = g.productSlug ? products.find((p) => p.slug === g.productSlug) : null;

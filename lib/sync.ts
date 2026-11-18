@@ -4,7 +4,7 @@ import { SITE_VARIABLES } from "@/site-variables";
 import { cleanProduct } from "./products";
 import { kv } from "./store";
 import type { Product, SiteSettings } from "./types";
-import { type FileProduct, variablesToProducts, variablesToSettings } from "./variables-map";
+import { type FileProduct, type FileSettings, variablesToProducts, variablesToSettings } from "./variables-map";
 
 /*
  * Applies site-variables.ts to the saved site data after each deploy.
@@ -17,7 +17,7 @@ const FILE_PRODUCTS = variablesToProducts(SITE_VARIABLES);
 const FILE_HASH = createHash("sha1").update(JSON.stringify([FILE_SETTINGS, FILE_PRODUCTS])).digest("hex");
 const APPLIED_KEY = "variables:applied";
 
-type Applied = { hash: string; settings: SiteSettings; products: FileProduct[] };
+type Applied = { hash: string; settings: FileSettings; products: FileProduct[] };
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
@@ -44,7 +44,7 @@ async function run() {
   // Settings: apply each value that is new or changed in the file
   const stored = (await kv.get<Partial<SiteSettings>>("settings")) ?? {};
   const settings: Partial<SiteSettings> = { ...stored };
-  for (const k of Object.keys(FILE_SETTINGS) as (keyof SiteSettings)[]) {
+  for (const k of Object.keys(FILE_SETTINGS) as (keyof FileSettings)[]) {
     if (!prev || !same(prev.settings?.[k], FILE_SETTINGS[k])) (settings as Record<string, unknown>)[k] = FILE_SETTINGS[k];
   }
 

@@ -16,7 +16,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         </div>
         <h1>{s.businessName}</h1>
         <p className="muted">Owner login. Customers never see this page.</p>
-        <LoginForm next={next && next.startsWith("/admin") ? next : "/admin"} />
+        <LoginForm next={next && next.startsWith("/admin") && next !== "/admin" ? next : s.admin.startPage || "/admin"} />
       </div>
     </div>
   );

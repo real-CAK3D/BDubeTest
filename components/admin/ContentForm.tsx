@@ -160,28 +160,9 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
           {
             id: "pages",
             label: "Pages",
-            badge: s.extraPages.length || undefined,
             content: (
-              <section className="panel stack">
-                <p className="hint">Add any other page: FAQ, events, care instructions. Each gets its own web address. In the text, a short first line followed by an answer on the next line shows as a question and answer.</p>
-                {s.extraPages.map((pg, i) => {
-                  const up = (patch: Partial<typeof pg>) => set({ extraPages: s.extraPages.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
-                  return (
-                    <div key={i} className="page-edit">
-                      <div className="row2">
-                        <label className="f"><span>Title</span><input value={pg.title} onChange={(e) => up({ title: e.target.value })} /></label>
-                        <label className="f"><span>Web address</span><input value={pg.slug} onChange={(e) => up({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-") })} /><em className="hint">/pages/{pg.slug || "..."}</em></label>
-                      </div>
-                      <label className="f"><span>Text</span><textarea rows={10} value={pg.body} onChange={(e) => up({ body: e.target.value })} /></label>
-                      <div className="row wrap">
-                        <label className="check"><input type="checkbox" checked={pg.inFooter} onChange={(e) => up({ inFooter: e.target.checked })} /> Link it in the footer</label>
-                        <a className="b b-ghost b-sm" href={`/pages/${pg.slug}`} target="_blank" rel="noreferrer">View</a>
-                        <button type="button" className="b b-danger b-sm" onClick={() => confirm(`Delete the "${pg.title}" page?`) && set({ extraPages: s.extraPages.filter((_, j) => j !== i) })}>Delete page</button>
-                      </div>
-                    </div>
-                  );
-                })}
-                <button type="button" className="b b-sm" onClick={() => set({ extraPages: [...s.extraPages, { slug: `page-${s.extraPages.length + 1}`, title: "New page", body: "", inFooter: true }] })}>Add a page</button>
+              <section className="panel">
+                <p>Your own pages (FAQ, events, care instructions...), the menu order and which pages are switched on are all on the <a href="/admin/pages">Pages &amp; menu</a> page.</p>
               </section>
             ),
           },

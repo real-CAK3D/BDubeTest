@@ -8,6 +8,7 @@ import { categoryHref } from "@/components/shop/layouts/types";
 import { Tracker } from "@/components/shop/Tracker";
 import { getProductBySlug, getSettings } from "@/lib/db";
 import { paragraphs } from "@/lib/format";
+import { fittingDesigns } from "@/lib/pricing";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -52,7 +53,24 @@ export default async function ProductPage({ params }: Params) {
             <StockNote p={p} low={s.lowStockAlert} />
           </div>
           {p.summary ? <p className="lede">{p.summary}</p> : null}
-          <AddToCart productId={p.id} option={p.option} personalize={p.personalize} soldOut={p.stock === 0} storeOpen={s.storeOpen} />
+          <AddToCart
+            productId={p.id}
+            option={p.option}
+            personalize={p.personalize}
+            soldOut={p.stock === 0}
+            storeOpen={s.storeOpen}
+            sizes={p.sizes}
+            designs={p.designs ? { label: p.designs.label, required: p.designs.required } : null}
+            fits={
+              p.designs
+                ? Object.fromEntries(
+                    Object.keys(p.designs.fit).map((k) => [k, fittingDesigns(p, k === "*" ? "" : k, s.designs).map((d) => ({ id: d.id, name: d.name, image: d.image, extra: d.extra, active: d.active, group: d.group }))])
+                  )
+                : undefined
+            }
+            basePrice={p.price}
+            currency={s.currency}
+          />
           <div className="prose">
             {paragraphs(p.description).map((x, i) => (
               <p key={i}>{x}</p>

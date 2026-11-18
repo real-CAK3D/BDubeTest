@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { getSettings } from "@/lib/db";
 import { paragraphs } from "@/lib/format";
 import { fillPolicy } from "@/lib/policy-text";
+import { resolveMenu } from "@/lib/site-structure";
 
-// Extra pages the owner adds in the dashboard (Words & logos > Pages), e.g. /pages/faq
+// Extra pages the owner adds in the dashboard (Pages & menu), e.g. /pages/faq
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -17,7 +18,7 @@ export default async function ExtraPage({ params }: Params) {
   const { slug } = await params;
   const s = await getSettings();
   const page = s.extraPages.find((p) => p.slug === slug);
-  if (!page) notFound();
+  if (!page || resolveMenu(s).find((m) => m.id === `page:${slug}`)?.off) notFound();
   // A paragraph whose first line is short and ends with "?" or ":" reads as a question/heading
   return (
     <article className="section policy prose">

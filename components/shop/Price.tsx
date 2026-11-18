@@ -4,6 +4,7 @@ import type { Product } from "@/lib/types";
 export function Price({ p, currency }: { p: Product; currency: string }) {
   return (
     <span className="price">
+      {p.sizes && p.sizes.length > 1 && new Set(p.sizes.map((s) => s.price)).size > 1 ? <em className="from">From </em> : null}
       {money(p.price, currency)}
       {p.compareAtPrice && p.compareAtPrice > p.price ? <s>{money(p.compareAtPrice, currency)}</s> : null}
     </span>

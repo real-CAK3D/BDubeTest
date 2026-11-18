@@ -34,3 +34,17 @@ export async function DELETE(req: Request) {
   await saveProducts(list.filter((p) => p.id !== id));
   return NextResponse.json({ ok: true });
 }
+
+// Category tools: { action: "renameCategory", from, to } moves every item from one category to another.
+export async function PATCH(req: Request) {
+  after(() => syncToGitHub("categories"));
+  const b = (await req.json().catch(() => ({}))) as { action?: string; from?: string; to?: string };
+  if (b.action !== "renameCategory" || typeof b.from !== "string") return NextResponse.json({ error: "Unknown action." }, { status: 400 });
+  const to = String(b.to ?? "").trim().slice(0, 60);
+  const list = await getProducts();
+  let n = 0;
+  const now = new Date().toISOString();
+  for (const p of list) if (p.category === b.from) (p.category = to), (p.updatedAt = now), n++;
+  await saveProducts(list);
+  return NextResponse.json({ ok: true, moved: n });
+}

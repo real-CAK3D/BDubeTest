@@ -1,6 +1,7 @@
 import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
 import { slugify } from "@/lib/format-slug";
+import { resolveMenu } from "@/lib/site-structure";
 import type { Product, SiteSettings } from "@/lib/types";
 import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, Pager, SeeAll } from "../CatalogParts";
@@ -27,8 +28,9 @@ function Shell({ s, products, current, children }: { s: SiteSettings; products: 
                 </Link>
               ))
             : null}
-          <Link href="/about">About</Link>
-          <Link href="/contact">Contact</Link>
+          {resolveMenu(s)
+            .filter((m) => m.top && !m.off && m.id !== "shop")
+            .map((m) => <Link key={m.id} href={m.href}>{m.label}</Link>)}
         </nav>
       </aside>
       <div className="fm-main">{children}</div>

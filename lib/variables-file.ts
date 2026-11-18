@@ -10,7 +10,7 @@ import type { Product, SiteSettings } from "./types";
 
 const dollars = (c: number | null | undefined) => (c == null ? null : Math.round(c) / 100);
 
-export function settingsToVariables(s: SiteSettings, products: Product[]): SiteVariables {
+export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Product[]): SiteVariables {
   return {
     brand: { businessName: s.businessName, tagline: s.tagline, announcement: s.announcement },
     homePage: {
@@ -48,6 +48,9 @@ export function settingsToVariables(s: SiteSettings, products: Product[]): SiteV
       state: s.legalState,
     },
     extraPages: s.extraPages,
+    menu: s.menu.map((m) => ({ page: m.id, label: m.label, ...(m.href ? { link: m.href } : {}), inMenu: m.top, inFooter: m.footer, on: !m.off })),
+    categories: s.categories,
+    designs: s.designs.map((d) => ({ id: d.id, name: d.name, image: d.image, group: d.group, extraPrice: dollars(d.extra) ?? 0, show: d.active })),
     footer: { note: s.footerNote },
     gallery: { heading: s.galleryHeading, text: s.galleryText, items: s.gallery },
     images: { logo: s.logo, patch: s.emblem, tabIcon: s.favicon, welcomePhoto: s.heroImage, aboutPhoto: s.aboutImage },
@@ -85,6 +88,8 @@ export function settingsToVariables(s: SiteSettings, products: Product[]): SiteV
       visible: p.active,
       choice: p.option ? { label: p.option.label, options: p.option.values } : null,
       engraving: p.personalize ? { ...p.personalize } : null,
+      sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: dollars(x.price) ?? 0 })) : null,
+      designs: p.designs ? { label: p.designs.label, required: p.designs.required, bySize: p.designs.fit } : null,
       ...(p.images.length ? { photos: p.images } : {}),
     })),
   };
@@ -234,6 +239,28 @@ export function variablesFile(v: SiteVariables): string {
   ]);
   sec("Extra pages", ["Any other page you want: FAQ, events, care instructions...", "slug is the web address (/pages/slug). inFooter: true adds a footer link."]);
   L.push("  extraPages: [", ...v.extraPages.map((p) => `    { slug: ${q(p.slug)}, title: ${q(p.title)}, inFooter: ${q(p.inFooter)}, body: ${q(p.body)} },`), "  ],");
+  sec("Pages & menu", [
+    "Every page of the shop, in menu order. page is shop, gallery, custom, about, contact, status, review,",
+    "page:<slug> for a page from extraPages, or link:<name> with a link for an outside address.",
+    "inMenu: top menu.  inFooter: footer.  on: false switches the page off (shows \"not found\").",
+  ]);
+  L.push(
+    "  menu: [",
+    ...v.menu.map((m) => `    { page: ${q(m.page)}, label: ${q(m.label)}, ${m.link ? `link: ${q(m.link)}, ` : ""}inMenu: ${m.inMenu}, inFooter: ${m.inFooter}, on: ${m.on} },`),
+    "  ],"
+  );
+  sec("Shop categories", ["In the order they show in the shop. Each product's category should match one of these."]);
+  L.push(`  ${field("categories", v.categories)}`);
+  sec("Design library", [
+    "Decals and engraving artwork customers pick from. Which designs fit which item and size is set on each",
+    "product (designs.bySize). id: short unique name.  group: e.g. \"Military\", \"Patriotic\", \"Family\".",
+    "extraPrice: added to the item's price in dollars (0 for none).  show: false hides it everywhere.",
+  ]);
+  L.push(
+    "  designs: [",
+    ...v.designs.map((d) => `    { id: ${q(d.id)}, name: ${q(d.name)}, group: ${q(d.group)}, extraPrice: ${d.extraPrice}, show: ${d.show}, image: ${q(d.image)} },`),
+    "  ],"
+  );
   sec("Our work (gallery)", [
     "Finished pieces to show off, for sale or not. featured: true puts it in the rotating showcase on the home page.",
     "productSlug: the slug of a shop item to buy one like it, or \"\" for an \"Order one like this\" button instead.",
@@ -308,6 +335,10 @@ export function variablesFile(v: SiteVariables): string {
     "  visible      false hides it without deleting it",
     "  choice       one pick-list for customers, or null",
     "  engraving    a text box for the customer (name, date, unit...), or null",
+    "  sizes        sizes with their own price, e.g. [{ name: \"30 oz\", price: 40 }], or null",
+    "  designs      which designs from the design library fit each size, or null:",
+    "               { label: \"Design\", required: true, bySize: { \"30 oz\": [\"flag\", \"eagle\"] } }",
+    "               (with no sizes, use \"*\" as the size name)",
     "  photos       leave out to keep photos added in the dashboard",
   ]);
   L.push("  products: [");
@@ -327,6 +358,18 @@ export function variablesFile(v: SiteVariables): string {
       `      ${field("visible", p.visible ?? true)}`,
       `      choice: ${p.choice ? `{ label: ${q(p.choice.label)}, options: ${q(p.choice.options)} }` : "null"},`,
       `      engraving: ${p.engraving ? `{ label: ${q(p.engraving.label)}, maxLength: ${p.engraving.maxLength}, required: ${p.engraving.required} }` : "null"},`,
+      `      sizes: ${p.sizes?.length ? `[${p.sizes.map((x) => `{ name: ${q(x.name)}, price: ${x.price} }`).join(", ")}]` : "null"},`,
+      ...(p.designs
+        ? [
+            `      designs: {`,
+            `        label: ${q(p.designs.label)},`,
+            `        required: ${p.designs.required},`,
+            `        bySize: {`,
+            ...Object.entries(p.designs.bySize).map(([k, ids]) => `          ${q(k)}: ${q(ids)},`),
+            `        },`,
+            `      },`,
+          ]
+        : ["      designs: null,"]),
       ...(p.photos ? [`      ${field("photos", p.photos)}`] : []),
       "    },"
     );

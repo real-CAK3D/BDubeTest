@@ -6,5 +6,5 @@ export const metadata = { title: "Products" };
 
 export default async function Products() {
   const [products, s, a, key] = await Promise.all([getProducts(), getSettings(), getAnalytics(), getKey("STRIPE_SECRET_KEY")]);
-  return <ProductManager initial={products} currency={s.currency} views={a.productViews} lowAt={s.lowStockAlert} stripeOn={Boolean(key)} stripeTest={Boolean(key?.includes("_test_"))} />;
+  return <ProductManager initial={products} currency={s.currency} views={a.productViews} lowAt={s.lowStockAlert} stripeOn={Boolean(key)} stripeTest={Boolean(key?.includes("_test_"))} library={s.designs} categories={s.categories} />;
 }

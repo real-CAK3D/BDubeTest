@@ -28,8 +28,8 @@ body:has(.hq) { background: #F2F3EF; }
   -webkit-font-smoothing: antialiased;
 }
 @media (prefers-color-scheme: dark) {
-  body:has(.hq) { background: #0F1311; }
-  .hq {
+  body:has(.hq):not(:has(.hq-shell[data-mode="light"])) { background: #0F1311; }
+  .hq:not(:has(.hq-shell[data-mode="light"])), .hq-shell:not([data-mode="light"]) {
     --bg: #0F1311;
     --surface: #181E1B;
     --surface-2: #212925;
@@ -49,6 +49,39 @@ body:has(.hq) { background: #F2F3EF; }
     color-scheme: dark;
   }
 }
+/* owner picked dark in Customize dashboard */
+body:has(.hq-shell[data-mode="dark"]) { background: #0F1311; }
+.hq-shell[data-mode="dark"] {
+  --bg: #0F1311;
+  --surface: #181E1B;
+  --surface-2: #212925;
+  --ink: #E6ECE8;
+  --muted: #9BA79F;
+  --line: #2B3430;
+  --accent: #5FB384;
+  --accent-ink: #0B1A12;
+  --gold: #E0BE5A;
+  --band: #0B0F0D;
+  --band-ink: #E9DFBA;
+  --bar: #5FB384;
+  --bar-on: #8ED2AA;
+  --danger: #F08A80;
+  --warn-bg: #3A2F12;
+  --warn-ink: #F3D58A;
+  color-scheme: dark;
+}
+/* owner's own main color */
+.hq-shell[style*="--owner-accent"] { --accent: var(--owner-accent); --bar: var(--owner-accent); --bar-on: var(--owner-accent); }
+@media (prefers-color-scheme: dark) {
+  .hq-shell[style*="--owner-accent"]:not([data-mode="light"]) { --accent: color-mix(in srgb, var(--owner-accent) 55%, white); --bar: var(--accent); --bar-on: var(--accent); }
+}
+.hq-shell[data-mode="dark"][style*="--owner-accent"] { --accent: color-mix(in srgb, var(--owner-accent) 55%, white); --bar: var(--accent); --bar-on: var(--accent); }
+.hq-shell { background: var(--bg); color: var(--ink); color-scheme: inherit; }
+.hq-shell[data-mode="dark"] { color-scheme: dark; }
+.hq-shell[data-text="large"] { font-size: 18px; }
+.hq-shell[data-density="compact"] .hq-main { gap: 0.7rem; padding-top: 1rem; }
+.hq-shell[data-density="compact"] .panel { padding: 0.8rem 0.9rem; }
+.hq-shell[data-density="compact"] .hq-side a { padding: 0.4rem 0.7rem; }
 .hq a { color: inherit; }
 .hq h1 { font: 400 1.9rem/1.1 "Saira Stencil One", "Barlow", sans-serif; margin: 0; letter-spacing: 0.01em; }
 .hq h2 { font-size: 1.05rem; margin: 0; font-weight: 700; }
@@ -106,8 +139,12 @@ body:has(.hq) { background: #F2F3EF; }
   .hq-tabs a { display: grid; justify-items: center; gap: 2px; padding: 0.5rem 0 0.45rem; text-decoration: none; font-size: 0.72rem; font-weight: 600; color: var(--muted); }
   .hq-tabs a.on { color: var(--accent); }
   .hq-main { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
-  .hq-top .b-ghost { display: none; }
+  .hq-top .view-site-text { display: none; }
 }
+.view-site { display: inline-flex; align-items: center; gap: 0.4rem; }
+.nav-badge { margin-left: auto; background: var(--gold); color: #1a1405; font-size: 0.7rem; border-radius: 999px; min-width: 18px; height: 18px; display: inline-grid; place-items: center; padding: 0 5px; font-style: normal; }
+.hq-tabs a { position: relative; }
+.hq-tabs .nav-badge { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; }
 
 /* blocks */
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
@@ -439,3 +476,48 @@ body:has(.hq) { background: #F2F3EF; }
 .req-photos img { width: 88px; height: 88px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
 .request .field { display: block; margin: 0.6rem 0; }
 .request textarea { width: 100%; }
+
+/* sizes & designs */
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chips button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 0.3rem 0.8rem; font: inherit; font-size: 0.86rem; cursor: pointer; }
+.chips button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.fit-size { border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem; display: grid; gap: 0.6rem; }
+.fit-head { display: flex; justify-content: space-between; gap: 1rem; align-items: center; background: none; border: 0; padding: 0.2rem; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+.design-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 0.5rem; }
+.design-pick button { position: relative; display: grid; gap: 0.25rem; padding: 0.35rem; border: 2px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 0.78rem; cursor: pointer; opacity: 0.55; text-align: center; }
+.design-pick button.on { border-color: var(--accent); opacity: 1; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.design-pick button.on::after { content: "✓"; position: absolute; top: 4px; right: 6px; background: var(--accent); color: var(--accent-ink); border-radius: 999px; width: 20px; height: 20px; display: grid; place-items: center; font-size: 0.75rem; }
+.design-pick img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: 6px; background: #fff; }
+.design-pick em { font-style: normal; color: var(--muted); font-size: 0.7rem; }
+.order-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.order-list > li { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.5rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); flex-wrap: wrap; }
+.order-list > li input:not([type="checkbox"]) { flex: 1 1 9rem; min-width: 0; }
+.order-list > li.off { opacity: 0.6; }
+.order-btns { display: inline-flex; gap: 2px; }
+.order-btns .b { padding: 0.25rem 0.5rem; }
+.design-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.7rem; }
+.design-grid button { width: 100%; display: grid; gap: 0.25rem; text-align: left; padding: 0.5rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.design-grid button.on { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+.design-grid img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: 8px; }
+.design-grid .hidden-item { opacity: 0.55; }
+.check.small { font-size: 0.86rem; font-weight: 500; }
+.pages-list > li { display: grid; gap: 0.5rem; }
+.page-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.page-name { display: grid; gap: 0.15rem; flex: 1 1 12rem; min-width: 0; }
+.page-name input { font-weight: 600; }
+.page-name .small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.page-row .grow { flex: 1; }
+.page-link { padding-left: 0.2rem; }
+.page-edit { border-top: 1px solid var(--line); padding-top: 0.7rem; }
+/* customize dashboard */
+.swatches { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.swatches button, .swatch-pick { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 0.3rem 0.75rem 0.3rem 0.35rem; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.swatches button.on { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink) inset; }
+.swatches i { width: 20px; height: 20px; border-radius: 999px; display: inline-block; }
+.swatch-pick input { width: 24px; height: 24px; padding: 0; border: 0; background: none; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; flex-wrap: wrap; }
+.seg button { border: 0; background: var(--surface); color: var(--ink); padding: 0.5rem 0.9rem; font: inherit; font-weight: 600; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.grow-text { flex: 1 1 10rem; display: grid; min-width: 0; }
+.quick-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }

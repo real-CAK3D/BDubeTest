@@ -1,3 +1,5 @@
+import { pageOn } from "@/lib/site-structure";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Showcase3D } from "@/components/shop/Showcase3D";
@@ -11,6 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const [s, sp] = await Promise.all([getSettings(), searchParams]);
+  if (!pageOn(s, "gallery")) notFound();
   const items = s.gallery.filter((g) => g.photos[0]);
   const cats = [...new Set(items.map((g) => g.category).filter(Boolean))];
   const current = cats.find((c) => slugify(c) === sp.category) ?? null;

@@ -160,10 +160,12 @@ export const HELP: HelpGroup[] = [
             list: [
               "**Name** and **Price**. **Was price** is optional: fill it in higher than the price to show a sale.",
               "**Short description**: one line shown on the shop page. **Full description**: shown on the item's own page. Leave a blank line between paragraphs.",
-              "**Category**: items with the same category are grouped together in some layouts.",
+              "**Category**: pick from your list (Drinkware, Home decor...) or choose **+ New category**. The **Categories** button at the top of Products renames, removes and orders them; the shop shows them in that order.",
               "**Photos**: tap **Add photos**. Big phone photos are shrunk automatically. The first photo (gold outline) is the cover; use the arrows to reorder.",
               "**Stock**: how many you have. Leave it empty for unlimited. It goes down by itself when someone buys. **Made to order** shows that label instead.",
-              "**Choices**: one pick-list for customers, like Color with Black, Brown, Natural.",
+              "**Sizes**: give each size its own price (16 oz $30, 40 oz $45). Tap **Tumbler sizes** to fill in the usual ones. The shop shows \"From\" the lowest price.",
+              "**Designs**: tick **Customers pick a decal or engraving**, then for each size tap the designs from your library that fit it. Customers pick a size first and only see the designs that fit that size. **Same as 20 oz** copies the list from the size above.",
+              "**Other choice**: one more pick-list, like Color with Black, Brown, Natural.",
               "**Personalization**: turn on to give customers a box for engraving text (a name, date, unit or message). Set the label, the most characters, and whether it's required.",
               "**Show in the shop** and **Feature at the top**.",
             ],
@@ -171,6 +173,25 @@ export const HELP: HelpGroup[] = [
           { h: "Items from Stripe" },
           { p: "Products you make in Stripe show up here on their own, marked **From Stripe**. Change their name, price, description and photos in Stripe. Stock, category, choices and featured can be set in either place. **Sync from Stripe** pulls everything again if something looks out of date. See **Selling items made in Stripe**." },
           { tip: "Hiding an item is safer than deleting it: you keep the details for later." },
+        ],
+      },
+      {
+        id: "designs",
+        title: "Designs (decals & engravings)",
+        match: ["/admin/designs"],
+        summary: "Your artwork library, and which items and sizes each design fits.",
+        blocks: [
+          { p: "Every decal or engraving you offer lives here once, and you choose which items and sizes it fits. Not every design fits every product, so a 40 oz tumbler might offer 2 designs while a 16 oz offers 10." },
+          {
+            steps: [
+              "Tap **Add designs** and pick one or more images from your phone. PNGs with a see-through background look best.",
+              "Tap a design to name it, put it in a **group** (Military, Patriotic, Police, Family...) and set an **extra charge** if it costs more.",
+              "Under **Fits on**, tick each item and size it fits.",
+              "Tap **Save changes**.",
+            ],
+          },
+          { p: "You can also set this from the other side: open an item in **Products** and tap the designs for each size. Untick **Offer this design** to hide one everywhere without deleting it." },
+          { tip: "The 8 starter designs are simple placeholders. Replace them with your own artwork, or delete them." },
         ],
       },
       {
@@ -215,7 +236,7 @@ export const HELP: HelpGroup[] = [
               "**Logos & photos**: main logo, the round patch, the browser tab icon, the big welcome photo and an about photo. Tap the box to take a picture or pick one from your phone.",
               "**Reviews**: turn the reviews section on or off and change its words.",
               "**Policies & footer**: shipping, returns, custom & engraved orders, privacy, terms of service and disclaimer, each its own page linked in the footer, plus the small print under the copyright.",
-              "**Pages**: add any other page, like the FAQ, events or care instructions.",
+              "**Pages**: a shortcut to **Pages & menu**, where you add your own pages (FAQ, events, care instructions) and set the menu.",
             ],
           },
           { p: "Tap **Save changes** at the bottom when you're done. Changes show on the site right away, and are also saved to GitHub if that's set up." },
@@ -240,6 +261,41 @@ export const HELP: HelpGroup[] = [
             ],
           },
           { tip: "Use the up and down arrows on the list to choose the order pieces appear in." },
+        ],
+      },
+      {
+        id: "pages",
+        title: "Pages & menu",
+        match: ["/admin/pages"],
+        summary: "Add, remove, rename and order the shop's pages.",
+        blocks: [
+          {
+            list: [
+              "**Arrows** set the order of the top menu and the footer.",
+              "Type over a name to rename it in the menu.",
+              "**Top menu** and **Footer** choose where each link shows.",
+              "The **switch** turns a page off: it leaves the menu and customers can't open it. Shop is always on.",
+              "**Add a page** makes your own page (FAQ, events, care instructions); tap **Edit text** to write it.",
+              "**Add a link** puts an outside link in the menu, like your Facebook group or Etsy shop.",
+            ],
+          },
+          { p: "Tap **Save changes** when done. Policy pages (shipping, returns, privacy...) are edited in **Words & logos > Policies**." },
+        ],
+      },
+      {
+        id: "customize",
+        title: "Customize dashboard",
+        match: ["/admin/customize"],
+        summary: "Colors, dark mode, home screen sections, menu order and the phone's bottom bar.",
+        blocks: [
+          {
+            list: [
+              "**Look**: the name in the top bar, the main color, light or dark, spacing, text size, and which page opens after you log in.",
+              "**Home screen**: turn sections of the Dashboard on or off and put them in order. **Quick links** adds your own buttons (the shop, Stripe, Pirate Ship...).",
+              "**Menu**: the order of the side menu, hiding pages you don't use, and the 4 buttons in the phone's bottom bar.",
+            ],
+          },
+          { p: "These only change your dashboard, never the shop. **Reset to default** puts everything back. The shop icon in the top bar opens your shop in a new tab." },
         ],
       },
       {

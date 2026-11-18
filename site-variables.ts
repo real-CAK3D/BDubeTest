@@ -158,6 +158,40 @@ export const SITE_VARIABLES = {
     { slug: "faq", title: "FAQ", inFooter: true, body: "How long does a custom order take?\nMost engraved pieces ship within 1-2 weeks. If you need something by a certain date, contact us before ordering.\n\nCan you engrave a logo or a photo?\nOften, yes. Send us the image through the contact page and we'll let you know how it will turn out.\n\nDo you take bulk or unit orders?\nYes. Unit coins displays, retirement gifts and team orders are some of our favorite projects. Contact us with the quantity and what you have in mind.\n\nHow do I care for my item?\nKeep wood away from soaking water and direct heat. Wipe cutting boards clean and re-oil them now and then." },
   ],
 
+  // Pages & menu
+  // Every page of the shop, in menu order. page is shop, gallery, custom, about, contact, status, review,
+  // page:<slug> for a page from extraPages, or link:<name> with a link for an outside address.
+  // inMenu: top menu.  inFooter: footer.  on: false switches the page off (shows "not found").
+  menu: [
+    { page: "shop", label: "Shop", inMenu: true, inFooter: false, on: true },
+    { page: "gallery", label: "Our work", inMenu: true, inFooter: false, on: true },
+    { page: "custom", label: "Custom orders", inMenu: true, inFooter: true, on: true },
+    { page: "about", label: "About", inMenu: true, inFooter: false, on: true },
+    { page: "contact", label: "Contact", inMenu: true, inFooter: true, on: true },
+    { page: "page:faq", label: "FAQ", inMenu: false, inFooter: true, on: true },
+    { page: "status", label: "Order status", inMenu: false, inFooter: true, on: true },
+    { page: "review", label: "Leave a review", inMenu: false, inFooter: true, on: true },
+  ],
+
+  // Shop categories
+  // In the order they show in the shop. Each product's category should match one of these.
+  categories: ["Drinkware", "Home decor", "Leather goods", "Patriotic & military", "Gifts & keepsakes"],
+
+  // Design library
+  // Decals and engraving artwork customers pick from. Which designs fit which item and size is set on each
+  // product (designs.bySize). id: short unique name.  group: e.g. "Military", "Patriotic", "Family".
+  // extraPrice: added to the item's price in dollars (0 for none).  show: false hides it everywhere.
+  designs: [
+    { id: "flag", name: "American flag", group: "Patriotic", extraPrice: 0, show: true, image: "/images/designs/flag.svg" },
+    { id: "thin-line-flag", name: "Thin blue line flag", group: "Police", extraPrice: 0, show: true, image: "/images/designs/thin-line-flag.svg" },
+    { id: "veteran-star", name: "Veteran star", group: "Military", extraPrice: 0, show: true, image: "/images/designs/veteran-star.svg" },
+    { id: "dog-tags", name: "Dog tags", group: "Military", extraPrice: 0, show: true, image: "/images/designs/dog-tags.svg" },
+    { id: "monogram", name: "Family monogram", group: "Family", extraPrice: 0, show: true, image: "/images/designs/monogram.svg" },
+    { id: "anchor", name: "Anchor", group: "Military", extraPrice: 0, show: true, image: "/images/designs/anchor.svg" },
+    { id: "mountains", name: "Mountains", group: "Outdoors", extraPrice: 0, show: true, image: "/images/designs/mountains.svg" },
+    { id: "compass", name: "Compass", group: "Outdoors", extraPrice: 0, show: true, image: "/images/designs/compass.svg" },
+  ],
+
   // Our work (gallery)
   // Finished pieces to show off, for sale or not. featured: true puts it in the rotating showcase on the home page.
   // productSlug: the slug of a shop item to buy one like it, or "" for an "Order one like this" button instead.
@@ -168,7 +202,7 @@ export const SITE_VARIABLES = {
       {
         slug: "stanley-aurora-tumblers",
         title: "Stanley Aurora Tumblers",
-        category: "Tumblers",
+        category: "Drinkware",
         description: "Northern lights over mountains and a lake, engraved through the iridescent finish so every angle catches a different color. Made on 30 oz and 40 oz Stanleys, and the design can go on other Stanley styles too.",
         photos: ["/images/work/aurora-1.webp", "/images/work/aurora-2.webp", "/images/work/aurora-3.webp"],
         featured: true,
@@ -177,7 +211,7 @@ export const SITE_VARIABLES = {
       {
         slug: "marine-veteran-tumbler",
         title: "Marine Veteran Tumbler",
-        category: "Tumblers",
+        category: "Drinkware",
         description: "Personalized for a Marine veteran with his name and years served: a gold eagle, globe and anchor, a waving flag and dog tags, all engraved in brushed gold.",
         photos: ["/images/work/marine-1.webp", "/images/work/marine-2.webp", "/images/work/marine-3.webp"],
         featured: true,
@@ -186,7 +220,7 @@ export const SITE_VARIABLES = {
       {
         slug: "sea-turtle-tumbler",
         title: "Sea Turtle Tumbler",
-        category: "Tumblers",
+        category: "Drinkware",
         description: "Sea turtles swimming through bubbles and coral, wrapped all the way around the tumbler.",
         photos: ["/images/work/turtle-1.webp", "/images/work/turtle-2.webp", "/images/work/turtle-3.webp"],
         featured: true,
@@ -195,7 +229,7 @@ export const SITE_VARIABLES = {
       {
         slug: "hibiscus-tumbler",
         title: "Hibiscus Tumbler",
-        category: "Tumblers",
+        category: "Drinkware",
         description: "Hibiscus flowers and leaves engraved around a red Stanley.",
         photos: ["/images/work/hibiscus-1.webp", "/images/work/hibiscus-2.webp", "/images/work/hibiscus-3.webp"],
         featured: true,
@@ -204,7 +238,7 @@ export const SITE_VARIABLES = {
       {
         slug: "campsite-signs",
         title: "Campsite & Family Name Signs",
-        category: "Signs",
+        category: "Home decor",
         description: "Made for two customers who wanted something special to stand out at their home and their campsite. Your name with a scene that fits you: lake and loons, mountains, campfire, camper. Signs come unfinished or stained and sealed.",
         photos: ["/images/work/sign-dube.webp", "/images/work/sign-jensen.webp"],
         featured: true,
@@ -213,7 +247,7 @@ export const SITE_VARIABLES = {
       {
         slug: "leather-card-holder",
         title: "Engraved Leather Card Holder",
-        category: "Leather",
+        category: "Leather goods",
         description: "Our first try at engraving leather, with our own logo, and it came out sharp. Personalized leather accessories make great gifts and everyday pieces.",
         photos: ["/images/work/card-holder.webp"],
         featured: true,
@@ -222,7 +256,7 @@ export const SITE_VARIABLES = {
       {
         slug: "slate-coaster",
         title: "Engraved Slate Coaster",
-        category: "Slate",
+        category: "Home decor",
         description: "Testing laser engraving on slate. The contrast against the dark stone gives designs a sharp, clean look. Custom slate coasters, family names and patriotic artwork are coming.",
         photos: ["/images/work/slate-coaster.webp"],
         featured: true,
@@ -294,6 +328,10 @@ export const SITE_VARIABLES = {
   //   visible      false hides it without deleting it
   //   choice       one pick-list for customers, or null
   //   engraving    a text box for the customer (name, date, unit...), or null
+  //   sizes        sizes with their own price, e.g. [{ name: "30 oz", price: 40 }], or null
+  //   designs      which designs from the design library fit each size, or null:
+  //                { label: "Design", required: true, bySize: { "30 oz": ["flag", "eagle"] } }
+  //                (with no sizes, use "*" as the size name)
   //   photos       leave out to keep photos added in the dashboard
   products: [
     {
@@ -303,13 +341,15 @@ export const SITE_VARIABLES = {
       wasPrice: null,
       summary: "Northern lights engraved through an iridescent 40 oz Stanley.",
       description: "Northern lights over mountains and a lake, engraved through the iridescent finish so every angle catches a different color.\n\nThese Stanleys are discontinued, so stock is limited. The design can also be made on a different style of Stanley; contact us to ask.",
-      category: "Tumblers",
+      category: "Drinkware",
       stock: 2,
       madeToOrder: false,
       featured: true,
       visible: true,
       choice: null,
       engraving: null,
+      sizes: null,
+      designs: null,
       photos: ["/images/work/aurora-1.webp", "/images/work/aurora-2.webp", "/images/work/aurora-3.webp"],
     },
     {
@@ -319,13 +359,15 @@ export const SITE_VARIABLES = {
       wasPrice: null,
       summary: "The same aurora design on a 30 oz Stanley with a straw lid.",
       description: "Northern lights over mountains and a lake, engraved through the iridescent finish.\n\nThese Stanleys are discontinued, so stock is limited. The design can also be made on a different style of Stanley; contact us to ask.",
-      category: "Tumblers",
+      category: "Drinkware",
       stock: 1,
       madeToOrder: false,
       featured: true,
       visible: true,
       choice: null,
       engraving: null,
+      sizes: null,
+      designs: null,
       photos: ["/images/work/aurora-3.webp", "/images/work/aurora-1.webp"],
     },
     {
@@ -335,13 +377,15 @@ export const SITE_VARIABLES = {
       wasPrice: 90,
       summary: "A band around the taper burned through the color. Sold as is.",
       description: "This one didn't come out perfect: a band around the taper was burned through the color. Everything else about it is fine, and it's sold as is at a big discount.",
-      category: "Tumblers",
+      category: "Drinkware",
       stock: 0,
       madeToOrder: false,
       featured: false,
       visible: false,
       choice: null,
       engraving: null,
+      sizes: null,
+      designs: null,
       photos: ["/images/work/aurora-flawed-1.webp", "/images/work/aurora-flawed-2.webp", "/images/work/aurora-flawed-3.webp"],
     },
     {
@@ -351,13 +395,15 @@ export const SITE_VARIABLES = {
       wasPrice: null,
       summary: "Your name and a scene that fits you, engraved in wood.",
       description: "Pick the name and tell us the scene: lake and loons, mountains, campfire, camper, or your own idea. Made to order.",
-      category: "Signs",
+      category: "Home decor",
       stock: null,
       madeToOrder: true,
       featured: false,
       visible: false,
       choice: { label: "Finish", options: ["Unfinished", "Stained and sealed"] },
       engraving: { label: "Name and the scene you'd like", maxLength: 120, required: true },
+      sizes: null,
+      designs: null,
       photos: ["/images/work/sign-dube.webp", "/images/work/sign-jensen.webp"],
     },
     {
@@ -365,15 +411,26 @@ export const SITE_VARIABLES = {
       name: "Custom Engraved Tumbler",
       price: 0,
       wasPrice: null,
-      summary: "Your design, name or service details engraved on a Stanley.",
+      summary: "Pick a size, then a design that fits it. Add a name if you like.",
       description: "Tell us the design and the text. Great for veterans, birthdays and gifts. Made to order.",
-      category: "Tumblers",
+      category: "Drinkware",
       stock: null,
       madeToOrder: true,
       featured: false,
       visible: false,
       choice: null,
-      engraving: { label: "Name, years served or design idea", maxLength: 120, required: true },
+      engraving: { label: "Name or text to add", maxLength: 60, required: false },
+      sizes: [{ name: "16 oz", price: 0 }, { name: "20 oz", price: 0 }, { name: "30 oz", price: 0 }, { name: "40 oz", price: 0 }],
+      designs: {
+        label: "Design",
+        required: false,
+        bySize: {
+          "16 oz": ["flag", "thin-line-flag", "veteran-star", "dog-tags", "monogram", "anchor", "mountains", "compass"],
+          "20 oz": ["flag", "thin-line-flag", "veteran-star", "monogram", "mountains", "compass"],
+          "30 oz": ["flag", "veteran-star", "monogram"],
+          "40 oz": ["flag", "veteran-star"],
+        },
+      },
       photos: ["/images/work/marine-3.webp", "/images/work/turtle-1.webp"],
     },
     {
@@ -383,13 +440,15 @@ export const SITE_VARIABLES = {
       wasPrice: null,
       summary: "Leather card holder with your initials, name or logo.",
       description: "A slim leather card holder, laser engraved with the text or logo you choose.",
-      category: "Leather",
+      category: "Leather goods",
       stock: null,
       madeToOrder: true,
       featured: false,
       visible: false,
       choice: null,
       engraving: { label: "Initials, name or logo idea", maxLength: 40, required: false },
+      sizes: null,
+      designs: null,
       photos: ["/images/work/card-holder.webp"],
     },
     {
@@ -399,13 +458,15 @@ export const SITE_VARIABLES = {
       wasPrice: null,
       summary: "Natural slate with a family name or patriotic design.",
       description: "Laser engraved natural slate. The design comes out bright against the dark stone.",
-      category: "Slate",
+      category: "Home decor",
       stock: null,
       madeToOrder: true,
       featured: false,
       visible: false,
       choice: null,
       engraving: { label: "Family name or design idea", maxLength: 40, required: false },
+      sizes: null,
+      designs: null,
       photos: ["/images/work/slate-coaster.webp"],
     },
   ],

@@ -2,9 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { money, toCents } from "@/lib/format";
-import type { Product } from "@/lib/types";
+import { fromPrice } from "@/lib/pricing";
+import type { Design, Product } from "@/lib/types";
 import { api } from "./api";
+import { CategoryManager } from "./CategoryManager";
 import { ImageList } from "./ImageField";
+import { ProductChoices, type SizeDraft } from "./ProductChoices";
 
 type Draft = Omit<Product, "price" | "compareAtPrice" | "stock" | "id" | "slug" | "createdAt" | "updatedAt"> & {
   id?: string;
@@ -12,9 +15,10 @@ type Draft = Omit<Product, "price" | "compareAtPrice" | "stock" | "id" | "slug" 
   compareAtPrice: string;
   stock: string;
   optionValues: string;
+  sizesDraft: SizeDraft[];
 };
 
-const blank: Draft = { stripeProductId: undefined, name: "", price: "", compareAtPrice: "", summary: "", description: "", category: "", images: [], stock: "", madeToOrder: false, featured: false, active: true, option: null, personalize: null, optionValues: "" };
+const blank: Draft = { stripeProductId: undefined, name: "", price: "", compareAtPrice: "", summary: "", description: "", category: "", images: [], stock: "", madeToOrder: false, featured: false, active: true, option: null, personalize: null, optionValues: "", sizes: null, designs: null, sizesDraft: [] };
 
 function toDraft(p: Product): Draft {
   return {
@@ -24,10 +28,12 @@ function toDraft(p: Product): Draft {
     stock: p.stock === null ? "" : String(p.stock),
     option: p.option ?? null,
     optionValues: p.option?.values.join(", ") ?? "",
+    sizesDraft: (p.sizes ?? []).map((s) => ({ name: s.name, price: (s.price / 100).toFixed(2) })),
+    designs: p.designs ?? null,
   };
 }
 
-export function ProductManager({ initial, currency, views, lowAt, stripeOn, stripeTest }: { initial: Product[]; currency: string; views: Record<string, number>; lowAt: number; stripeOn: boolean; stripeTest: boolean }) {
+export function ProductManager({ initial, currency, views, lowAt, stripeOn, stripeTest, library, categories: savedCats }: { initial: Product[]; currency: string; views: Record<string, number>; lowAt: number; stripeOn: boolean; stripeTest: boolean; library: Design[]; categories: string[] }) {
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
@@ -48,19 +54,37 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
-  const categories = useMemo(() => [...new Set(list.map((p) => p.category).filter(Boolean))], [list]);
-  const shown = list.filter((p) => !q || (p.name + p.category).toLowerCase().includes(q.toLowerCase()));
+  const [cats, setCats] = useState(savedCats);
+  const [catFilter, setCatFilter] = useState("");
+  const [catsOpen, setCatsOpen] = useState(false);
+  const categories = useMemo(() => [...new Set([...cats, ...list.map((p) => p.category).filter(Boolean)])], [cats, list]);
+  const shown = list.filter((p) => (!q || (p.name + p.category).toLowerCase().includes(q.toLowerCase())) && (!catFilter || (catFilter === "-" ? !p.category : p.category === catFilter)));
+
+  async function newCategory(): Promise<string> {
+    const name = prompt("Name of the new category (e.g. Drinkware)")?.trim().slice(0, 40);
+    if (!name) return "";
+    if (!cats.includes(name)) {
+      const next = [...cats, name];
+      setCats(next);
+      await api("/api/admin/settings", "PUT", { categories: next }).catch(() => {});
+    }
+    return name;
+  }
 
   async function save() {
     if (!editing) return;
     if (!editing.name.trim()) return setErr("Give the item a name.");
-    if (!toCents(editing.price)) return setErr("Add a price.");
+    const sizes = editing.sizesDraft.filter((s) => s.name.trim() || s.price.trim());
+    if (sizes.some((s) => !s.name.trim())) return setErr("Every size needs a name.");
+    if (sizes.some((s) => !toCents(s.price))) return setErr("Every size needs a price.");
+    if (!sizes.length && !toCents(editing.price)) return setErr("Add a price.");
     setBusy(true);
     setErr("");
     const label = editing.option?.label?.trim() || "";
     const body = {
       ...editing,
-      price: toCents(editing.price),
+      price: sizes.length ? 0 : toCents(editing.price),
+      sizes: sizes.length ? sizes.map((s) => ({ name: s.name.trim(), price: toCents(s.price) })) : null,
       compareAtPrice: editing.compareAtPrice ? toCents(editing.compareAtPrice) : null,
       stock: editing.stock.trim() === "" ? null : Number(editing.stock),
       option: label ? { label, values: editing.optionValues.split(",").map((v) => v.trim()).filter(Boolean) } : null,
@@ -106,15 +130,22 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
           <section className="panel stack">
             <label className="f"><span>Name</span><input value={editing.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Challenge Coin Display" /></label>
             <div className="row2">
-              <label className="f"><span>Price</span><input inputMode="decimal" value={editing.price} onChange={(e) => set({ price: e.target.value })} placeholder="45.00" /></label>
+              {editing.sizesDraft.length ? (
+                <div className="f"><span>Price</span><p className="hint">Set for each size below.</p></div>
+              ) : (
+                <label className="f"><span>Price</span><input inputMode="decimal" value={editing.price} onChange={(e) => set({ price: e.target.value })} placeholder="45.00" /></label>
+              )}
               <label className="f"><span>Was price <em className="muted">(optional, shows a sale)</em></span><input inputMode="decimal" value={editing.compareAtPrice} onChange={(e) => set({ compareAtPrice: e.target.value })} /></label>
             </div>
             <label className="f"><span>Short description <em className="muted">(shown on the shop page)</em></span><input value={editing.summary} onChange={(e) => set({ summary: e.target.value })} maxLength={300} placeholder="One line that sells it" /></label>
             <label className="f"><span>Full description</span><textarea rows={7} value={editing.description} onChange={(e) => set({ description: e.target.value })} placeholder={"Materials, size, care, how it's made.\n\nLeave a blank line between paragraphs."} /></label>
             <label className="f">
               <span>Category</span>
-              <input list="cats" value={editing.category} onChange={(e) => set({ category: e.target.value })} placeholder="e.g. Woodwork" />
-              <datalist id="cats">{categories.map((c) => <option key={c} value={c} />)}</datalist>
+              <select value={editing.category} onChange={async (e) => set({ category: e.target.value === "+new" ? (await newCategory()) || editing.category : e.target.value })}>
+                <option value="">No category</option>
+                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                <option value="+new">+ New category…</option>
+              </select>
             </label>
             <ImageList value={editing.images} onChange={(images) => set({ images })} folder="products" />
           </section>
@@ -122,8 +153,15 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
             <h2>Stock</h2>
             <label className="f"><span>How many do you have? <em className="muted">(leave empty for unlimited)</em></span><input inputMode="numeric" value={editing.stock} onChange={(e) => set({ stock: e.target.value.replace(/[^0-9]/g, "") })} /></label>
             <label className="check"><input type="checkbox" checked={editing.madeToOrder} onChange={(e) => set({ madeToOrder: e.target.checked })} /> Made to order</label>
-            <h2>Choices</h2>
-            <p className="hint">Let customers pick a size, color, wood, etc.</p>
+            <ProductChoices
+              sizes={editing.sizesDraft}
+              designs={editing.designs ?? null}
+              library={library}
+              onSizes={(sizesDraft, designs) => set({ sizesDraft, designs })}
+              onDesigns={(designs) => set({ designs })}
+            />
+            <h2>Other choice</h2>
+            <p className="hint">One more pick-list if needed: color, wood, finish...</p>
             <label className="f"><span>Choice name</span><input value={editing.option?.label ?? ""} onChange={(e) => set({ option: { label: e.target.value, values: [] } })} placeholder="e.g. Color" /></label>
             <label className="f"><span>Options, separated by commas</span><input value={editing.optionValues} onChange={(e) => set({ optionValues: e.target.value })} placeholder="Black, Brown, Natural" /></label>
             <h2>Personalization</h2>
@@ -162,11 +200,21 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
         <div className="row wrap">
           {stripeOn ? <button className="b" onClick={syncStripe} disabled={syncing}>{syncing ? "Syncing…" : "Sync from Stripe"}</button> : null}
           {stripeOn ? <a className="b b-ghost" href={`https://dashboard.stripe.com/${stripeTest ? "test/" : ""}products/create`} target="_blank" rel="noreferrer">Add in Stripe</a> : null}
+          <button className="b" onClick={() => setCatsOpen(!catsOpen)}>Categories</button>
+          <a className="b b-ghost" href="/admin/designs">Designs</a>
           <button className="b b-primary" onClick={() => { setErr(""); setEditing({ ...blank }); }}>Add item</button>
         </div>
       </div>
+      {catsOpen ? <CategoryManager initial={cats} products={list} onClose={() => setCatsOpen(false)} /> : null}
       {syncMsg ? <p className="alert" role="status">{syncMsg}</p> : null}
       {list.length > 6 ? <input className="search" placeholder="Search items" value={q} onChange={(e) => setQ(e.target.value)} /> : null}
+      {categories.length > 1 ? (
+        <div className="chips" role="group" aria-label="Show category">
+          <button type="button" className={!catFilter ? "on" : ""} onClick={() => setCatFilter("")}>All ({list.length})</button>
+          {categories.map((c) => <button key={c} type="button" className={catFilter === c ? "on" : ""} onClick={() => setCatFilter(c)}>{c} ({list.filter((p) => p.category === c).length})</button>)}
+          {list.some((p) => !p.category) ? <button type="button" className={catFilter === "-" ? "on" : ""} onClick={() => setCatFilter("-")}>No category</button> : null}
+        </div>
+      ) : null}
       {shown.length ? (
         <ul className="plist">
           {shown.map((p) => (
@@ -178,7 +226,8 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
                   <span className="muted">{[p.stripeProductId ? "From Stripe" : null, p.category, p.active ? null : "Hidden", p.featured ? "Featured" : null].filter(Boolean).join(", ")}</span>
                 </span>
                 <span className="plist-meta">
-                  <strong>{money(p.price, currency)}</strong>
+                  <strong>{p.sizes?.length ? `From ${money(fromPrice(p), currency)}` : money(p.price, currency)}</strong>
+                  {p.sizes?.length ? <span className="muted">{p.sizes.length} sizes{p.designs ? ", designs" : ""}</span> : null}
                   <span className={p.stock !== null && p.stock <= lowAt ? "warn-text" : "muted"}>{p.stock === null ? (p.madeToOrder ? "Made to order" : "Unlimited") : `${p.stock} in stock`}</span>
                   <span className="muted">{views[p.id] ?? 0} views</span>
                 </span>

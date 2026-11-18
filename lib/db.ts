@@ -1,15 +1,16 @@
 import "server-only";
 import { kv } from "./store";
+import { DEFAULT_ADMIN } from "./site-structure";
 import { fileSettings, syncVariables } from "./sync";
 import type { AppNotification, CustomRequest, Expense, Message, Order, Product, Review, SiteSettings, Subscriber } from "./types";
 
 // Starting values come from site-variables.ts (the SITE-VARIABLES edit point).
-export const DEFAULT_SETTINGS: SiteSettings = fileSettings();
+export const DEFAULT_SETTINGS: SiteSettings = { ...fileSettings(), admin: DEFAULT_ADMIN };
 
 export async function getSettings(): Promise<SiteSettings> {
   await syncVariables();
   const s = await kv.get<Partial<SiteSettings>>("settings");
-  return { ...DEFAULT_SETTINGS, ...(s ?? {}), social: { ...(s?.social ?? {}) } };
+  return { ...DEFAULT_SETTINGS, ...(s ?? {}), social: { ...(s?.social ?? {}) }, admin: { ...DEFAULT_ADMIN, ...(s?.admin ?? {}) } };
 }
 
 export async function saveSettings(patch: Partial<SiteSettings>) {
@@ -24,8 +25,14 @@ export async function getProducts(): Promise<Product[]> {
   return (await kv.get<Product[]>("products")) ?? [];
 }
 
+/** Items customers can see, grouped in the owner's category order (Products > Categories). */
 export async function getActiveProducts() {
-  return (await getProducts()).filter((p) => p.active);
+  const [list, s] = await Promise.all([getProducts(), getSettings()]);
+  const rank = (c: string) => {
+    const i = s.categories.indexOf(c);
+    return i < 0 ? s.categories.length + (c ? 0 : 1) : i;
+  };
+  return list.filter((p) => p.active).sort((a, b) => rank(a.category) - rank(b.category));
 }
 
 export async function getProductBySlug(slug: string) {

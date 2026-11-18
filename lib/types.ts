@@ -1,6 +1,29 @@
 export type ProductOption = { label: string; values: string[] };
 // Lets the customer type text for the item, e.g. a name to engrave.
 export type Personalize = { label: string; maxLength: number; required: boolean };
+// A size (or style) of an item with its own price, e.g. "30 oz" at $80.
+export type ProductSize = { name: string; price: number }; // cents
+// Which designs from the design library fit this item. "fit" is keyed by size
+// name ("*" when the item has no sizes) and lists design ids, so each size can
+// offer a different set (a 40 oz tumbler might fit 2 designs, a 16 oz 10).
+export type ProductDesigns = { label: string; required: boolean; fit: Record<string, string[]> };
+// One decal / engraving artwork in the design library.
+export type Design = { id: string; name: string; image: string; group: string; extra: number; active: boolean };
+// One entry in the shop's page list (top menu and footer).
+export type MenuItem = { id: string; label: string; href?: string; top: boolean; footer: boolean; off?: boolean };
+// How the owner's dashboard looks and what it shows.
+export type AdminPrefs = {
+  title: string; // name in the dashboard's top bar ("" = business name)
+  accent: string; // main color, e.g. "#2f5d3a"
+  mode: "auto" | "light" | "dark";
+  density: "comfy" | "compact";
+  textSize: "normal" | "large";
+  startPage: string; // where the dashboard opens after login
+  nav: { href: string; hidden: boolean }[]; // menu order
+  tabs: string[]; // up to 4 hrefs for the phone's bottom bar
+  widgets: { id: string; hidden: boolean }[]; // dashboard home sections, in order
+  quickLinks: { label: string; url: string }[]; // buttons on the dashboard home
+};
 
 export type Product = {
   id: string;
@@ -18,6 +41,8 @@ export type Product = {
   active: boolean; // visible to customers
   option?: ProductOption | null;
   personalize?: Personalize | null;
+  sizes?: ProductSize[] | null; // price then comes from the chosen size
+  designs?: ProductDesigns | null;
   // Set when the item comes from Stripe (Stripe > Product catalog)
   stripeProductId?: string;
   stripeStockSeen?: string | null;
@@ -152,6 +177,9 @@ export type SiteSettings = {
   customOrderPolicy: string;
   legalState: string; // which state's laws apply in the terms, e.g. "Oklahoma"
   extraPages: InfoPage[];
+  menu: MenuItem[]; // order and visibility of pages in the menu and footer
+  categories: string[]; // shop categories, in display order
+  designs: Design[]; // design library for decals / engravings
   showContactForm: boolean;
   showNewsletter: boolean;
   newsletterText: string;
@@ -185,6 +213,7 @@ export type SiteSettings = {
   githubRepo: string;
   vercelProject: string;
   customLinks: CustomLink[];
+  admin: AdminPrefs; // dashboard look and layout (not in site-variables.ts)
   expenseCategories: string[];
 };
 

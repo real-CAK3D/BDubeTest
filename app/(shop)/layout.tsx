@@ -24,11 +24,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const [s, products] = await Promise.all([getSettings(), getActiveProducts()]);
-  const cartProducts = products.map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.images[0], slug: p.slug, stock: p.stock }));
+  const cartProducts = products.map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.images[0], slug: p.slug, stock: p.stock, sizes: p.sizes ?? null, designs: p.designs ?? null }));
+  const used = new Set(products.flatMap((p) => (p.designs ? Object.values(p.designs.fit).flat() : [])));
+  const cartDesigns = s.designs.filter((d) => d.active && used.has(d.id)).map((d) => ({ id: d.id, name: d.name, image: d.image, extra: d.extra, active: d.active, group: d.group }));
   return (
     <div className="shop">
       <ThemeStyle theme={getTheme(s.theme)} />
-      <CartProvider products={cartProducts}>
+      <CartProvider products={cartProducts} designs={cartDesigns}>
         <Header s={s} />
         <main className="main">{children}</main>
         <Footer s={s} />

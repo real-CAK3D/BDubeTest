@@ -1,3 +1,5 @@
+import { pageOn } from "@/lib/site-structure";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { About } from "@/components/shop/Sections";
@@ -10,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const s = await getSettings();
+  if (!pageOn(s, "about")) notFound();
   return (
     <>
       <Tracker />

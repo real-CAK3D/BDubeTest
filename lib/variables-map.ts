@@ -3,8 +3,15 @@ import type { Product, SiteSettings } from "./types";
 
 const cents = (d: number | null | undefined) => (d == null ? null : Math.max(0, Math.round(d * 100)));
 
-export function variablesToSettings(v: SiteVariables): SiteSettings {
+export type FileSettings = Omit<SiteSettings, "admin">;
+
+const idOf = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50);
+
+export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
+    menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
+    categories: [...(v.categories ?? [])],
+    designs: (v.designs ?? []).map((d) => ({ id: idOf(d.id || d.name), name: d.name, image: d.image, group: d.group, extra: cents(d.extraPrice) ?? 0, active: d.show })),
     businessName: v.brand.businessName,
     tagline: v.brand.tagline,
     announcement: v.brand.announcement,
@@ -82,7 +89,7 @@ export function variablesToSettings(v: SiteVariables): SiteSettings {
   };
 }
 
-export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize"> & { images?: string[] };
+export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize" | "sizes" | "designs"> & { images?: string[] };
 
 // duplicate slugs: first one wins
 export function variablesToProducts(v: SiteVariables): FileProduct[] {
@@ -109,6 +116,8 @@ export function variablesToProducts(v: SiteVariables): FileProduct[] {
       active: p.visible ?? true,
       option: p.choice && p.choice.label && p.choice.options.length ? { label: p.choice.label, values: p.choice.options } : null,
       personalize: p.engraving ? { label: p.engraving.label, maxLength: p.engraving.maxLength, required: p.engraving.required } : null,
+      sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: cents(x.price) ?? 0 })) : null,
+      designs: p.designs ? { label: p.designs.label, required: p.designs.required, fit: Object.fromEntries(Object.entries(p.designs.bySize).map(([k, ids]) => [k, ids.map(idOf)])) } : null,
     };
     if (p.photos) fp.images = p.photos;
     out.push(fp);

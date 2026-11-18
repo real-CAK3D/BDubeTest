@@ -69,6 +69,7 @@ export function OrderList({ initial, openId, status, canEmail }: { initial: Orde
                 <span>{o.name || o.email}</span>
                 <span className="muted">{shortDate(o.createdAt)}</span>
                 {o.items.some((i) => i.custom) ? <span className="pill engrave-pill">Engraving</span> : null}
+                {o.delivery === "pickup" ? <span className="pill">Pickup</span> : null}
                 <span className={`pill s-${o.status}`}>{STATUSES.find((s) => s.id === o.status)?.label}</span>
                 <strong>{money(o.total, o.currency)}</strong>
               </button>
@@ -89,9 +90,11 @@ export function OrderList({ initial, openId, status, canEmail }: { initial: Orde
                         {o.tax ? <li className="muted">Tax {money(o.tax, o.currency)}</li> : null}
                       </ul>
                       {o.paymentMethod ? <p className="muted small">Paid with {o.paymentMethod}</p> : null}
+                      {o.giftNote ? <div className="engrave">Gift message: <strong>&ldquo;{o.giftNote}&rdquo;</strong></div> : null}
+                      {o.shipNote ? <p className="err small">{o.shipNote}</p> : null}
                     </div>
                     <div>
-                      <h3>Ship to</h3>
+                      <h3>{o.delivery === "pickup" ? "Local pickup" : "Ship to"}</h3>
                       <p className="addr">{o.name}{o.shippingAddress ? "\n" + o.shippingAddress : ""}</p>
                       <p>
                         {o.email ? <a href={`mailto:${o.email}?subject=Your order %23${o.number}`}>{o.email}</a> : null}

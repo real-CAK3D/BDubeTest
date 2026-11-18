@@ -26,6 +26,7 @@ export function settingsToVariables(s: SiteSettings, products: Product[]): SiteV
       customSteps: s.customSteps,
     },
     reviews: { show: s.showReviews, heading: s.reviewsHeading, text: s.reviewsText },
+    customOrders: { show: s.showCustomOrders, heading: s.customOrderHeading, intro: s.customOrderIntro, notice: s.customOrderNotice, types: s.customOrderTypes },
     about: { heading: s.aboutTitle, story: s.about, serviceLine: s.serviceLine, showVeteranBadge: s.showVeteranBadge },
     contact: { heading: s.contactHeading, text: s.contactText, email: s.contactEmail, phone: s.contactPhone, location: s.location, showContactForm: s.showContactForm },
     newsletter: { show: s.showNewsletter, text: s.newsletterText },
@@ -58,6 +59,12 @@ export function settingsToVariables(s: SiteSettings, products: Product[]): SiteV
       shippingPrice: dollars(s.shippingFlat) ?? 0,
       freeShippingOver: dollars(s.freeShippingOver) ?? 0,
       shipToCountries: s.shipCountries,
+      shipFromZip: s.shipFromZip,
+      shippingByDistance: s.shippingTiers.map((t) => ({ upToMiles: t.upToMiles, price: dollars(t.price) ?? 0 })),
+      internationalShipping: dollars(s.intlShipping) ?? 0,
+      localPickup: s.localPickup,
+      pickupNote: s.pickupNote,
+      giftNotes: s.giftNotes,
       lowStockAlert: s.lowStockAlert,
       allowPromoCodes: s.allowPromoCodes,
       salesTaxByStripe: s.stripeTax,
@@ -187,6 +194,14 @@ export function variablesFile(v: SiteVariables): string {
     field("heading", v.reviews.heading),
     field("text", v.reviews.text, "next to the Leave a review button"),
   ]);
+  sec("Custom orders", ["The custom order request form (/custom-order). Requests land in the dashboard under Requests."]);
+  obj("customOrders", [
+    field("show", v.customOrders.show, "the form and its menu link"),
+    field("heading", v.customOrders.heading),
+    field("intro", v.customOrders.intro),
+    field("notice", v.customOrders.notice, "shown in a box at the top of the form"),
+    field("types", v.customOrders.types, "choices for \"What would you like?\""),
+  ]);
   sec("About page");
   obj("about", [
     field("heading", v.about.heading),
@@ -259,7 +274,15 @@ export function variablesFile(v: SiteVariables): string {
     field("open", v.store.open, "false pauses ordering; the shop stays visible"),
     field("closedMessage", v.store.closedMessage),
     field("askForShippingAddress", v.store.askForShippingAddress, "false for pickup-only items (no shipping charged)"),
-    field("shippingPrice", v.store.shippingPrice, "flat shipping per order, in dollars"),
+    field("shipFromZip", v.store.shipFromZip, "your ZIP code; shipping distance is measured from here"),
+    "shippingByDistance: [ // nearest first: up to this many miles costs this many dollars",
+    ...v.store.shippingByDistance.map((t) => `  { upToMiles: ${t.upToMiles}, price: ${t.price} },`),
+    "],",
+    field("shippingPrice", v.store.shippingPrice, "farther than the last tier, or if the distance can't be worked out"),
+    field("internationalShipping", v.store.internationalShipping, "outside the US, in dollars"),
+    field("localPickup", v.store.localPickup, "let customers choose free local pickup"),
+    field("pickupNote", v.store.pickupNote, "shown when they choose pickup"),
+    field("giftNotes", v.store.giftNotes, "optional gift message box at checkout"),
     field("freeShippingOver", v.store.freeShippingOver, "orders this big ship free; 0 = never"),
     field("shipToCountries", v.store.shipToCountries, "two-letter country codes"),
     field("lowStockAlert", v.store.lowStockAlert, "phone alert when an item gets down to this many"),

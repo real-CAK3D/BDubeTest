@@ -99,11 +99,32 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
             </div>
             {s.collectShipping ? (
               <>
-                <div className="row2">
-                  <label className="f"><span>Flat shipping price</span><input inputMode="decimal" defaultValue={dollars(s.shippingFlat)} onBlur={(e) => set({ shippingFlat: cents(e.target.value) })} /></label>
-                  <label className="f"><span>Free shipping on orders over <em className="muted">(0 = never)</em></span><input inputMode="decimal" defaultValue={dollars(s.freeShippingOver)} onBlur={(e) => set({ freeShippingOver: cents(e.target.value) })} /></label>
+                <h3 className="sub">Shipping by distance</h3>
+                <p className="hint">Customers enter their ZIP code in the cart and see the price before they pay. Distance is measured in a straight line from your ZIP.</p>
+                <label className="f"><span>Your ZIP code (ship from)</span><input inputMode="numeric" maxLength={5} value={s.shipFromZip} onChange={(e) => set({ shipFromZip: e.target.value.replace(/\D/g, "").slice(0, 5) })} placeholder="e.g. 73501" /></label>
+                <div className="tiers">
+                  {s.shippingTiers.map((t, i) => (
+                    <div key={i} className="tier">
+                      <span>Up to</span>
+                      <input aria-label="Miles" inputMode="numeric" value={t.upToMiles} onChange={(e) => set({ shippingTiers: s.shippingTiers.map((x, j) => (j === i ? { ...x, upToMiles: Number(e.target.value.replace(/\D/g, "")) || 0 } : x)) })} />
+                      <span>miles: $</span>
+                      <input aria-label="Price" inputMode="decimal" defaultValue={dollars(t.price)} onBlur={(e) => set({ shippingTiers: s.shippingTiers.map((x, j) => (j === i ? { ...x, price: cents(e.target.value) } : x)) })} />
+                      <button type="button" className="b b-ghost b-sm" onClick={() => set({ shippingTiers: s.shippingTiers.filter((_, j) => j !== i) })} aria-label="Remove this distance">✕</button>
+                    </div>
+                  ))}
+                  <button type="button" className="b b-sm" onClick={() => set({ shippingTiers: [...s.shippingTiers, { upToMiles: (s.shippingTiers.at(-1)?.upToMiles ?? 0) + 250, price: s.shippingTiers.at(-1)?.price ?? 0 }] })}>Add a distance</button>
                 </div>
-                <label className="f"><span>Ship to countries <em className="muted">(two-letter codes, comma separated)</em></span><input defaultValue={s.shipCountries.join(", ")} onBlur={(e) => set({ shipCountries: e.target.value.split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[A-Z]{2}$/.test(c)) })} /></label>
+                <div className="row2">
+                  <label className="f"><span>Farther than that (or ZIP not found)</span><input inputMode="decimal" defaultValue={dollars(s.shippingFlat)} onBlur={(e) => set({ shippingFlat: cents(e.target.value) })} /></label>
+                  <label className="f"><span>Outside the US</span><input inputMode="decimal" defaultValue={dollars(s.intlShipping)} onBlur={(e) => set({ intlShipping: cents(e.target.value) })} /></label>
+                </div>
+                <div className="row2">
+                  <label className="f"><span>Free shipping on orders over <em className="muted">(0 = never)</em></span><input inputMode="decimal" defaultValue={dollars(s.freeShippingOver)} onBlur={(e) => set({ freeShippingOver: cents(e.target.value) })} /></label>
+                  <label className="f"><span>Ship to countries <em className="muted">(two-letter codes)</em></span><input defaultValue={s.shipCountries.join(", ")} onBlur={(e) => set({ shipCountries: e.target.value.split(",").map((c) => c.trim().toUpperCase()).filter((c) => /^[A-Z]{2}$/.test(c)) })} /></label>
+                </div>
+                <h3 className="sub">Local pickup</h3>
+                <label className="check"><input type="checkbox" checked={s.localPickup} onChange={(e) => set({ localPickup: e.target.checked })} /> Let customers pick up for free</label>
+                {s.localPickup ? <label className="f"><span>Pickup note</span><input value={s.pickupNote} onChange={(e) => set({ pickupNote: e.target.value })} /></label> : null}
               </>
             ) : null}
           </div>
@@ -119,7 +140,8 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
             <label className="check"><input type="checkbox" checked={s.allowPromoCodes} onChange={(e) => set({ allowPromoCodes: e.target.checked })} /> Let customers enter promo codes <Link href="/admin/discounts" className="small">Discounts</Link></label>
             <label className="check"><input type="checkbox" checked={s.stripeTax} onChange={(e) => set({ stripeTax: e.target.checked })} /> Sales tax by Stripe <a className="small" href="https://dashboard.stripe.com/settings/tax" target="_blank" rel="noreferrer">set up Stripe Tax first</a></label>
             <label className="check"><input type="checkbox" checked={s.showContactForm} onChange={(e) => set({ showContactForm: e.target.checked })} /> Contact form on the shop <Link href="/admin/inbox" className="small">Inbox</Link></label>
-            <label className="check"><input type="checkbox" checked={s.showNewsletter} onChange={(e) => set({ showNewsletter: e.target.checked })} /> Email sign-up box in the footer</label>
+            <label className="check"><input type="checkbox" checked={s.giftNotes} onChange={(e) => set({ giftNotes: e.target.checked })} /> Gift message box at checkout</label>
+          <label className="check"><input type="checkbox" checked={s.showNewsletter} onChange={(e) => set({ showNewsletter: e.target.checked })} /> Email sign-up box in the footer</label>
             <label className="f">
               <span>Send customer emails from <em className="muted">(for tracking emails{hasResend ? "" : "; needs a Resend key"})</em></span>
               <input value={s.emailFrom} onChange={(e) => set({ emailFrom: e.target.value })} placeholder="Your Shop <orders@yourshop.com>" />

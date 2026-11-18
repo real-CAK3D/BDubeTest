@@ -13,6 +13,8 @@ export function Footer({ s }: { s: SiteSettings }) {
   const help = [
     ...s.extraPages.filter((p) => p.inFooter).map((p) => ({ href: `/pages/${p.slug}`, label: p.title })),
     ...policy("Help"),
+    { href: "/order-status", label: "Order status" },
+    ...(s.showCustomOrders ? [{ href: "/custom-order", label: "Custom order form" }] : []),
     ...(s.showReviews ? [{ href: "/review", label: "Leave a review" }] : []),
     { href: "/contact", label: "Contact" },
   ];
@@ -49,6 +51,7 @@ export function Footer({ s }: { s: SiteSettings }) {
           */}
       <p className="fine">
         © {new Date().getFullYear()} {s.businessName}. All rights reserved.{s.footerNote ? ` ${s.footerNote}` : ""}
+        {" "}<Link href="/admin" className="owner-link">Owner login</Link>
       </p>
     </footer>
   );

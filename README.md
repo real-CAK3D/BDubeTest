@@ -24,24 +24,25 @@ There's a Deploy to Vercel button in [SETUP.md, step 2](SETUP.md#copy).
 
 | Area | What it does |
 |---|---|
-| **Shop** (`/`) | 4 page layouts × 8 themes, product pages with photo galleries and choices, cart, Stripe checkout with promo codes and optional sales tax, thank-you page, contact form, email sign-up, shipping / returns / privacy / terms pages, sitemap |
+| **Shop** (`/`) | 6 page layouts × 18 themes, product pages with photo galleries and choices, cart with shipping priced by distance or local pickup, Stripe checkout with promo codes, gift messages and optional sales tax, thank-you page, custom order request form, order status lookup, shop search, contact form, email sign-up, shipping / returns / privacy / terms pages, sitemap |
 | **Dashboard** | Sales, orders, profit, visitors, conversion, charts, best sellers, most viewed, traffic sources, setup progress |
 | **Orders** | Items, address, payment method, discounts and tax, status, carrier and tracking number, one-tap "shipped" email, private notes, spreadsheet download |
 | **Products** | Add/edit/hide items with up to 12 photos, stock, choices, sale prices. Items made in Stripe sync in automatically |
 | **Money** | Income vs. expenses, profit, margin, spreadsheets for taxes |
 | **Customers** | Buyers, repeat customers, email sign-ups, downloads |
 | **Inbox** | Messages from the shop's contact form |
+| **Requests** | Custom order requests with reference photos; email a quote or politely decline in one tap |
 | **Our work** | Finished pieces with photos and descriptions, a 3D rotating showcase on the home page, "Order one like this" |
 | **Reviews** | Customers leave star reviews with a photo; nothing shows until approved; pin favorites to the home page |
 | **Discounts** | Stripe coupons and promo codes, with usage |
 | **Words & logos / Look & layout** | Every word on the site, logos, photos, six policy pages, extra pages (FAQ...), footer; theme and layout with live preview |
 | **Setup** | The setup steps with live checkmarks |
 | **Keys** | Paste, test and replace API keys; create notification keys; connect the Stripe webhook; add keys for any other service |
-| **Settings** | Store, shipping, checkout options, notifications, password, links to every account |
+| **Settings** | Store, shipping by distance, local pickup, checkout options, notifications, password, links to every account |
 | **Help** | The full guide, searchable, opened from the **?** icon to the topic for the current page |
 
-**Themes:** Military Police, Olive Drab, OCP Field, Dress Blues, Night Patrol (dark), Old Glory, Brass & Leather, Clean Dispatch.
-**Layouts:** Garrison, Field Manual, Showroom, Quartermaster.
+**Themes:** Dube Family, Military Police, Olive Drab, OCP Field, Desert Camo, Woodland Camo, Dress Blues, Night Patrol (dark), Thin Blue Line, Black & Gold, Old Glory, Americana, Yellow Ribbon, Brass & Leather, Burnt Birch, Etched Slate, Maple & Walnut, Clean Dispatch.
+**Layouts:** Garrison, Field Manual, Showroom, Quartermaster, Workshop, Tribute.
 
 ## Changing things later
 - **Day to day:** the dashboard, on a phone or computer. Edits show instantly and are saved to `site-variables.ts` on GitHub too (once a GitHub token is added).

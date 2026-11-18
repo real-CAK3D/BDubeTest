@@ -25,9 +25,7 @@ export function About({ s }: { s: SiteSettings }) {
         ) : null}
         <div className="prose">
           <h1>{s.aboutTitle}</h1>
-          {paragraphs(s.about).map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
+          {s.about.trim() ? paragraphs(s.about).map((p, i) => <p key={i}>{p}</p>) : <p className="muted">Our story is coming soon.</p>}
           <VeteranBadge s={s} />
         </div>
       </div>

@@ -13,7 +13,7 @@ export function Header({ s }: { s: SiteSettings }) {
             <Logo s={s} size={54} />
             <span className="brand-name">{s.businessName}</span>
           </Link>
-          <NavLinks />
+          <NavLinks custom={s.showCustomOrders} />
         </div>
       </header>
       {!s.storeOpen ? <div className="closed-note">{s.closedMessage}</div> : null}

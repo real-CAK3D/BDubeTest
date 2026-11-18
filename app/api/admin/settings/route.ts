@@ -37,7 +37,12 @@ export async function PUT(req: Request) {
     if (typeof def === "number") patch[k] = Math.max(0, Math.round(Number(v) || 0));
     else if (typeof def === "boolean") patch[k] = Boolean(v);
     else if (typeof def === "string") patch[k] = String(v ?? "").slice(0, 8000);
-    else if (k === "shipCountries" || k === "expenseCategories")
+    else if (k === "shippingTiers")
+      patch[k] = Array.isArray(v)
+        ? (v as unknown as Row[]).slice(0, 12).map((t) => ({ upToMiles: Math.max(1, Math.round(Number(t.upToMiles) || 0)), price: Math.max(0, Math.round(Number(t.price) || 0)) })).sort((a, b) => a.upToMiles - b.upToMiles)
+        : def;
+    else if (k === "shipFromZip") patch[k] = String(v ?? "").replace(/\D/g, "").slice(0, 5);
+    else if (k === "shipCountries" || k === "expenseCategories" || k === "customOrderTypes")
       patch[k] = Array.isArray(v) ? v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 50) : def;
     else if (k === "customSteps" || k === "extraPages" || k === "gallery") patch[k] = Array.isArray(v) ? cleanList(k, v as unknown as Row[]) : def;
     else patch[k] = v;

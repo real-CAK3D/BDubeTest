@@ -72,6 +72,12 @@ export async function recordOrderFromSession(sessionId: string) {
           .join("\n")
       : undefined,
     items,
+    delivery: session.metadata?.delivery === "pickup" ? "pickup" : session.metadata?.delivery === "ship" ? "ship" : undefined,
+    giftNote: session.custom_fields?.find((f) => f.key === "gift")?.text?.value || undefined,
+    shipNote:
+      session.metadata?.shipZip && addr?.postal_code && !addr.postal_code.startsWith(session.metadata.shipZip)
+        ? `Shipping was priced for ZIP ${session.metadata.shipZip} but the address is ${addr.postal_code}. Check the shipping cost before sending.`
+        : undefined,
     subtotal: session.amount_subtotal ?? 0,
     shipping,
     discount: session.total_details?.amount_discount || undefined,

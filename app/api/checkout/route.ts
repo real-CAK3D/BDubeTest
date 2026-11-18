@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getActiveProducts, getSettings } from "@/lib/db";
+import { cleanZip, quoteShipping } from "@/lib/shipping";
 import { siteUrl, stripe } from "@/lib/stripe";
 
 type CartLine = { productId: string; quantity: number; option?: string; custom?: string };
@@ -9,7 +10,8 @@ export async function POST(req: Request) {
   const s = await stripe();
   if (!s) return NextResponse.json({ error: "Online checkout isn't switched on yet. Please check back soon." }, { status: 503 });
 
-  const { items } = (await req.json().catch(() => ({ items: [] }))) as { items: CartLine[] };
+  const body = (await req.json().catch(() => ({ items: [] }))) as { items: CartLine[]; delivery?: string; zip?: string; abroad?: boolean };
+  const items = body.items;
   const [products, settings] = await Promise.all([getActiveProducts(), getSettings()]);
   if (!settings.storeOpen) return NextResponse.json({ error: settings.closedMessage }, { status: 400 });
 
@@ -55,8 +57,14 @@ export async function POST(req: Request) {
   }
   if (!lines.length) return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
 
-  const freeShip = settings.freeShippingOver > 0 && subtotal >= settings.freeShippingOver;
-  const shippingAmount = settings.collectShipping && !freeShip ? settings.shippingFlat : 0;
+  // Shipping is priced here again from the ZIP (never trusted from the browser).
+  const pickup = settings.collectShipping && settings.localPickup && body.delivery === "pickup";
+  const shipZip = cleanZip(body.zip).slice(0, 5);
+  const abroad = Boolean(body.abroad);
+  if (settings.collectShipping && !pickup && !abroad && !/^\d{5}$/.test(shipZip)) return NextResponse.json({ error: "Enter your ZIP code in the cart so we can work out shipping." }, { status: 400 });
+  const quote = settings.collectShipping && !pickup ? await quoteShipping(settings, { zip: shipZip, country: abroad ? "XX" : "US", subtotal }) : null;
+  const countries = (abroad ? settings.shipCountries.filter((c) => c !== "US") : ["US"]) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[];
+  if (abroad && !countries.length) return NextResponse.json({ error: "Sorry, we only ship within the US right now." }, { status: 400 });
   const base = siteUrl(req);
 
   try {
@@ -69,26 +77,29 @@ export async function POST(req: Request) {
     const session = await s.checkout.sessions.create({
       mode: "payment",
       line_items: lines,
-      ...(settings.collectShipping
+      ...(quote
         ? {
-            shipping_address_collection: { allowed_countries: (settings.shipCountries.length ? settings.shipCountries : ["US"]) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] },
+            shipping_address_collection: { allowed_countries: countries },
             shipping_options: [
               {
                 shipping_rate_data: {
                   type: "fixed_amount",
-                  display_name: freeShip ? "Free shipping" : "Standard shipping",
-                  fixed_amount: { amount: shippingAmount, currency: settings.currency },
+                  display_name: quote.label.slice(0, 100),
+                  fixed_amount: { amount: quote.amount, currency: settings.currency },
                   ...(settings.stripeTax ? { tax_behavior: "exclusive" as const } : {}),
                 },
               },
             ],
           }
         : {}),
+      ...(settings.giftNotes
+        ? { custom_fields: [{ key: "gift", label: { type: "custom" as const, custom: "Gift message (optional)" }, type: "text" as const, optional: true, text: { maximum_length: 255 } }] }
+        : {}),
       phone_number_collection: { enabled: true },
       allow_promotion_codes: settings.allowPromoCodes || undefined,
       // needs Stripe Tax set up first (Stripe > Settings > Tax)
       ...(settings.stripeTax ? { automatic_tax: { enabled: true } } : {}),
-      metadata: { cart: JSON.stringify(cart).slice(0, 499) },
+      metadata: { cart: JSON.stringify(cart).slice(0, 499), delivery: pickup ? "pickup" : quote ? "ship" : "none", shipZip: abroad ? "" : shipZip },
       success_url: `${base}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/cart`,
     });

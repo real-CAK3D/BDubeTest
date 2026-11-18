@@ -57,6 +57,9 @@ export type Order = {
   currency: string;
   paymentMethod?: string;
   status: OrderStatus;
+  delivery?: "ship" | "pickup";
+  giftNote?: string;
+  shipNote?: string; // e.g. shipping ZIP differs from the one quoted
   note?: string;
 };
 
@@ -88,6 +91,7 @@ export type SocialLinks = {
 
 export type CustomLink = { label: string; url: string };
 export type Step = { title: string; text: string };
+export type ShippingTier = { upToMiles: number; price: number }; // price in cents
 // A finished piece shown in "Our work". Not necessarily for sale.
 export type GalleryItem = {
   slug: string;
@@ -126,6 +130,11 @@ export type SiteSettings = {
   reviewsHeading: string;
   reviewsText: string;
   footerNote: string;
+  showCustomOrders: boolean;
+  customOrderHeading: string;
+  customOrderIntro: string;
+  customOrderNotice: string;
+  customOrderTypes: string[];
   galleryHeading: string;
   galleryText: string;
   gallery: GalleryItem[];
@@ -163,6 +172,12 @@ export type SiteSettings = {
   closedMessage: string;
   lowStockAlert: number;
   shipCountries: string[];
+  shipFromZip: string; // distance is measured from here
+  shippingTiers: ShippingTier[]; // nearest first; anything farther uses shippingFlat
+  intlShipping: number; // cents, outside the US
+  localPickup: boolean;
+  pickupNote: string;
+  giftNotes: boolean;
   allowPromoCodes: boolean;
   stripeTax: boolean;
   emailFrom: string; // sender for customer emails, e.g. "My Shop <orders@myshop.com>"
@@ -183,6 +198,26 @@ export type Message = {
 };
 
 export type Subscriber = { email: string; createdAt: string };
+
+export type RequestStatus = "new" | "quoted" | "accepted" | "declined" | "done";
+export type CustomRequest = {
+  id: string;
+  number: number;
+  createdAt: string;
+  name: string;
+  email: string;
+  phone: string;
+  kind: string; // tumbler, sign...
+  quantity: number;
+  details: string;
+  engraving: string;
+  neededBy: string; // YYYY-MM-DD or ""
+  budget: string;
+  zip: string;
+  photos: string[];
+  status: RequestStatus;
+  note: string; // private
+};
 
 export type ReviewStatus = "pending" | "approved" | "hidden";
 export type Review = {

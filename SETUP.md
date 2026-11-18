@@ -23,20 +23,21 @@ Getting the shop online, in order: GitHub, Vercel, Supabase, then Stripe (which 
 **Products**
 
 9. [Add products (here or in Stripe)](#products), as long as you like
+12. [Set your shipping prices](#shipping), 5 min
 10. [Coupons and promo codes](#coupons) (optional), 2 min
 11. [Phone notifications](#push), 3 min
-12. [Place a test order](#test-order), 3 min
+13. [Place a test order](#test-order), 3 min
 
 **Extras**
 
-13. [Save dashboard edits to GitHub](#github-sync), 5 min
-14. [Tracking emails](#email) (optional), 10 min
-15. [Your own web address](#domain) (optional), 10 min
-16. [Sales tax](#tax) (optional), 10 min
+14. [Save dashboard edits to GitHub](#github-sync), 5 min
+15. [Tracking emails](#email) (optional), 10 min
+16. [Your own web address](#domain) (optional), 10 min
+17. [Sales tax](#tax) (optional), 10 min
 
 **Go live**
 
-17. [Go live](#live), 15 min
+18. [Go live](#live), 15 min
 
 ## Get online
 
@@ -168,8 +169,19 @@ Links: [Stripe: new coupon](https://dashboard.stripe.com/coupons/create), Open D
 
 Links: Open Keys (dashboard, `/admin/keys`)
 
+<a id="shipping"></a>
+### 12. Set your shipping prices
+
+1. Open **Settings > Store**.
+2. Enter your **Ship-from ZIP**.
+3. Set a price for each distance band, plus **Farther than that** and **Outside the US**.
+4. Turn on **Local pickup** if people can collect orders, and write where and when in the note.
+5. Tap **Save changes**, then add something to the cart and try a few ZIP codes.
+
+> **Tip:** Weigh a typical package and price a label at Pirate Ship or USPS for a near and a far ZIP. That gives you good numbers for the bands.
+
 <a id="test-order"></a>
-### 12. Place a test order
+### 13. Place a test order
 
 1. Open your shop, add something to the cart and check out.
 2. Pay with card `4242 4242 4242 4242`, any future date, any 3-digit code and any ZIP.
@@ -178,7 +190,7 @@ Links: Open Keys (dashboard, `/admin/keys`)
 ## Extras
 
 <a id="github-sync"></a>
-### 13. Save dashboard edits to GitHub
+### 14. Save dashboard edits to GitHub
 
 Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), ready for code changes or ChatGPT edits.
 
@@ -193,7 +205,7 @@ Edits made in the dashboard show on the site right away. With a GitHub token, th
 Links: [Create a GitHub token](https://github.com/settings/personal-access-tokens/new), Open Keys (dashboard, `/admin/keys`)
 
 <a id="email"></a>
-### 14. Tracking emails (optional)
+### 15. Tracking emails (optional)
 
 Lets you email customers their tracking number with one tap from an order.
 
@@ -206,7 +218,7 @@ Lets you email customers their tracking number with one tap from an order.
 Links: [Resend](https://resend.com/signup)
 
 <a id="domain"></a>
-### 15. Your own web address (optional)
+### 16. Your own web address (optional)
 
 1. Buy a domain (for example in Vercel > Domains, or any registrar).
 2. In Vercel, open your project > **Settings > Domains**, add it, and follow the instructions to point it at Vercel.
@@ -215,7 +227,7 @@ Links: [Resend](https://resend.com/signup)
 Links: [Vercel domains](https://vercel.com/domains)
 
 <a id="tax"></a>
-### 16. Sales tax (optional)
+### 17. Sales tax (optional)
 
 Stripe Tax works out and adds the right sales tax at checkout. Set it up in Stripe under **Settings > Tax** (add your address and where you're registered), then turn on **Sales tax by Stripe** in **Settings > Checkout & emails**.
 
@@ -226,7 +238,7 @@ Links: [Stripe Tax](https://dashboard.stripe.com/settings/tax)
 ## Go live
 
 <a id="live"></a>
-### 17. Go live
+### 18. Go live
 
 1. In Stripe, finish **Activate payments** (business details and bank account).
 2. Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).

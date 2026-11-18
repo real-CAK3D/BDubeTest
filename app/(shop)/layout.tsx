@@ -11,11 +11,14 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings();
+  const url = process.env.NEXT_PUBLIC_SITE_URL;
+  const ogImage = s.heroImage || s.logo;
   return {
+    metadataBase: url ? new URL(url) : undefined,
     title: { default: `${s.businessName}`, template: `%s | ${s.businessName}` },
     description: s.tagline || s.heroText,
     icons: s.favicon || s.logo ? { icon: s.favicon || s.logo, apple: s.favicon || s.logo } : undefined,
-    openGraph: { title: s.businessName, description: s.tagline, images: s.heroImage ? [s.heroImage] : undefined },
+    openGraph: { title: s.businessName, description: s.tagline, images: ogImage ? [ogImage] : undefined, type: "website", siteName: s.businessName },
   };
 }
 

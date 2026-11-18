@@ -46,7 +46,7 @@ export function GalleryManager({ initial, products }: { initial: SiteSettings; p
             <label className="f">
               <span>Link to a shop item <em className="muted">(optional)</em></span>
               <select value={g.productSlug} onChange={(e) => update(open, { productSlug: e.target.value })}>
-                <option value="">No, show &quot;Order one like this&quot; (goes to Contact)</option>
+                <option value="">No, show &quot;Order one like this&quot; (goes to the custom order form)</option>
                 {products.map((p) => <option key={p.slug} value={p.slug}>{p.name}</option>)}
               </select>
             </label>

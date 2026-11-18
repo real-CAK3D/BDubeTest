@@ -58,6 +58,7 @@ export type SiteVariables = {
     customSteps: { title: string; text: string }[];
   };
   reviews: { show: boolean; heading: string; text: string };
+  customOrders: { show: boolean; heading: string; intro: string; notice: string; types: string[] };
   about: { heading: string; story: string; serviceLine: string; showVeteranBadge: boolean };
   contact: { heading: string; text: string; email: string; phone: string; location: string; showContactForm: boolean };
   newsletter: { show: boolean; text: string };
@@ -87,6 +88,12 @@ export type SiteVariables = {
     shippingPrice: number;
     freeShippingOver: number;
     shipToCountries: string[];
+    shipFromZip: string;
+    shippingByDistance: { upToMiles: number; price: number }[];
+    internationalShipping: number;
+    localPickup: boolean;
+    pickupNote: string;
+    giftNotes: boolean;
     lowStockAlert: number;
     allowPromoCodes: boolean;
     salesTaxByStripe: boolean;

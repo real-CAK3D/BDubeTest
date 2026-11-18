@@ -34,7 +34,7 @@ export default async function GalleryItemPage({ params }: Params) {
           </div>
           <div className="hero-actions">
             {product ? <Link href={`/product/${product.slug}`} className="btn btn-lg">Buy one</Link> : null}
-            <Link href={`/contact?about=${encodeURIComponent(g.title)}`} className={`btn btn-lg ${product ? "btn-ghost" : ""}`}>Order one like this</Link>
+            <Link href={`/${s.showCustomOrders ? "custom-order" : "contact"}?about=${encodeURIComponent(g.title)}`} className={`btn btn-lg ${product ? "btn-ghost" : ""}`}>Order one like this</Link>
           </div>
           <p className="muted small">Every piece is made by hand, so yours will be one of a kind.</p>
         </div>

@@ -1,7 +1,7 @@
 import "server-only";
 import { kv } from "./store";
 import { fileSettings, syncVariables } from "./sync";
-import type { AppNotification, Expense, Message, Order, Product, Review, SiteSettings, Subscriber } from "./types";
+import type { AppNotification, CustomRequest, Expense, Message, Order, Product, Review, SiteSettings, Subscriber } from "./types";
 
 // Starting values come from site-variables.ts (the SITE-VARIABLES edit point).
 export const DEFAULT_SETTINGS: SiteSettings = fileSettings();
@@ -126,4 +126,11 @@ export async function homeReviews(max = 6) {
   const ok = (await getReviews()).filter((r) => r.status === "approved");
   const pinned = ok.filter((r) => r.featured);
   return (pinned.length ? pinned : ok).slice(0, max);
+}
+
+export async function getRequests(): Promise<CustomRequest[]> {
+  return (await kv.get<CustomRequest[]>("requests")) ?? [];
+}
+export async function saveRequests(list: CustomRequest[]) {
+  await kv.set("requests", list.slice(0, 2000));
 }

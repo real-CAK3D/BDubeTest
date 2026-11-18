@@ -3,7 +3,7 @@ import { siteUrl } from "@/lib/stripe";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/cart", "/success"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/cart", "/success", "/order-status"] },
     sitemap: `${siteUrl()}/sitemap.xml`,
   };
 }

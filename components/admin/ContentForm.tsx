@@ -121,6 +121,23 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
             ),
           },
           {
+            id: "custom",
+            label: "Custom orders",
+            content: (
+              <section className="panel">
+                <label className="check"><input type="checkbox" checked={s.showCustomOrders} onChange={(e) => set({ showCustomOrders: e.target.checked })} /> Show the custom order form (adds &quot;Custom orders&quot; to the menu)</label>
+                {text("customOrderHeading", "Heading")}
+                {text("customOrderIntro", "Intro text", { rows: 3 })}
+                {text("customOrderNotice", "Notice shown above the form (sizes, equipment limits, large orders)", { rows: 4 })}
+                <label className="field">
+                  <span>Kinds of pieces people can pick (one per line)</span>
+                  <textarea rows={5} value={s.customOrderTypes.join("\n")} onChange={(e) => set({ customOrderTypes: e.target.value.split("\n") })} />
+                </label>
+                <p className="hint">Requests show up on the <a href="/admin/requests">Requests</a> page, with buttons to email a quote or politely decline.</p>
+              </section>
+            ),
+          },
+          {
             id: "policies",
             label: "Policies & footer",
             content: (

@@ -37,7 +37,7 @@ export function WorkshopHome({ s, products, reviews }: HomeProps) {
           <p className="lede">{s.heroText}</p>
           <div className="hero-actions">
             <Link href="/shop" className="btn btn-lg">{s.shopButton}</Link>
-            <Link href="/contact" className="btn btn-lg btn-ghost">{s.customButton}</Link>
+            <Link href={s.showCustomOrders ? "/custom-order" : "/contact"} className="btn btn-lg btn-ghost">{s.customButton}</Link>
           </div>
           <VeteranBadge s={s} />
         </div>

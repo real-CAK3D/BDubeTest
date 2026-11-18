@@ -22,6 +22,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Customers](#customers): Who's buying, how often, and how much.
 - [Words & logos](#words): Every word customers see, plus logos, photos, policies and extra pages.
 - [Our work (gallery)](#gallery): Show off finished pieces with photos and a description.
+- [Custom order requests](#requests): The request form, quoting a price, and saying no politely.
 - [Reviews](#reviews): Customer reviews with photos. You approve each one.
 - [Look & layout](#look): Themes and page layouts, with a live preview.
 - [Settings](#settings): Store options, checkout, notifications, password and your accounts.
@@ -233,6 +234,22 @@ _Show off finished pieces with photos and a description._
 
 > **Tip:** Use the up and down arrows on the list to choose the order pieces appear in.
 
+<a id="requests"></a>
+### Custom order requests
+
+_The request form, quoting a price, and saying no politely._
+
+Customers fill in the **Custom orders** form: what they want, how many, engraving text, a needed-by date, a budget and up to 3 reference photos. Each one lands on the **Requests** page and sends you a notification.
+
+- **Email a quote** opens your mail app with a reply already written. Fill in the price and time, then send. The request moves to **In progress**.
+- **Politely decline** writes a friendly no, for jobs your equipment can't handle without major changes.
+- **Private note**: what you quoted, materials, dates. Only you see it.
+- When they agree to a price, make a product for it (it can be hidden, and you can send them its link) or send a payment link from Stripe. Mark the request **Done** when it's finished.
+
+The heading, intro, the notice above the form, and the list of kinds of pieces are all in **Words & logos > Custom orders**. Turn the form off there to hide it from the menu.
+
+> **Tip:** The notice tells customers up front that not every custom job can be accepted, and that large orders may be possible, so a no doesn't come as a surprise.
+
 <a id="reviews"></a>
 ### Reviews
 
@@ -277,14 +294,27 @@ Every layout splits the shop into pages instead of one long scroll: a home page 
 
 _Store options, checkout, notifications, password and your accounts._
 
-- **Store**: open or pause ordering (vacation, craft show), shipping price, free-shipping amount, countries you ship to, and the low-stock alert level.
-- **Checkout & emails**: promo codes on or off, sales tax by Stripe, the contact form, the email sign-up box, and the address tracking emails come from.
+- **Store**: open or pause ordering (vacation, craft show), shipping by distance, free-shipping amount, local pickup, countries you ship to, and the low-stock alert level.
+- **Checkout & emails**: promo codes on or off, sales tax by Stripe, the gift message box, the contact form, the email sign-up box, and the address tracking emails come from.
 - **Notifications on this device**: turn on order alerts for the phone or computer you're using.
 - **Accounts & links**: one-tap links to Stripe, Supabase, Vercel and GitHub, and **Save to GitHub now** with the time of the last save.
 - **My links**: your own shortcuts (shipping labels, suppliers, your bank).
 - **Password**: change your dashboard password.
 
 Tap **Save changes** at the bottom after changing anything. API keys are on the **Keys** page.
+
+#### Shipping by distance
+
+1. Enter your **Ship-from ZIP** (where packages leave from).
+2. Add a row for each distance band, like **Up to 50 miles: $6**, **Up to 250 miles: $9**. Use **Add a distance** for more rows.
+3. Set the price for **Farther than that** (also used if a ZIP can't be found) and for **Outside the US**.
+4. Customers type their ZIP in the cart and see their shipping price right away. The price is checked again at checkout, so it can't be changed in the browser.
+
+Orders over the free-shipping amount ship free. **Local pickup** adds a pickup choice in the cart with no shipping charge; the note tells customers where and when. If the address entered at Stripe has a different ZIP than the one quoted, the order shows a warning so you can check the postage.
+
+#### Getting to the dashboard
+
+Go to your site address with `/admin` on the end, or tap the small **Owner login** link at the very bottom of any shop page. On a phone, add the dashboard to your home screen (see **The phone app**).
 
 <a id="keys"></a>
 ### Keys
@@ -437,10 +467,13 @@ _A walk through the shop from a customer's side._
 3. The footer links to the shipping, returns, custom orders, privacy, terms and disclaimer pages, your extra pages (like the FAQ) and the review form.
 4. Tapping an item opens its page: photos, price, description, the choice list and quantity, and **Add to cart**.
 5. The cart shows the subtotal, shipping, and how much more is needed for free shipping.
-6. **Check out** opens Stripe, where they enter shipping details and pay.
-7. They land on a thank-you page with their order number, and Stripe emails a receipt.
+6. The cart asks for their ZIP to price shipping (or offers local pickup), and has an optional gift message at checkout.
+7. **Check out** opens Stripe, where they enter shipping details and pay.
+8. They land on a thank-you page with their order number, and Stripe emails a receipt.
 
-Nothing on the shop links to the dashboard, and search engines are told not to list it.
+**Custom orders** has the request form. **Order status** in the footer lets customers look up an order with their order number and email. The shop has a search box once there are more than 6 items.
+
+The only link to the dashboard is the small **Owner login** at the very bottom, which still needs your password. Search engines are told not to list it.
 
 ## Troubleshooting
 

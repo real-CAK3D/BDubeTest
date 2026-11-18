@@ -426,3 +426,16 @@ body:has(.hq) { background: #F2F3EF; }
 .step-num { width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; }
 .page-edit { display: grid; gap: 0.7rem; padding: 0.9rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
 .order-btns { display: flex; gap: 0.2rem; }
+.hq h3.sub { margin: 0.6rem 0 0; padding-top: 0.8rem; border-top: 1px solid var(--line); }
+.tiers { display: grid; gap: 0.5rem; }
+.tier { display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; }
+.tier span { white-space: nowrap; font-size: 0.92rem; }
+.tier input { width: 4.6rem !important; min-width: 0; flex: 0 1 4.6rem; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+.tier .b { padding-left: 0.5rem; padding-right: 0.5rem; }
+
+/* custom requests */
+.request .pre { white-space: pre-wrap; }
+.req-photos { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0; }
+.req-photos img { width: 88px; height: 88px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.request .field { display: block; margin: 0.6rem 0; }
+.request textarea { width: 100%; }

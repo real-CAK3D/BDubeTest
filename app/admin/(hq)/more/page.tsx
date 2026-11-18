@@ -12,6 +12,7 @@ const GROUPS = [
     title: "Customers",
     links: [
       { href: "/admin/customers", label: "Customers", note: "Who's buying, email sign-ups, downloads" },
+      { href: "/admin/requests", label: "Custom requests", note: "Quote or decline custom order requests" },
       { href: "/admin/reviews", label: "Reviews", note: "Approve customer reviews and photos" },
       { href: "/admin/inbox", label: "Inbox", note: "Messages from the contact form" },
       { href: "/admin/notifications", label: "Notifications", note: "Orders and alerts" },

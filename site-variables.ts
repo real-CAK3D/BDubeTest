@@ -71,7 +71,7 @@ export const SITE_VARIABLES = {
     headline: "Let's create something unique.", // big headline; best under 8 words
     intro: "Custom laser-engraved tumblers, campsite and family name signs, personalized gifts and handmade crafts from a veteran-owned family workshop. Tell us your idea and we'll turn it into something special.",
     shopButton: "Shop the collection", // main button under the headline
-    customButton: "Request a custom piece", // second button (Workshop layout), goes to the contact page
+    customButton: "Request a custom order", // second button (Workshop layout), goes to the contact page
     featuredHeading: "Featured", // above items marked featured: true
     categoriesHeading: "Shop by category", // above the category tiles
     aboutButton: "Read our story", // button under the short about section
@@ -93,10 +93,20 @@ export const SITE_VARIABLES = {
     text: "Bought something from us? We'd love to see it in its new home and hear what you think.", // next to the Leave a review button
   },
 
+  // Custom orders
+  // The custom order request form (/custom-order). Requests land in the dashboard under Requests.
+  customOrders: {
+    show: true, // the form and its menu link
+    heading: "Request a custom order",
+    intro: "Tell us what you have in mind and we'll get back to you with a price and a timeline, usually within a couple of days. Nothing is charged until you approve the quote.",
+    notice: "Please note: because of sizing and the setup some designs need, we can only take on some custom requests. If we have to decline, please don't be discouraged. It usually means the piece would need too many changes to our equipment, not that it isn't a great idea. Larger orders may be easier for us to make work, so ask!", // shown in a box at the top of the form
+    types: ["Tumbler", "Sign", "Leather", "Slate", "Something else"], // choices for "What would you like?"
+  },
+
   // About page
   about: {
     heading: "About the Dube family",
-    story: "We're Brian and Kaleigh Dube, and Dube Family Creations is our small family business. We make custom laser-engraved signs, tumblers, personalized gifts and handmade crafts, each one made with care.\n\nOur goal is to turn your ideas into something special. Whether you have a design in mind, need a personalized gift, or just want to see what we're making next, we're glad to have you along for the ride.\n\nWe're always trying new materials and designs, from wood and stainless steel to leather and slate. If there's something you'd love to see us make, tell us. Your idea might be our next project.\n\nThank you for supporting our family business. Every order, share and kind word helps us grow, and we truly appreciate it.", // the first paragraph also shows on the home page
+    story: "", // the first paragraph also shows on the home page
     serviceLine: "U.S. Army Military Police veteran", // e.g. "U.S. Army Military Police, 2004-2012"
     showVeteranBadge: true, // the star badge with the service line
   },
@@ -247,7 +257,17 @@ export const SITE_VARIABLES = {
     open: true, // false pauses ordering; the shop stays visible
     closedMessage: "The shop is on leave for a few days. Orders reopen soon.",
     askForShippingAddress: true, // false for pickup-only items (no shipping charged)
-    shippingPrice: 8, // flat shipping per order, in dollars
+    shipFromZip: "", // your ZIP code; shipping distance is measured from here
+    shippingByDistance: [ // nearest first: up to this many miles costs this many dollars
+      { upToMiles: 50, price: 6 },
+      { upToMiles: 250, price: 9 },
+      { upToMiles: 1000, price: 12 },
+    ],
+    shippingPrice: 15, // farther than the last tier, or if the distance can't be worked out
+    internationalShipping: 30, // outside the US, in dollars
+    localPickup: true, // let customers choose free local pickup
+    pickupNote: "We'll message you to set up a pickup time once your order is ready.", // shown when they choose pickup
+    giftNotes: true, // optional gift message box at checkout
     freeShippingOver: 75, // orders this big ship free; 0 = never
     shipToCountries: ["US", "CA"], // two-letter country codes
     lowStockAlert: 2, // phone alert when an item gets down to this many

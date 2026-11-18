@@ -24,6 +24,23 @@ export default async function ProductPage({ params }: Params) {
   return (
     <article className="product">
       <Tracker productId={p.id} />
+      <script
+        type="application/ld+json"
+        // product details for search engines (price, stock, photos)
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: p.name,
+            description: p.summary || p.description.slice(0, 300),
+            image: p.images.slice(0, 3).map((u) => (u.startsWith("http") ? u : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}${u}`)),
+            brand: { "@type": "Brand", name: s.businessName },
+            ...(p.price >= 50
+              ? { offers: { "@type": "Offer", price: (p.price / 100).toFixed(2), priceCurrency: s.currency.toUpperCase(), availability: p.stock === 0 ? "https://schema.org/OutOfStock" : "https://schema.org/InStock" } }
+              : {}),
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <Link href={categoryHref(p.category || null)} className="back">Back to {p.category || "shop"}</Link>
       <div className="product-grid">
         <Gallery p={p} />

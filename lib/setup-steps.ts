@@ -228,6 +228,23 @@ export const SETUP_STEPS: SetupStep[] = [
     links: [{ label: "Open Keys", url: "/admin/keys" }],
   },
   {
+    id: "shipping",
+    title: "Set your shipping prices",
+    time: "5 min",
+    blocks: [
+      {
+        steps: [
+          "Open **Settings > Store**.",
+          "Enter your **Ship-from ZIP**.",
+          "Set a price for each distance band, plus **Farther than that** and **Outside the US**.",
+          "Turn on **Local pickup** if people can collect orders, and write where and when in the note.",
+          "Tap **Save changes**, then add something to the cart and try a few ZIP codes.",
+        ],
+      },
+      { tip: "Weigh a typical package and price a label at Pirate Ship or USPS for a near and a far ZIP. That gives you good numbers for the bands." },
+    ],
+  },
+  {
     id: "test-order",
     title: "Place a test order",
     time: "3 min",
@@ -338,7 +355,7 @@ export const SETUP_STEPS: SetupStep[] = [
 export const PHASES: { id: string; title: string; steps: string[] }[] = [
   { id: "online", title: "Get online", steps: ["accounts", "copy", "password", "supabase"] },
   { id: "payments", title: "Payments", steps: ["stripe", "webhook", "wallets", "receipts"] },
-  { id: "products", title: "Products", steps: ["products", "coupons", "push", "test-order"] },
+  { id: "products", title: "Products", steps: ["products", "shipping", "coupons", "push", "test-order"] },
   { id: "extras", title: "Extras", steps: ["github-sync", "email", "domain", "tax"] },
   { id: "live", title: "Go live", steps: ["live"] },
 ];

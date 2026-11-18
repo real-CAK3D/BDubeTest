@@ -16,7 +16,7 @@ const LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function NavLinks() {
+export function NavLinks({ custom = false }: { custom?: boolean }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [path]);
@@ -26,7 +26,7 @@ export function NavLinks() {
         Menu
       </button>
       <div id="nav-links" className="nav-links">
-        {LINKS.map((l) => (
+        {(custom ? [...LINKS.slice(0, 2), { href: "/custom-order", label: "Custom orders" }, ...LINKS.slice(2)] : LINKS).map((l) => (
           <Link key={l.href} href={l.href} aria-current={path === l.href || path.startsWith(l.href + "/") ? "page" : undefined}>
             {l.label}
           </Link>

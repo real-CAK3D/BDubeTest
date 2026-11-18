@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export function ContactForm() {
+export function ContactForm({ initial = "" }: { initial?: string }) {
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [err, setErr] = useState("");
   async function send(e: React.FormEvent<HTMLFormElement>) {
@@ -21,7 +21,7 @@ export function ContactForm() {
     <form className="contact-form" onSubmit={send}>
       <label className="field"><span>Name</span><input name="name" autoComplete="name" maxLength={100} /></label>
       <label className="field"><span>Email</span><input name="email" type="email" autoComplete="email" required maxLength={200} /></label>
-      <label className="field full"><span>Message</span><textarea name="message" rows={4} required maxLength={5000} /></label>
+      <label className="field full"><span>Message</span><textarea name="message" rows={4} required maxLength={5000} defaultValue={initial} /></label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hp" aria-hidden />
       <button className="btn" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send message"}</button>
       {err ? <p className="error" role="alert">{err}</p> : null}

@@ -15,7 +15,7 @@ export default async function AboutPage() {
       <Tracker />
       <About s={s} />
       <p className="page-next">
-        <Link href="/shop" className="btn">See the work</Link>
+        <Link href="/shop" className="btn">{s.shopButton}</Link>
         <Link href="/contact" className="btn btn-ghost">Get in touch</Link>
       </p>
     </>

@@ -1,7 +1,7 @@
 import { slugify } from "@/lib/format-slug";
-import type { Product, SiteSettings } from "@/lib/types";
+import type { Product, Review, SiteSettings } from "@/lib/types";
 
-export type HomeProps = { s: SiteSettings; products: Product[] };
+export type HomeProps = { s: SiteSettings; products: Product[]; reviews: Review[] };
 export type CatalogProps = { s: SiteSettings; products: Product[]; category: string | null; page: number };
 
 export function byCategory(products: Product[]) {

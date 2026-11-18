@@ -7,11 +7,12 @@ import { stripe } from "./stripe";
 import { supabaseStatus } from "./supabase";
 import { imageStorage } from "./upload";
 import { getPasswordHash } from "./password";
+import { lastGitHubSync } from "./github-sync";
 
 export type Check = { ok: boolean; detail: string };
 
 export async function getStatus() {
-  const [settings, stripeKey, webhookKey, resendKey, push, db, pwHash] = await Promise.all([
+  const [settings, stripeKey, webhookKey, resendKey, push, db, pwHash, ghToken, ghLast] = await Promise.all([
     getSettings(),
     getKey("STRIPE_SECRET_KEY"),
     getKey("STRIPE_WEBHOOK_SECRET"),
@@ -19,6 +20,8 @@ export async function getStatus() {
     pushConfigured(),
     storageMode === "supabase" ? supabaseStatus() : Promise.resolve({ ok: storageMode === "redis", message: storageMode === "redis" ? "Upstash Redis" : "Not connected" }),
     getPasswordHash(),
+    getKey("GITHUB_SYNC_TOKEN"),
+    lastGitHubSync().catch(() => null),
   ]);
 
   let stripeCheck: Check = { ok: false, detail: "No key yet" };
@@ -50,6 +53,10 @@ export async function getStatus() {
     wallets,
     push: { ok: push, detail: push ? "Keys ready; turn on per device in Settings" : "No notification keys yet" },
     email: { ok: Boolean(resendKey && settings.emailFrom), detail: resendKey ? (settings.emailFrom ? "Tracking emails on" : "Add a sender address in Settings") : "Optional" },
+    githubSync: {
+      ok: Boolean(ghToken && ghLast?.ok),
+      detail: !ghToken ? "No GitHub token yet" : ghLast ? `${ghLast.ok ? "Last saved" : "Last try failed"} ${new Date(ghLast.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}${ghLast.ok ? "" : `: ${ghLast.message}`}` : "Token saved; press Save to GitHub now in Settings",
+    },
     live: { ok: Boolean(stripeKey?.includes("_live_")), detail: stripeKey?.includes("_live_") ? "Taking real payments" : "Test mode" },
   };
 }

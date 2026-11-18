@@ -1,6 +1,8 @@
+import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
 import type { Product, SiteSettings } from "@/lib/types";
 import { AddToCart } from "../AddToCart";
+import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, CategoryTabs, CategoryTiles, Pager, SeeAll } from "../CatalogParts";
 import { Price, StockNote } from "../Price";
 import { ProductImage } from "../ProductImage";
@@ -37,7 +39,7 @@ function List({ s, items }: { s: SiteSettings; items: Product[] }) {
   );
 }
 
-export function QuartermasterHome({ s, products }: HomeProps) {
+export function QuartermasterHome({ s, products, reviews }: HomeProps) {
   return (
     <>
       <section className="qm-head">
@@ -47,12 +49,14 @@ export function QuartermasterHome({ s, products }: HomeProps) {
         </div>
         <VeteranBadge s={s} />
       </section>
+      <WorkShowcase s={s} />
       <section className="section qm-group">
         <h2>{s.featuredHeading}</h2>
         <List s={s} items={featuredOf(products, 8)} />
         {products.length > 8 ? <SeeAll label="Full list" /> : null}
       </section>
-      <CategoryTiles products={products} />
+      <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>
   );

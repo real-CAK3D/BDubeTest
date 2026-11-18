@@ -35,7 +35,7 @@ export function About({ s }: { s: SiteSettings }) {
   );
 }
 
-export function Contact({ s, always = false }: { s: SiteSettings; always?: boolean }) {
+export function Contact({ s, always = false, about = "" }: { s: SiteSettings; always?: boolean; about?: string }) {
   const any = s.showContactForm || s.contactEmail || s.contactPhone || s.location || Object.values(s.social).some(Boolean);
   if (!any && !always) return null;
   return (
@@ -61,7 +61,7 @@ export function Contact({ s, always = false }: { s: SiteSettings; always?: boole
         {s.location ? <li>{s.location}</li> : null}
       </ul>
       <Social links={s.social} />
-      {s.showContactForm ? <ContactForm /> : null}
+      {s.showContactForm ? <ContactForm initial={about ? `I'd like one like your "${about}". ` : ""} /> : null}
     </section>
   );
 }

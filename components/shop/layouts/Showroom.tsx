@@ -1,5 +1,7 @@
+import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
 import type { Product, SiteSettings } from "@/lib/types";
+import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, CategoryTabs, CategoryTiles, Pager, SeeAll } from "../CatalogParts";
 import { Patch } from "../Logo";
 import { Price, StockNote } from "../Price";
@@ -33,7 +35,7 @@ function Rows({ s, items }: { s: SiteSettings; items: Product[] }) {
   );
 }
 
-export function ShowroomHome({ s, products }: HomeProps) {
+export function ShowroomHome({ s, products, reviews }: HomeProps) {
   return (
     <>
       <section className={`hero-show ${s.heroImage ? "has-img" : ""}`} style={s.heroImage ? { backgroundImage: `url(${s.heroImage})` } : undefined}>
@@ -41,15 +43,17 @@ export function ShowroomHome({ s, products }: HomeProps) {
           <Patch s={s} size={110} />
           <h1>{s.heroHeadline}</h1>
           <p className="lede">{s.heroText}</p>
-          <Link href="/shop" className="btn btn-lg">See the work</Link>
+          <Link href="/shop" className="btn btn-lg">{s.shopButton}</Link>
         </div>
       </section>
+      <WorkShowcase s={s} />
       <section className="section">
         <h2>{s.featuredHeading}</h2>
         <Rows s={s} items={featuredOf(products, 3)} />
         {products.length > 3 ? <SeeAll /> : null}
       </section>
-      <CategoryTiles products={products} />
+      <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>
   );

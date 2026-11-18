@@ -42,8 +42,24 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
                 <h2>Welcome section</h2>
                 {text("heroHeadline", "Headline")}
                 {text("heroText", "Intro text", { rows: 3 })}
+                {text("shopButton", "Main button", { hint: "Under the headline. Goes to the Shop page." })}
+                {text("customButton", "Second button", { hint: "Workshop layout. Goes to the Contact page." })}
                 {text("featuredHeading", "Heading above featured items")}
+                {text("categoriesHeading", "Heading above the category tiles")}
+                {text("aboutButton", "Button under the short about section")}
                 {text("allItemsHeading", "Shop page heading", { hint: "Shown at the top of the page that lists every item." })}
+                <h2>Custom order steps</h2>
+                <p className="hint">Shown on the home page with the Workshop layout. Leave a title empty to skip that step.</p>
+                {text("stepsHeading", "Heading")}
+                {s.customSteps.map((st, i) => (
+                  <div key={i} className="step-edit">
+                    <span className="step-num">{i + 1}</span>
+                    <input aria-label={`Step ${i + 1} title`} value={st.title} placeholder="Title" onChange={(e) => set({ customSteps: s.customSteps.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />
+                    <textarea aria-label={`Step ${i + 1} text`} rows={2} value={st.text} placeholder="One or two sentences" onChange={(e) => set({ customSteps: s.customSteps.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} />
+                    <button type="button" className="b b-ghost b-sm" onClick={() => set({ customSteps: s.customSteps.filter((_, j) => j !== i) })}>Remove</button>
+                  </div>
+                ))}
+                {s.customSteps.length < 6 ? <button type="button" className="b b-sm" onClick={() => set({ customSteps: [...s.customSteps, { title: "", text: "" }] })}>Add a step</button> : null}
               </section>
             ),
           },
@@ -93,16 +109,62 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
             ),
           },
           {
-            id: "policies",
-            label: "Policies",
+            id: "reviews",
+            label: "Reviews",
             content: (
               <section className="panel stack">
-                {text("shippingPolicy", "Shipping", { rows: 3 })}
-                {text("returnPolicy", "Returns", { rows: 3 })}
-                {text("privacyPolicy", "Privacy policy", { rows: 6, hint: "Shown at /policies/privacy. {business} and {email} fill in automatically. A starting point, not legal advice." })}
-                {text("termsOfService", "Terms of sale", { rows: 6, hint: "Shown at /policies/terms." })}
+                <label className="check"><input type="checkbox" checked={s.showReviews} onChange={(e) => set({ showReviews: e.target.checked })} /> Show the reviews section and the Leave a review form</label>
+                {text("reviewsHeading", "Heading")}
+                {text("reviewsText", "Text next to the Leave a review button", { rows: 2 })}
+                <p className="hint">Approve, pin or hide reviews on the <a href="/admin/reviews">Reviews</a> page.</p>
+              </section>
+            ),
+          },
+          {
+            id: "policies",
+            label: "Policies & footer",
+            content: (
+              <section className="panel stack">
+                <p className="hint">Each policy is its own page, linked in the footer. {"{business}"}, {"{email}"} and {"{state}"} fill in automatically. These are plain starting points, not legal advice; leave one empty to hide it.</p>
+                {text("shippingPolicy", "Shipping", { rows: 5 })}
+                {text("returnPolicy", "Returns", { rows: 5 })}
+                {text("customOrderPolicy", "Custom & engraved orders", { rows: 6 })}
+                {text("privacyPolicy", "Privacy", { rows: 7 })}
+                {text("termsOfService", "Terms of service", { rows: 7 })}
+                {text("disclaimer", "Disclaimer", { rows: 6 })}
+                {text("legalState", "State whose laws apply", { placeholder: "e.g. Oklahoma", hint: "Used in the terms of service." })}
+                <h2>Footer</h2>
+                {text("footerNote", "Small print after the copyright line", { hint: `Shows as: © ${new Date().getFullYear()} ${s.businessName}. All rights reserved. (your note)` })}
                 <h2>Email sign-up</h2>
                 {text("newsletterText", "Text next to the sign-up box", { hint: "Turn the box on or off in Settings." })}
+              </section>
+            ),
+          },
+          {
+            id: "pages",
+            label: "Pages",
+            badge: s.extraPages.length || undefined,
+            content: (
+              <section className="panel stack">
+                <p className="hint">Add any other page: FAQ, events, care instructions. Each gets its own web address. In the text, a short first line followed by an answer on the next line shows as a question and answer.</p>
+                {s.extraPages.map((pg, i) => {
+                  const up = (patch: Partial<typeof pg>) => set({ extraPages: s.extraPages.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+                  return (
+                    <div key={i} className="page-edit">
+                      <div className="row2">
+                        <label className="f"><span>Title</span><input value={pg.title} onChange={(e) => up({ title: e.target.value })} /></label>
+                        <label className="f"><span>Web address</span><input value={pg.slug} onChange={(e) => up({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-") })} /><em className="hint">/pages/{pg.slug || "..."}</em></label>
+                      </div>
+                      <label className="f"><span>Text</span><textarea rows={10} value={pg.body} onChange={(e) => up({ body: e.target.value })} /></label>
+                      <div className="row wrap">
+                        <label className="check"><input type="checkbox" checked={pg.inFooter} onChange={(e) => up({ inFooter: e.target.checked })} /> Link it in the footer</label>
+                        <a className="b b-ghost b-sm" href={`/pages/${pg.slug}`} target="_blank" rel="noreferrer">View</a>
+                        <button type="button" className="b b-danger b-sm" onClick={() => confirm(`Delete the "${pg.title}" page?`) && set({ extraPages: s.extraPages.filter((_, j) => j !== i) })}>Delete page</button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <button type="button" className="b b-sm" onClick={() => set({ extraPages: [...s.extraPages, { slug: `page-${s.extraPages.length + 1}`, title: "New page", body: "", inFooter: true }] })}>Add a page</button>
               </section>
             ),
           },

@@ -1,6 +1,8 @@
+import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
 import { slugify } from "@/lib/format-slug";
 import type { Product, SiteSettings } from "@/lib/types";
+import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, Pager, SeeAll } from "../CatalogParts";
 import { Patch } from "../Logo";
 import { ProductGrid } from "../ProductCard";
@@ -34,18 +36,20 @@ function Shell({ s, products, current, children }: { s: SiteSettings; products: 
   );
 }
 
-export function FieldManualHome({ s, products }: HomeProps) {
+export function FieldManualHome({ s, products, reviews }: HomeProps) {
   return (
     <Shell s={s} products={products}>
       <section className="fm-intro">
         <h1>{s.heroHeadline}</h1>
         <p className="lede">{s.heroText}</p>
       </section>
+      <WorkShowcase s={s} />
       <section className="section fm-section">
         <h2>{s.featuredHeading}</h2>
         <ProductGrid items={featuredOf(products, 6)} currency={s.currency} low={s.lowStockAlert} />
         {products.length > 6 ? <SeeAll /> : null}
       </section>
+      <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </Shell>
   );

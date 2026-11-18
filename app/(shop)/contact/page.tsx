@@ -7,12 +7,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getSettings()).contactHeading };
 }
 
-export default async function ContactPage() {
-  const s = await getSettings();
+export default async function ContactPage({ searchParams }: { searchParams: Promise<{ about?: string }> }) {
+  const [s, sp] = await Promise.all([getSettings(), searchParams]);
   return (
     <>
       <Tracker />
-      <Contact s={s} always />
+      <Contact s={s} always about={(sp.about ?? "").slice(0, 100)} />
     </>
   );
 }

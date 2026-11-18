@@ -5,6 +5,7 @@
  */
 
 export type ThemeId =
+  | "dube-family"
   | "military-police"
   | "olive-drab"
   | "ocp-field"
@@ -44,12 +45,39 @@ export type VariableProduct = {
 
 export type SiteVariables = {
   brand: { businessName: string; tagline: string; announcement: string };
-  homePage: { headline: string; intro: string; featuredHeading: string; allItemsHeading: string };
+  homePage: {
+    headline: string;
+    intro: string;
+    shopButton: string;
+    customButton: string;
+    featuredHeading: string;
+    categoriesHeading: string;
+    aboutButton: string;
+    allItemsHeading: string;
+    stepsHeading: string;
+    customSteps: { title: string; text: string }[];
+  };
+  reviews: { show: boolean; heading: string; text: string };
   about: { heading: string; story: string; serviceLine: string; showVeteranBadge: boolean };
   contact: { heading: string; text: string; email: string; phone: string; location: string; showContactForm: boolean };
   newsletter: { show: boolean; text: string };
   social: { facebook: string; instagram: string; tiktok: string; youtube: string; x: string; etsy: string };
-  policies: { shipping: string; returns: string; privacy: string; terms: string };
+  policies: {
+    shipping: string;
+    returns: string;
+    customOrders: string;
+    privacy: string;
+    terms: string;
+    disclaimer: string;
+    state: string;
+  };
+  extraPages: { slug: string; title: string; body: string; inFooter: boolean }[];
+  footer: { note: string };
+  gallery: {
+    heading: string;
+    text: string;
+    items: { slug: string; title: string; category: string; description: string; photos: string[]; featured: boolean; productSlug: string }[];
+  };
   images: { logo: string; patch: string; tabIcon: string; welcomePhoto: string; aboutPhoto: string };
   look: { theme: ThemeId; layout: LayoutId };
   store: {

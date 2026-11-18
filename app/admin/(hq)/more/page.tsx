@@ -12,6 +12,7 @@ const GROUPS = [
     title: "Customers",
     links: [
       { href: "/admin/customers", label: "Customers", note: "Who's buying, email sign-ups, downloads" },
+      { href: "/admin/reviews", label: "Reviews", note: "Approve customer reviews and photos" },
       { href: "/admin/inbox", label: "Inbox", note: "Messages from the contact form" },
       { href: "/admin/notifications", label: "Notifications", note: "Orders and alerts" },
     ],
@@ -19,6 +20,7 @@ const GROUPS = [
   {
     title: "Your site",
     links: [
+      { href: "/admin/gallery", label: "Our work", note: "Photos and descriptions of finished pieces" },
       { href: "/admin/content", label: "Words & logos", note: "Business name, about, logos, photos" },
       { href: "/admin/appearance", label: "Look & layout", note: "Themes and page styles" },
     ],

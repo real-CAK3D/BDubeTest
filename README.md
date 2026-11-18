@@ -1,4 +1,4 @@
-# Veteran-owned storefront + Shop HQ
+# Dube Family Creations: shop + Shop HQ
 
 Setting it up for the first time? Start with [SETUP.md](SETUP.md).
 Already running and want to know how something works? See [GUIDE.md](GUIDE.md). Both are also in the dashboard (Setup, and the ? button).
@@ -31,8 +31,10 @@ There's a Deploy to Vercel button in [SETUP.md, step 2](SETUP.md#copy).
 | **Money** | Income vs. expenses, profit, margin, spreadsheets for taxes |
 | **Customers** | Buyers, repeat customers, email sign-ups, downloads |
 | **Inbox** | Messages from the shop's contact form |
+| **Our work** | Finished pieces with photos and descriptions, a 3D rotating showcase on the home page, "Order one like this" |
+| **Reviews** | Customers leave star reviews with a photo; nothing shows until approved; pin favorites to the home page |
 | **Discounts** | Stripe coupons and promo codes, with usage |
-| **Words & logos / Look & layout** | All text, logos, photos, policies; theme and layout with live preview |
+| **Words & logos / Look & layout** | Every word on the site, logos, photos, six policy pages, extra pages (FAQ...), footer; theme and layout with live preview |
 | **Setup** | The setup steps with live checkmarks |
 | **Keys** | Paste, test and replace API keys; create notification keys; connect the Stripe webhook; add keys for any other service |
 | **Settings** | Store, shipping, checkout options, notifications, password, links to every account |
@@ -42,7 +44,7 @@ There's a Deploy to Vercel button in [SETUP.md, step 2](SETUP.md#copy).
 **Layouts:** Garrison, Field Manual, Showroom, Quartermaster.
 
 ## Changing things later
-- **Day to day:** the dashboard.
+- **Day to day:** the dashboard, on a phone or computer. Edits show instantly and are saved to `site-variables.ts` on GitHub too (once a GitHub token is added).
 - **With ChatGPT:** all words, prices, products and settings are in **[`site-variables.ts`](site-variables.ts)**. Copy it into ChatGPT, ask for a change, paste the result back on GitHub and commit.
 - **Code:** spots meant for editing are marked `EDIT-POINT` (`npm run edit-points`). See **[CUSTOMIZE.md](CUSTOMIZE.md)**.
 

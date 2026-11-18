@@ -24,12 +24,12 @@ export function CategoryTabs({ products, current }: { products: Product[]; curre
   );
 }
 
-export function CategoryTiles({ products }: { products: Product[] }) {
+export function CategoryTiles({ products, heading }: { products: Product[]; heading: string }) {
   const cats = byCategory(products);
   if (cats.length < 2) return null;
   return (
     <section className="section">
-      <h2>Shop by category</h2>
+      <h2>{heading}</h2>
       <div className="tiles-grid">
         {cats.map(([c, items]) => {
           const cover = items.find((p) => p.images[0]) ?? items[0];
@@ -59,7 +59,7 @@ export function AboutTeaser({ s }: { s: SiteSettings }) {
         <h2>{s.aboutTitle}</h2>
         <p className="lede">{first}</p>
         <div className="hero-actions">
-          <Link href="/about" className="btn btn-ghost">Read the story</Link>
+          <Link href="/about" className="btn btn-ghost">{s.aboutButton}</Link>
           <VeteranBadge s={s} />
         </div>
       </div>

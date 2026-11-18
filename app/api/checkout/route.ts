@@ -19,6 +19,7 @@ export async function POST(req: Request) {
   for (const it of Array.isArray(items) ? items.slice(0, 50) : []) {
     const p = products.find((x) => x.id === it.productId);
     if (!p) continue;
+    if (p.price < 50) return NextResponse.json({ error: `${p.name} doesn't have a price yet. Please contact us to order it.` }, { status: 400 });
     let qty = Math.max(1, Math.min(99, Math.floor(Number(it.quantity) || 1)));
     if (p.stock !== null) qty = Math.min(qty, p.stock);
     if (qty <= 0) return NextResponse.json({ error: `${p.name} is sold out.` }, { status: 400 });

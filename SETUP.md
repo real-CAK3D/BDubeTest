@@ -29,13 +29,14 @@ Getting the shop online, in order: GitHub, Vercel, Supabase, then Stripe (which 
 
 **Extras**
 
-13. [Tracking emails](#email) (optional), 10 min
-14. [Your own web address](#domain) (optional), 10 min
-15. [Sales tax](#tax) (optional), 10 min
+13. [Save dashboard edits to GitHub](#github-sync), 5 min
+14. [Tracking emails](#email) (optional), 10 min
+15. [Your own web address](#domain) (optional), 10 min
+16. [Sales tax](#tax) (optional), 10 min
 
 **Go live**
 
-16. [Go live](#live), 15 min
+17. [Go live](#live), 15 min
 
 ## Get online
 
@@ -176,8 +177,23 @@ Links: Open Keys (dashboard, `/admin/keys`)
 
 ## Extras
 
+<a id="github-sync"></a>
+### 13. Save dashboard edits to GitHub
+
+Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), ready for code changes or ChatGPT edits.
+
+1. On GitHub, open the token page (link below): **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
+2. Name it "Shop dashboard", set an expiration (a year is fine), and under **Repository access** choose **Only select repositories** and pick the shop's repository.
+3. Under **Permissions > Repository permissions**, set **Contents** to **Read and write**. Click **Generate token** and copy it.
+4. In this dashboard, open **Keys**, paste it into **GitHub token** and press **Save**.
+5. Open **Settings > Your accounts** and press **Save to GitHub now**. From then on it happens after every save.
+
+> **Tip:** These saves don't make Vercel rebuild the site (it's already up to date), so they don't use up builds.
+
+Links: [Create a GitHub token](https://github.com/settings/personal-access-tokens/new), Open Keys (dashboard, `/admin/keys`)
+
 <a id="email"></a>
-### 13. Tracking emails (optional)
+### 14. Tracking emails (optional)
 
 Lets you email customers their tracking number with one tap from an order.
 
@@ -190,7 +206,7 @@ Lets you email customers their tracking number with one tap from an order.
 Links: [Resend](https://resend.com/signup)
 
 <a id="domain"></a>
-### 14. Your own web address (optional)
+### 15. Your own web address (optional)
 
 1. Buy a domain (for example in Vercel > Domains, or any registrar).
 2. In Vercel, open your project > **Settings > Domains**, add it, and follow the instructions to point it at Vercel.
@@ -199,7 +215,7 @@ Links: [Resend](https://resend.com/signup)
 Links: [Vercel domains](https://vercel.com/domains)
 
 <a id="tax"></a>
-### 15. Sales tax (optional)
+### 16. Sales tax (optional)
 
 Stripe Tax works out and adds the right sales tax at checkout. Set it up in Stripe under **Settings > Tax** (add your address and where you're registered), then turn on **Sales tax by Stripe** in **Settings > Checkout & emails**.
 
@@ -210,7 +226,7 @@ Links: [Stripe Tax](https://dashboard.stripe.com/settings/tax)
 ## Go live
 
 <a id="live"></a>
-### 16. Go live
+### 17. Go live
 
 1. In Stripe, finish **Activate payments** (business details and bank account).
 2. Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).

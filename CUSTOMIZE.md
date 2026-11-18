@@ -66,6 +66,8 @@ Find one by searching the repository for `EDIT-POINT: NAME` (on GitHub press `/`
 | `ADMIN-MENU` | `components/admin/AdminNav.tsx` | Owner dashboard menu |
 | `APP-ICON` | `app/api/manifest/route.ts` | Home-screen app name and icon |
 | `LOGIN` | `lib/auth.ts` | How long the owner stays logged in |
+| `VARIABLES-FILE` | `lib/variables-file.ts` | How the dashboard writes site-variables.ts (and its comments) |
+| `GITHUB-SYNC` | `lib/github-sync.ts` | Saving dashboard edits to GitHub |
 | `HELP` | `lib/help.ts` | The Help page and GUIDE.md (run `npm run guide` after editing) |
 | `SETUP-STEPS` | `lib/setup-steps.ts` | The Setup page and SETUP.md (run `npm run guide` after editing) |
 | `API-KEYS` | `lib/keys.ts` | The keys listed on the Keys page; how to use a new service's key |

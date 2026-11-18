@@ -20,7 +20,9 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Products](#products): Add, edit, hide and price your items.
 - [Money (income & expenses)](#money): What came in, what went out, and what you kept.
 - [Customers](#customers): Who's buying, how often, and how much.
-- [Words & logos](#words): Your name, story, contact info, logos and photos.
+- [Words & logos](#words): Every word customers see, plus logos, photos, policies and extra pages.
+- [Our work (gallery)](#gallery): Show off finished pieces with photos and a description.
+- [Reviews](#reviews): Customer reviews with photos. You approve each one.
 - [Look & layout](#look): Themes and page layouts, with a live preview.
 - [Settings](#settings): Store options, checkout, notifications, password and your accounts.
 - [Keys](#keys): Where API keys for Stripe and other services go.
@@ -199,18 +201,50 @@ Everyone who has placed an order, with their total spent and last order date. **
 <a id="words"></a>
 ### Words & logos
 
-_Your name, story, contact info, logos and photos._
+_Every word customers see, plus logos, photos, policies and extra pages._
 
-- **Business**: name, tagline, and the thin **top banner** message (leave empty to hide it).
-- **Welcome section**: the big headline and intro at the top of the home page, plus the headings above your items.
-- **About**: your story and service line. **Show the veteran-owned badge** adds the star badge.
-- **Policies**: shipping and returns, shown on item pages and in the footer.
-- **Logos & photos**: main logo (header and footer), the round patch on the home page, the browser tab icon, the big welcome photo (used by the Showroom layout) and an about photo.
-- **Contact** and **Social links**: anything left empty is hidden.
+Everything written on the shop can be changed here, split into tabs:
 
-Tap **Save changes** at the bottom when you're done.
+- **Home page**: business name, top banner, headline, intro, the button labels, section headings, and the custom order steps (Workshop layout).
+- **About page**: your story, service line and the veteran badge. The first paragraph also shows on the home page.
+- **Contact page**: heading, intro, email, phone, location and social links (the Facebook group is already linked).
+- **Logos & photos**: main logo, the round patch, the browser tab icon, the big welcome photo and an about photo. Tap the box to take a picture or pick one from your phone.
+- **Reviews**: turn the reviews section on or off and change its words.
+- **Policies & footer**: shipping, returns, custom & engraved orders, privacy, terms of service and disclaimer, each its own page linked in the footer, plus the small print under the copyright.
+- **Pages**: add any other page, like the FAQ, events or care instructions.
 
-> **Tip:** A logo with a see-through background (PNG) looks best on every theme.
+Tap **Save changes** at the bottom when you're done. Changes show on the site right away, and are also saved to GitHub if that's set up.
+
+> **Tip:** Policies are plain starting points, not legal advice. {business}, {email} and {state} fill in automatically.
+
+<a id="gallery"></a>
+### Our work (gallery)
+
+_Show off finished pieces with photos and a description._
+
+"Our work" is for pieces you want people to see, whether or not they're for sale: custom orders, one-offs, new materials you're testing.
+
+1. Tap **Add a piece**.
+2. Give it a title and a kind (Tumblers, Signs, Leather...), and write a few lines about it.
+3. Tap **Add photos** and take pictures or pick several from your phone. The first one is the cover; use the arrows to reorder.
+4. Leave **In the rotating showcase** ticked to have it spin in the 3D showcase on the home page.
+5. If it's for sale, link it to the shop item. Otherwise customers get an **Order one like this** button that opens the contact form with the piece already mentioned.
+6. Tap **Save changes**.
+
+> **Tip:** Use the up and down arrows on the list to choose the order pieces appear in.
+
+<a id="reviews"></a>
+### Reviews
+
+_Customer reviews with photos. You approve each one._
+
+Customers tap **Leave a review** on the home page (or go to /review), pick 1 to 5 stars, write a few words and can add a photo. You get a notification.
+
+- **Waiting**: new reviews. Nothing shows on the site until you tap **Approve**.
+- **On the site**: approved reviews. **Pin to home page** to choose exactly which ones show there; otherwise the newest approved ones show.
+- **Hidden**: ones you took down. You can approve them again later.
+
+> **Tip:** Text a happy customer the link yourshop.com/review. A review with a photo of their piece is the best advertising there is.
 
 <a id="look"></a>
 ### Look & layout
@@ -246,7 +280,7 @@ _Store options, checkout, notifications, password and your accounts._
 - **Store**: open or pause ordering (vacation, craft show), shipping price, free-shipping amount, countries you ship to, and the low-stock alert level.
 - **Checkout & emails**: promo codes on or off, sales tax by Stripe, the contact form, the email sign-up box, and the address tracking emails come from.
 - **Notifications on this device**: turn on order alerts for the phone or computer you're using.
-- **Your accounts**: one-tap links to Stripe, Supabase, Vercel and GitHub.
+- **Accounts & links**: one-tap links to Stripe, Supabase, Vercel and GitHub, and **Save to GitHub now** with the time of the last save.
 - **My links**: your own shortcuts (shipping labels, suppliers, your bank).
 - **Password**: change your dashboard password.
 
@@ -399,11 +433,12 @@ _Where the site lives and where your data is kept._
 _A walk through the shop from a customer's side._
 
 1. The home page shows your banner, headline, patch or logo, featured items, categories and the start of your story, arranged by your chosen layout.
-2. **Shop** lists everything, with a tab for each category and 12 or so items per page. **About** has your full story and **Contact** has your details and the message form.
-3. Tapping an item opens its page: photos, price, description, the choice list and quantity, and **Add to cart**.
-4. The cart shows the subtotal, shipping, and how much more is needed for free shipping.
-5. **Check out** opens Stripe, where they enter shipping details and pay.
-6. They land on a thank-you page with their order number, and Stripe emails a receipt.
+2. **Shop** lists everything for sale, with a tab for each category. **Our work** shows finished pieces with photos and descriptions. **About** has your full story and **Contact** has your details and the message form.
+3. The footer links to the shipping, returns, custom orders, privacy, terms and disclaimer pages, your extra pages (like the FAQ) and the review form.
+4. Tapping an item opens its page: photos, price, description, the choice list and quantity, and **Add to cart**.
+5. The cart shows the subtotal, shipping, and how much more is needed for free shipping.
+6. **Check out** opens Stripe, where they enter shipping details and pay.
+7. They land on a thank-you page with their order number, and Stripe emails a receipt.
 
 Nothing on the shop links to the dashboard, and search engines are told not to list it.
 
@@ -441,6 +476,10 @@ It needs a **one-off** price in US dollars and must not be archived. Press **Syn
 #### A key says "Needs re-entering"
 
 The secret that protects saved keys changed (usually AUTH_SECRET was added or edited in Vercel). Paste the key in again on **Keys**.
+
+#### My edit isn't on GitHub
+
+Open **Settings > Accounts & links**. The GitHub box shows the last save and any error. Usually the token expired or doesn't have **Contents: Read and write**; make a new one (Setup > Save dashboard edits to GitHub) and paste it on **Keys**, then press **Save to GitHub now**.
 
 #### I forgot my password
 

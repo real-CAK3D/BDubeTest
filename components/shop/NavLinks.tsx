@@ -11,6 +11,7 @@ import { CartButton } from "./CartButton";
  */
 const LINKS = [
   { href: "/shop", label: "Shop" },
+  { href: "/gallery", label: "Our work" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];

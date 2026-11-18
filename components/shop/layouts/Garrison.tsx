@@ -1,11 +1,13 @@
+import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
+import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, CategoryTabs, CategoryTiles, Pager, SeeAll } from "../CatalogParts";
 import { Patch } from "../Logo";
 import { ProductGrid } from "../ProductCard";
 import { VeteranBadge } from "../Sections";
 import { featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
 
-export function GarrisonHome({ s, products }: HomeProps) {
+export function GarrisonHome({ s, products, reviews }: HomeProps) {
   return (
     <>
       <section className="hero hero-garrison">
@@ -14,17 +16,19 @@ export function GarrisonHome({ s, products }: HomeProps) {
           <h1>{s.heroHeadline}</h1>
           <p className="lede">{s.heroText}</p>
           <div className="hero-actions">
-            <Link href="/shop" className="btn btn-lg">Shop the collection</Link>
+            <Link href="/shop" className="btn btn-lg">{s.shopButton}</Link>
             <VeteranBadge s={s} />
           </div>
         </div>
       </section>
+      <WorkShowcase s={s} />
       <section className="section">
         <h2>{s.featuredHeading}</h2>
         <ProductGrid items={featuredOf(products, 8)} currency={s.currency} low={s.lowStockAlert} />
         {products.length > 8 ? <SeeAll /> : null}
       </section>
-      <CategoryTiles products={products} />
+      <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>
   );

@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { syncToGitHub } from "@/lib/github-sync";
 import { saveKey } from "@/lib/keys";
 import { siteUrl, stripe, WEBHOOK_EVENTS } from "@/lib/stripe";
 import { listDiscounts, syncStripeCatalog } from "@/lib/stripe-catalog";
@@ -11,6 +12,7 @@ export async function POST(req: Request) {
   try {
     if (action === "sync") {
       const c = await syncStripeCatalog();
+      after(() => syncToGitHub("products from Stripe"));
       return NextResponse.json({ ok: true, message: `Synced from Stripe: ${c.added} new, ${c.updated} updated, ${c.hidden} hidden.` });
     }
     if (action === "discounts") return NextResponse.json(await listDiscounts());

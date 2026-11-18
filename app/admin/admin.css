@@ -409,3 +409,20 @@ body:has(.hq) { background: #F2F3EF; }
 .pill.engrave-pill { background: var(--warn-bg); color: var(--warn-ink); }
 .theme-group + .theme-group { margin-top: 1.2rem; }
 .theme-group h3 { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.5rem; }
+.reviews-admin { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.8rem; }
+.review-admin { display: grid; grid-template-columns: 140px 1fr; gap: 1rem; align-items: start; }
+.review-admin:not(:has(.review-photo)) { grid-template-columns: 1fr; }
+.review-admin.pinned { border-color: var(--gold); }
+.review-photo img { width: 140px; height: 140px; object-fit: cover; border-radius: 8px; }
+.review-body { display: grid; gap: 0.5rem; min-width: 0; }
+.review-body p { margin: 0; }
+.review-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; align-items: center; }
+.review-text { white-space: pre-line; overflow-wrap: anywhere; }
+.gold { color: var(--gold); letter-spacing: 0.08em; }
+@media (max-width: 560px) { .review-admin { grid-template-columns: 1fr; } .review-photo img { width: 100%; height: 200px; } }
+.step-edit { display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 0.6rem; align-items: start; padding: 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.step-edit textarea, .step-edit button { grid-column: 2; }
+.step-edit button { justify-self: start; }
+.step-num { width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; }
+.page-edit { display: grid; gap: 0.7rem; padding: 0.9rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.order-btns { display: flex; gap: 0.2rem; }

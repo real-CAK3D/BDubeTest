@@ -10,7 +10,7 @@ export function Header({ s }: { s: SiteSettings }) {
       <header className="band">
         <div className="band-inner">
           <Link href="/" className="brand">
-            <Logo s={s} />
+            <Logo s={s} size={54} />
             <span className="brand-name">{s.businessName}</span>
           </Link>
           <NavLinks />

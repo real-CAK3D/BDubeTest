@@ -87,6 +87,19 @@ export type SocialLinks = {
 };
 
 export type CustomLink = { label: string; url: string };
+export type Step = { title: string; text: string };
+// A finished piece shown in "Our work". Not necessarily for sale.
+export type GalleryItem = {
+  slug: string;
+  title: string;
+  category: string;
+  description: string;
+  photos: string[];
+  featured: boolean; // in the rotating showcase on the home page
+  productSlug: string; // optional: shop item to buy one like it
+};
+// Extra pages the owner adds himself (FAQ, Events...), shown at /pages/<slug>
+export type InfoPage = { slug: string; title: string; body: string; inFooter: boolean };
 
 export type SiteSettings = {
   // Brand
@@ -103,6 +116,19 @@ export type SiteSettings = {
   heroText: string;
   featuredHeading: string;
   allItemsHeading: string;
+  shopButton: string;
+  customButton: string;
+  categoriesHeading: string;
+  aboutButton: string;
+  stepsHeading: string;
+  customSteps: Step[];
+  showReviews: boolean;
+  reviewsHeading: string;
+  reviewsText: string;
+  footerNote: string;
+  galleryHeading: string;
+  galleryText: string;
+  gallery: GalleryItem[];
   contactHeading: string;
   contactText: string;
   aboutTitle: string;
@@ -113,6 +139,10 @@ export type SiteSettings = {
   returnPolicy: string;
   privacyPolicy: string;
   termsOfService: string;
+  disclaimer: string;
+  customOrderPolicy: string;
+  legalState: string; // which state's laws apply in the terms, e.g. "Oklahoma"
+  extraPages: InfoPage[];
   showContactForm: boolean;
   showNewsletter: boolean;
   newsletterText: string;
@@ -153,3 +183,17 @@ export type Message = {
 };
 
 export type Subscriber = { email: string; createdAt: string };
+
+export type ReviewStatus = "pending" | "approved" | "hidden";
+export type Review = {
+  id: string;
+  createdAt: string;
+  name: string;
+  location: string;
+  rating: number; // 1-5
+  text: string;
+  item: string; // what they bought, in their words (optional)
+  photo: string; // image URL or ""
+  status: ReviewStatus;
+  featured: boolean; // pinned to the home page
+};

@@ -57,6 +57,15 @@ export const KEY_DEFS: KeyDef[] = [
     secret: true,
   },
   {
+    envName: "GITHUB_SYNC_TOKEN",
+    label: "GitHub token",
+    group: "GitHub",
+    where: "Lets dashboard edits save to site-variables.ts on GitHub. GitHub > Settings > Developer settings > Fine-grained tokens > Generate new token. Repository access: only this shop's repository. Permissions: Contents, Read and write.",
+    link: "https://github.com/settings/personal-access-tokens/new",
+    prefix: /^(github_pat_|ghp_)/,
+    secret: true,
+  },
+  {
     envName: "RESEND_API_KEY",
     label: "Resend API key (optional)",
     group: "Email",

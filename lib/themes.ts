@@ -37,6 +37,30 @@ export type Theme = {
  */
 export const THEMES: Theme[] = [
   {
+    id: "dube-family",
+    name: "Dube Family",
+    group: "USA & support",
+    texture: "stars",
+    description: "Matched to the Dube Family Creations logo: black, metallic gold and flag red.",
+    fonts: { display: "Cinzel", body: "Libre Franklin" },
+    displayCase: "none",
+    displayTracking: "0.01em",
+    radius: "4px",
+    colors: {
+      bg: "#F7F3EA",
+      surface: "#FFFFFF",
+      surface2: "#EDE5D3",
+      ink: "#15120D",
+      muted: "#5A5244",
+      line: "#DDD3BD",
+      accent: "#15120D",
+      accentInk: "#E4BC5C",
+      band: "#0E0C09",
+      bandInk: "#E4BC5C",
+      stitch: "#C99A3A",
+    },
+  },
+  {
     id: "military-police",
     group: "Police",
     texture: "none",

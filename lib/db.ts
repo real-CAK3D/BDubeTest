@@ -1,7 +1,7 @@
 import "server-only";
 import { kv } from "./store";
 import { fileSettings, syncVariables } from "./sync";
-import type { AppNotification, Expense, Message, Order, Product, SiteSettings, Subscriber } from "./types";
+import type { AppNotification, Expense, Message, Order, Product, Review, SiteSettings, Subscriber } from "./types";
 
 // Starting values come from site-variables.ts (the SITE-VARIABLES edit point).
 export const DEFAULT_SETTINGS: SiteSettings = fileSettings();
@@ -113,4 +113,17 @@ export async function getSubscribers(): Promise<Subscriber[]> {
 }
 export async function saveSubscribers(list: Subscriber[]) {
   await kv.set("subscribers", list);
+}
+
+export async function getReviews(): Promise<Review[]> {
+  return (await kv.get<Review[]>("reviews")) ?? [];
+}
+export async function saveReviews(list: Review[]) {
+  await kv.set("reviews", list.slice(0, 2000));
+}
+/** What the home page shows: the ones he pinned, or else the newest approved. */
+export async function homeReviews(max = 6) {
+  const ok = (await getReviews()).filter((r) => r.status === "approved");
+  const pinned = ok.filter((r) => r.featured);
+  return (pinned.length ? pinned : ok).slice(0, max);
 }

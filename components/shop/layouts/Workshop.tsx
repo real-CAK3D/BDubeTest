@@ -1,22 +1,13 @@
+import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
 import type { Product, SiteSettings } from "@/lib/types";
+import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, CategoryTabs, CategoryTiles, Pager, SeeAll } from "../CatalogParts";
 import { Patch } from "../Logo";
 import { Price } from "../Price";
 import { ProductImage } from "../ProductImage";
 import { VeteranBadge } from "../Sections";
 import { featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
-
-/*
- * EDIT-POINT: WORKSHOP-STEPS
- * The "How custom orders work" steps on the Workshop layout's home page.
- */
-const STEPS = [
-  { title: "Pick a piece", text: "Choose something from the shop, or describe what you have in mind." },
-  { title: "Make it yours", text: "Add a name, date, unit or message. Engraving text goes in right on the item page." },
-  { title: "Made by hand", text: "Cut, engraved and finished in the workshop, one at a time." },
-  { title: "Shipped to you", text: "Packed with care. You'll get tracking as soon as it's on its way." },
-];
 
 function Gallery({ s, items }: { s: SiteSettings; items: Product[] }) {
   if (!items.length) return <p className="empty">New pieces are on the way. Check back soon.</p>;
@@ -36,7 +27,7 @@ function Gallery({ s, items }: { s: SiteSettings; items: Product[] }) {
   );
 }
 
-export function WorkshopHome({ s, products }: HomeProps) {
+export function WorkshopHome({ s, products, reviews }: HomeProps) {
   const cover = products.find((p) => p.images[0]);
   return (
     <>
@@ -45,8 +36,8 @@ export function WorkshopHome({ s, products }: HomeProps) {
           <h1>{s.heroHeadline}</h1>
           <p className="lede">{s.heroText}</p>
           <div className="hero-actions">
-            <Link href="/shop" className="btn btn-lg">Browse the work</Link>
-            <Link href="/contact" className="btn btn-lg btn-ghost">Request a custom piece</Link>
+            <Link href="/shop" className="btn btn-lg">{s.shopButton}</Link>
+            <Link href="/contact" className="btn btn-lg btn-ghost">{s.customButton}</Link>
           </div>
           <VeteranBadge s={s} />
         </div>
@@ -61,10 +52,11 @@ export function WorkshopHome({ s, products }: HomeProps) {
           )}
         </div>
       </section>
+      <WorkShowcase s={s} />
       <section className="section">
-        <h2>How custom orders work</h2>
+        <h2>{s.stepsHeading}</h2>
         <ol className="steps-row">
-          {STEPS.map((st) => (
+          {s.customSteps.filter((st) => st.title).map((st) => (
             <li key={st.title}>
               <strong>{st.title}</strong>
               <span>{st.text}</span>
@@ -77,7 +69,8 @@ export function WorkshopHome({ s, products }: HomeProps) {
         <Gallery s={s} items={featuredOf(products, 9)} />
         {products.length > 9 ? <SeeAll /> : null}
       </section>
-      <CategoryTiles products={products} />
+      <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>
   );

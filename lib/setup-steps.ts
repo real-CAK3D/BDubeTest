@@ -10,7 +10,7 @@ export type SetupStep = {
   id: string;
   title: string;
   time: string;
-  check?: "github" | "vercel" | "password" | "secret" | "database" | "photos" | "stripe" | "webhook" | "wallets" | "push" | "email" | "live";
+  check?: "githubSync" | "github" | "vercel" | "password" | "secret" | "database" | "photos" | "stripe" | "webhook" | "wallets" | "push" | "email" | "live";
   optional?: boolean;
   blocks: HelpBlock[];
   links?: { label: string; url: string }[];
@@ -242,6 +242,29 @@ export const SETUP_STEPS: SetupStep[] = [
     ],
   },
   {
+    id: "github-sync",
+    title: "Save dashboard edits to GitHub",
+    time: "5 min",
+    check: "githubSync",
+    blocks: [
+      { p: "Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), ready for code changes or ChatGPT edits." },
+      {
+        steps: [
+          "On GitHub, open the token page (link below): **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.",
+          "Name it \"Shop dashboard\", set an expiration (a year is fine), and under **Repository access** choose **Only select repositories** and pick the shop's repository.",
+          "Under **Permissions > Repository permissions**, set **Contents** to **Read and write**. Click **Generate token** and copy it.",
+          "In this dashboard, open **Keys**, paste it into **GitHub token** and press **Save**.",
+          "Open **Settings > Your accounts** and press **Save to GitHub now**. From then on it happens after every save.",
+        ],
+      },
+      { tip: "These saves don't make Vercel rebuild the site (it's already up to date), so they don't use up builds." },
+    ],
+    links: [
+      { label: "Create a GitHub token", url: "https://github.com/settings/personal-access-tokens/new" },
+      { label: "Open Keys", url: "/admin/keys" },
+    ],
+  },
+  {
     id: "email",
     title: "Tracking emails",
     time: "10 min",
@@ -316,6 +339,6 @@ export const PHASES: { id: string; title: string; steps: string[] }[] = [
   { id: "online", title: "Get online", steps: ["accounts", "copy", "password", "supabase"] },
   { id: "payments", title: "Payments", steps: ["stripe", "webhook", "wallets", "receipts"] },
   { id: "products", title: "Products", steps: ["products", "coupons", "push", "test-order"] },
-  { id: "extras", title: "Extras", steps: ["email", "domain", "tax"] },
+  { id: "extras", title: "Extras", steps: ["github-sync", "email", "domain", "tax"] },
   { id: "live", title: "Go live", steps: ["live"] },
 ];

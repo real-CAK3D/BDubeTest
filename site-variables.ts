@@ -160,9 +160,58 @@ export const SITE_VARIABLES = {
     { page: "giftcards", label: "Gift cards", inMenu: false, inFooter: true, on: true },
   ],
 
+  // Links
+  // Links with a picture in the footer and on the contact page. icon is one of: facebook, instagram, tiktok, youtube, x,
+  // pinterest, etsy, google, whatsapp, linkedin, threads, snapchat, amazon, phone, text, email, website, map, reviews, link.
+  // label: leave "" to use the usual name. For phone, text and email, url is just the number or address.
+  links: [
+    { icon: "facebook", label: "", url: "https://www.facebook.com/groups/2154317351855824/" },
+  ],
+
+  // Hidden text
+  // Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos).
+  hiddenText: [],
+
   // Shop categories
   // In the order they show in the shop. Each product's category should match one of these.
   categories: ["Drinkware", "Home decor", "Leather goods", "Patriotic & military", "Gifts & keepsakes"],
+
+  // Chat
+  // The 'Ask us' chat on the shop. It answers from these questions and answers (and the shop's own info).
+  // hidden: true keeps an answer but stops the chat using it.
+  chat: {
+    on: true, // show the chat button on the shop
+    useAI: true, // write natural replies with Claude (needs a key); false = reply with the closest answer as written
+    title: "Questions? Ask us",
+    greeting: "Hi! Ask me anything about our tumblers, signs, custom orders, shipping or discounts.",
+    questions: [
+      { id: "ship-time", question: "How long does shipping take?", answer: "Ready-made items ship within 3-5 business days. Custom and engraved pieces are made to order and usually ship within 1-2 weeks. You get an email with tracking as soon as it ships." },
+      { id: "ship-cost", question: "How much is shipping?", answer: "Shipping is worked out from your ZIP code in the cart, so you see the price before checkout. Orders over the free-shipping amount ship free, and local pickup is free too." },
+      { id: "pickup", question: "Can I pick up my order instead of shipping?", answer: "Yes. Choose Local pickup in the cart and there's no shipping charge. We'll message you to set up a pickup time once your order is ready." },
+      { id: "intl", question: "Do you ship outside the US?", answer: "We mainly ship within the US. For an address outside the US, tick 'Shipping outside the US' in the cart to see if we can send it and what it costs." },
+      { id: "track", question: "Where is my order? How do I track it?", answer: "Use the Order status page (link at the bottom of the site) with your order number and email. Once it ships you'll also get an email with the tracking number." },
+      { id: "custom", question: "Do you make custom orders?", answer: "Yes! Use the Custom orders page to tell us what you'd like, with photos if you have them. We'll reply with a price. Because of sizing and how much our equipment would need changing, we can't take every custom job, but larger orders are often possible." },
+      { id: "decline", question: "Why was my custom request declined?", answer: "Some designs need more changes to our laser setup than one piece allows, or don't fit the item well. It's never about the idea itself. Larger orders can make it workable, so feel free to ask again with a different size or quantity." },
+      { id: "logo", question: "Can you engrave my own logo or picture?", answer: "Often, yes. On items that allow it, pick 'Your own logo' and upload it (a PNG with a see-through background works best). Otherwise send it through the Custom orders page and we'll tell you how it will turn out." },
+      { id: "designs", question: "Why can't I pick every design on every size?", answer: "Not every design fits every item. Each size only shows the designs that fit it well, so bigger or smaller tumblers may have different choices." },
+      { id: "text", question: "Can you add a name or date?", answer: "Yes. Many items have a box for the text to engrave. It's used exactly as typed, so double-check spelling, capitals and dates before you order." },
+      { id: "proof", question: "Will I see a proof before you engrave?", answer: "For custom orders we talk through the design before starting. For regular items, the preview on the item page shows roughly how your design will look, and the text is engraved exactly as you type it." },
+      { id: "change", question: "Can I change or cancel my order?", answer: "Message us right away. Once we start cutting or engraving, an order can't be changed or cancelled, but we'll do our best to catch it in time." },
+      { id: "returns", question: "What is your return policy?", answer: "Ready-made items can be returned within 30 days if unused. Custom, personalized and engraved items are made just for you, so they can't be returned unless they arrive damaged or we made a mistake; then send a photo within 7 days and we'll fix or replace it." },
+      { id: "damaged", question: "My item arrived damaged. What do I do?", answer: "We're sorry! Send us a photo through the Contact page within 7 days of delivery and we'll make it right." },
+      { id: "care", question: "How do I care for an engraved tumbler?", answer: "Hand wash with warm soapy water and skip the dishwasher to keep the finish and engraving looking their best. Wood should stay out of soaking water; slate wipes clean." },
+      { id: "dishwasher", question: "Are the tumblers dishwasher safe?", answer: "We recommend hand washing. Dishwashers can wear down the coating and engraving over time." },
+      { id: "material", question: "What do you engrave on?", answer: "Mostly stainless tumblers, wood signs, slate and leather. Natural materials vary piece to piece, so yours may look a little different from the photos, and that's part of what makes it one of a kind." },
+      { id: "military", question: "Do you have a military or veteran discount?", answer: "Yes. Veterans, active duty, Guard and Reserve, police, firefighters and EMTs get a discount. Visit the Military discount page (link at the bottom of the site) to get your code." },
+      { id: "bulk", question: "Do you offer bulk or group pricing?", answer: "Yes. The more items in one order, the bigger the discount; it comes off automatically in the cart. For large unit, team or event orders, send a custom request with the quantity." },
+      { id: "gift", question: "Do you sell gift cards?", answer: "Yes. Visit the Gift cards page, pick an amount, and we'll email the code to whoever it's for. It's used in one order." },
+      { id: "codes", question: "How do I use a promo code?", answer: "Type it in the promo code box on the checkout page, before you pay." },
+      { id: "pay", question: "How can I pay?", answer: "All major cards, Apple Pay and Google Pay, through Stripe's secure checkout. Your card details never touch our site." },
+      { id: "rush", question: "I need it by a certain date. Can you rush it?", answer: "Send us a message or a custom request with the date before you order, and we'll tell you honestly whether we can make it." },
+      { id: "who", question: "Who are you?", answer: "We're a veteran-owned family business. Everything is made by hand in our workshop, much of it with our laser engraver." },
+      { id: "contact", question: "How do I contact you?", answer: "Use the Contact page to send us a message, or reach us through our Facebook group. We usually reply within a day or two." },
+    ],
+  },
 
   // Discounts
   // Promo codes themselves are made in Dashboard > Discounts (they live in Stripe). These are the programs.

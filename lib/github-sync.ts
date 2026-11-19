@@ -29,7 +29,7 @@ export async function lastGitHubSync() {
 export async function syncToGitHub(reason: string): Promise<SyncStatus> {
   const token = await getKey("GITHUB_SYNC_TOKEN");
   const repo = await repoName();
-  if (!token || !repo) return { at: new Date().toISOString(), ok: false, message: !token ? "No GitHub token yet (Keys page)." : "GitHub repository not known (Settings > Your accounts)." };
+  if (!token || !repo) return { at: new Date().toISOString(), ok: false, message: !token ? "No GitHub token yet (Accounts & keys)." : "GitHub repository not known (Settings > Your accounts)." };
   const branch = process.env.VERCEL_GIT_COMMIT_REF || "main";
   const api = `https://api.github.com/repos/${repo}/contents/${PATH}`;
   const headers = { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28", "user-agent": "shop-dashboard" };
@@ -46,7 +46,7 @@ export async function syncToGitHub(reason: string): Promise<SyncStatus> {
         return { at: new Date().toISOString(), ok: true, message: "Already up to date." };
       }
     } else if (cur.status !== 404) {
-      throw new Error(cur.status === 401 || cur.status === 403 ? "GitHub didn't accept the token. Check its permissions (Contents: Read and write) on the Keys page." : `GitHub said ${cur.status}.`);
+      throw new Error(cur.status === 401 || cur.status === 403 ? "GitHub didn't accept the token. Check its permissions (Contents: Read and write) on Accounts & keys." : `GitHub said ${cur.status}.`);
     }
     const put = await fetch(api, {
       method: "PUT",

@@ -29,6 +29,11 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Shipping labels](#labels): Buy and print postage from an order; the tracking number fills itself in.
 - [Blanks (stock to engrave)](#blanks): Count the plain pieces you engrave and get warned before you run out.
 - [Previews: design on a photo, 3D, scans and 360°](#previews): Extra ways for customers to see an item, set at the bottom of each item in Products.
+- [Chat (Ask us)](#chat): A chat button on the shop that answers customers' questions from your own answers.
+- [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
+- [Links (Facebook, Instagram, phone...)](#links): Your social pages and contact links, each with its own icon.
+- [Order codes, QR codes, packing slips and labels](#codes): One code per order that ties the receipt, packing slip and box together.
+- [Insights (charts)](#insights): Charts of sales, what's selling, busy hours and where orders ship.
 - [Watermark](#watermark): Stamp your name or logo on shop photos, on or off at any time.
 - [Advertising and getting found](#advertising): Facebook and Instagram Shop, Google free listings, sharing.
 - [Pages & menu](#pages): Add, remove, rename and order the shop's pages.
@@ -37,7 +42,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Reviews](#reviews): Customer reviews with photos. You approve each one.
 - [Look & layout](#look): Themes and page layouts, with a live preview.
 - [Settings](#settings): Store options, checkout, notifications, password and your accounts.
-- [Keys](#keys): Where API keys for Stripe and other services go.
+- [Accounts & keys](#keys): One spot for every service: sign-in links, API keys, saved logins and your own links.
 - [Inbox](#inbox): Messages from your shop's contact form.
 - [Discounts](#discounts): Coupons and promo codes, made in Stripe.
 - [Notifications](#notifications): New orders, refunds and low stock.
@@ -274,11 +279,17 @@ _Who can get in, and how your customers' details are kept private._
 
 #### Getting in
 
-There's no login link on the shop. Tap the **version number** at the very bottom of any page 7 times in a row (it counts down from the 4th tap), or go to your address with `/admin` on the end. The Shop HQ app on your home screen opens straight in.
+There's no login link on the shop. Tap the **version number** at the very bottom of any page **15 times** quickly (no more than a second or so between taps; nothing on screen counts), or go to your address with `/admin` on the end. The Shop HQ app on your home screen opens straight in. Once you're signed in on a phone, the shop shows you (and only you) a **Shop HQ** button in the corner to jump back to the dashboard, and an edit shortcut for the page you're on; the shop icon in the dashboard's top bar goes the other way.
 
-#### Password
+#### Your own password
 
-**Settings > Password & security** changes it (at least 8 characters). You and your wife use the same password; each of you types your own name when signing in, so you can tell your phones apart.
+The first time each of you signs in, type **your name** and the **starter password** (`bdube123` until you change it). The dashboard then asks you to **choose your own password** (and an email, for resets). From then on you sign in with your name and your own password; your wife does the same with hers.
+
+**Settings > Password & security** lists everyone who can sign in. **Reset** makes that person use the starter password again next time (handy if your wife forgets hers); **Remove** takes them off. The **starter password** can be changed there too.
+
+#### Forgot your password?
+
+Tap **Forgot your password?** on the sign-in page. If you saved an email, a reset link is emailed (needs Resend on Accounts & keys) and works for 30 minutes. No email? Use the **reset code** instead: that's the `OWNER_RESET_CODE` variable in Vercel, if you added one. Or simply ask the other person to tap **Reset** next to your name.
 
 #### Lock screen (optional)
 
@@ -355,6 +366,8 @@ Then in **Products**, choose the blank next to each size (or for the whole item)
 
 _Extra ways for customers to see an item, set at the bottom of each item in Products._
 
+Quickest way in: **3D & 360** in the dashboard menu lists every item and what it has; **Set up** opens that item's **Previews** section.
+
 - **Design on a photo**: pick a photo of the plain item and drag across it where the design goes. Customers see the design they pick drawn on the photo.
 - **3D model**: choose the closest shape (tumbler, mug, sign, round or square coaster, card holder) and a color. The site draws it in 3D wearing the chosen design, shown the way a laser mark looks on that material. Customers drag to turn it.
 - **3D scan**: scan the real finished piece with a phone app (Polycam or KIRI Engine on iPhone and Android, Scaniverse on iPhone), export a .glb file and upload it. Customers can turn it and, on most phones, tap **View in your space** to see it on their own table.
@@ -363,6 +376,78 @@ _Extra ways for customers to see an item, set at the bottom of each item in Prod
 Each one you set up adds a tab above the item's photos. When a customer picks a design, the Preview or 3D tab opens on its own.
 
 > **Tip:** Free 3D models of products are on Poly Pizza (free to use) and Sketchfab (check each model's license). A scan of your own finished piece shows the real thing, which sells best.
+
+<a id="chat"></a>
+### Chat (Ask us)
+
+_A chat button on the shop that answers customers' questions from your own answers._
+
+Customers tap **Ask us** in the corner of the shop and type a question. The chat answers from **your questions & answers** plus what the shop already knows (items, prices, shipping, discounts). It starts with 25 common questions filled in; change them to fit.
+
+#### Adding an answer
+
+1. Open **Chat** in the dashboard.
+2. Tap **Add a question**, type the question how a customer would ask it, and your answer.
+3. Save. The chat uses it straight away, even if the customer words the question differently.
+
+**What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it.
+
+#### Smart replies (optional)
+
+With an **Anthropic API key** on Accounts & keys, the chat writes natural replies using only your answers and shop facts; it never makes up prices or promises. Without a key it still works: it shows the closest matching answer, or points to the contact page. Try it on the **Settings & try it** tab.
+
+> **Tip:** Hide an answer (the switch) instead of deleting it if it's only out of date for now, like a holiday shipping note.
+
+<a id="hiding"></a>
+### Hide instead of delete
+
+_Take text, steps, photos, links or chat answers off the shop without losing them._
+
+Most things have an **eye** or **Shown / Hidden** switch. Hidden things stay saved in the dashboard and in `site-variables.ts` but customers don't see them. Flip it back any time.
+
+- **Words & logos**: the eye next to each text box.
+- **How it works steps**: Hide next to a step.
+- **Our work**: untick **Show on the shop**.
+- **Links**: the eye next to a link.
+- **Chat**: the switch next to an answer.
+
+<a id="links"></a>
+### Links (Facebook, Instagram, phone...)
+
+_Your social pages and contact links, each with its own icon._
+
+In **Words & logos > Links**, tap **Add link**, pick an icon (Facebook, Instagram, TikTok, YouTube, Google, Etsy, phone, text message, email, map, reviews, website...), and type the address. For **phone** and **text** just type the number; for **email** the address. Drag the arrows to reorder; the eye hides one.
+
+They show in the shop's footer and anywhere you add a Links section.
+
+<a id="codes"></a>
+### Order codes, QR codes, packing slips and labels
+
+_One code per order that ties the receipt, packing slip and box together._
+
+Every order gets an **order code** like `DFC1042-7KQ3` (your initials, the order number, and 4 check letters so a typo can't open the wrong order). It's different from the **tracking number**, which comes from the post office.
+
+- **Customer's receipt** (the thank-you page) shows the code as a **barcode**. They can also type it on **Order status**.
+- **Packing slip** (button on each order): print it and put it in the box. It has the barcode and a **QR code**.
+- **Scan** (dashboard menu): point the phone camera at the barcode or QR on a slip or receipt and that order opens, with its full **History**: paid, code used, label bought, tracking, shipped, refunds, and who did each.
+- **Item labels**: print a QR + barcode sticker for each item and size, for your shelves or bags.
+
+> **Tip:** The QR codes only hold a link into your dashboard, not the customer's details. A lost slip shows nothing to anyone who isn't signed in.
+
+Real **UPC** barcodes (the ones stores scan) have to be bought from GS1 for each product; you don't need them to sell online. The Code 128 barcodes used here are free and work with any scanner.
+
+<a id="insights"></a>
+### Insights (charts)
+
+_Charts of sales, what's selling, busy hours and where orders ship._
+
+- **Sales over time**: pinch or drag to zoom. Green markers are your biggest orders, red are refunds. **Add a note** ("Craft fair", "Facebook post") and it shows on the chart so you can see what worked.
+- **What's selling**: pie charts by category, design, payment type, or shipped vs pickup.
+- **Best sellers**: the items sold most.
+- **Busy days & hours**: when orders come in.
+- **Where orders go**: a US map shaded by state with a dot for each town.
+
+Tap the buttons at the top to show or hide each chart; the phone remembers your choice. Pick 7, 30, 90 or 365 days at the top right.
 
 <a id="watermark"></a>
 ### Watermark
@@ -490,12 +575,18 @@ Orders over the free-shipping amount ship free. **Local pickup** adds a pickup c
 
 #### Getting to the dashboard
 
-Go to your site address with `/admin` on the end, or tap the **version and build number** at the very bottom of any shop page 7 times in a row (it counts down from the 4th tap). There's no visible login link, so customers never find it. On a phone, add the dashboard to your home screen (see **The phone app**).
+Go to your site address with `/admin` on the end, or tap the **version and build number** at the very bottom of any shop page 15 times quickly. There's no visible login link, so customers never find it. On a phone, add the dashboard to your home screen (see **The phone app**).
 
 <a id="keys"></a>
-### Keys
+### Accounts & keys
 
-_Where API keys for Stripe and other services go._
+_One spot for every service: sign-in links, API keys, saved logins and your own links._
+
+Each service (Stripe, Supabase, Vercel, GitHub, Anthropic for the chat, Shippo, Resend, Facebook and Google listings) has a card showing whether it's connected, links to sign in or make a key, and a box to paste the key.
+
+- **Saved logins**: usernames and passwords for any site (supplier, Etsy, the laser's software...). Stored encrypted; the password only shows when you tap **Show**.
+- **My links**: bookmarks to the pages you use (Stripe payouts, USPS pickup...).
+- **Other keys**: any other service's key.
 
 An API key is a long password that lets the shop talk to another service. Paste it in, press **Save**, and the site checks it before storing it encrypted. Nobody, including you, can read a saved key back; you can only replace or remove it.
 
@@ -635,7 +726,7 @@ _A walk through the shop from a customer's side._
 
 **Custom orders** has the request form. **Order status** in the footer lets customers look up an order with their order number and email. The shop has a search box once there are more than 6 items.
 
-There's no link to the dashboard on the shop. The hidden way in is tapping the version number at the bottom 7 times, and it still needs your password (and your PIN, if the lock screen is on). Search engines are told not to list it.
+There's no link to the dashboard on the shop. The hidden way in is tapping the version number at the bottom 15 times, and it still needs your password (and your PIN, if the lock screen is on). Search engines are told not to list it.
 
 ## Troubleshooting
 

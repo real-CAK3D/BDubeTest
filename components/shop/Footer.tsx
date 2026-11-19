@@ -33,7 +33,7 @@ export function Footer({ s }: { s: SiteSettings }) {
         ) : null}
         <div className="footer-side">
           {s.showNewsletter ? <Newsletter text={s.newsletterText} /> : null}
-          <Social links={s.social} />
+          <Social links={s.links} />
         </div>
       </div>
       {/*

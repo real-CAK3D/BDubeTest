@@ -1,26 +1,36 @@
 "use client";
-import type { SiteSettings, SocialLinks } from "@/lib/types";
+import type { SiteSettings } from "@/lib/types";
 import { ImageField } from "./ImageField";
+import { LinksEditor } from "./LinksEditor";
 import { Tabs } from "./Tabs";
 import { useSettings } from "./useSettings";
 
 export function ContentForm({ initial }: { initial: SiteSettings }) {
   const { s, set, bar } = useSettings(initial);
+  const hidden = (k: string) => s.hiddenFields.includes(k);
+  const eye = (k: string) => (
+    <button
+      type="button"
+      className={`eye ${hidden(k) ? "off" : ""}`}
+      onClick={(e) => {
+        e.preventDefault();
+        set({ hiddenFields: hidden(k) ? s.hiddenFields.filter((x) => x !== k) : [...s.hiddenFields, k] });
+      }}
+      aria-pressed={hidden(k)}
+      title={hidden(k) ? "Hidden on the shop (tap to show)" : "Shown on the shop (tap to hide, keeps the text)"}
+    >
+      {hidden(k) ? "Hidden" : "Shown"}
+    </button>
+  );
   const text = (k: keyof SiteSettings, label: string, opts: { rows?: number; hint?: string; placeholder?: string } = {}) => (
-    <label className="f">
-      <span>{label}</span>
+    <label className={`f ${hidden(k) ? "is-hidden" : ""}`}>
+      <span className="f-row">{label}{k !== "businessName" ? eye(k) : null}</span>
       {opts.rows ? (
         <textarea rows={opts.rows} value={String(s[k] ?? "")} onChange={(e) => set({ [k]: e.target.value } as Partial<SiteSettings>)} placeholder={opts.placeholder} />
       ) : (
         <input value={String(s[k] ?? "")} onChange={(e) => set({ [k]: e.target.value } as Partial<SiteSettings>)} placeholder={opts.placeholder} />
       )}
       {opts.hint ? <em className="hint">{opts.hint}</em> : null}
-    </label>
-  );
-  const social = (k: keyof SocialLinks, label: string) => (
-    <label className="f">
-      <span>{label}</span>
-      <input type="url" value={s.social[k] ?? ""} onChange={(e) => set({ social: { ...s.social, [k]: e.target.value } })} placeholder="https://" />
     </label>
   );
   return (
@@ -56,7 +66,8 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
                     <span className="step-num">{i + 1}</span>
                     <input aria-label={`Step ${i + 1} title`} value={st.title} placeholder="Title" onChange={(e) => set({ customSteps: s.customSteps.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />
                     <textarea aria-label={`Step ${i + 1} text`} rows={2} value={st.text} placeholder="One or two sentences" onChange={(e) => set({ customSteps: s.customSteps.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} />
-                    <button type="button" className="b b-ghost b-sm" onClick={() => set({ customSteps: s.customSteps.filter((_, j) => j !== i) })}>Remove</button>
+                    <button type="button" className="b b-ghost b-sm" onClick={() => set({ customSteps: s.customSteps.map((x, j) => (j === i ? { ...x, hidden: !x.hidden } : x)) })}>{st.hidden ? "Show" : "Hide"}</button>
+                    <button type="button" className="b b-ghost b-sm" onClick={() => confirm("Delete this step? (Hide keeps it.)") && set({ customSteps: s.customSteps.filter((_, j) => j !== i) })}>Delete</button>
                   </div>
                 ))}
                 {s.customSteps.length < 6 ? <button type="button" className="b b-sm" onClick={() => set({ customSteps: [...s.customSteps, { title: "", text: "" }] })}>Add a step</button> : null}
@@ -85,13 +96,9 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
                 {text("contactEmail", "Email")}
                 {text("contactPhone", "Phone")}
                 {text("location", "Location", { placeholder: "e.g. Fort Leonard Wood, MO" })}
-                <h2>Social links</h2>
-                {social("facebook", "Facebook")}
-                {social("instagram", "Instagram")}
-                {social("tiktok", "TikTok")}
-                {social("youtube", "YouTube")}
-                {social("x", "X")}
-                {social("etsy", "Etsy")}
+                <h2>Links with pictures</h2>
+                <p className="hint">Shown in the footer and on the contact page: Facebook, Instagram, a phone number to call or text, an email, your website...</p>
+                <LinksEditor value={s.links} onChange={(links) => set({ links })} />
               </section>
             ),
           },

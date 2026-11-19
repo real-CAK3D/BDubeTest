@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import type { AdminSession, LockInfo } from "@/lib/admin-security";
 import { api } from "./api";
 
-type Data = { lock: LockInfo; sessions: AdminSession[]; me: string | null; shared?: boolean };
+type Account = { id: string; name: string; email: string; lastLogin?: string; mustChange: boolean };
+type Data = { lock: LockInfo; sessions: AdminSession[]; me: string | null; shared?: boolean; accounts: Account[] };
 const ONLINE_MS = 5 * 60_000;
 const ago = (iso: string) => {
   const m = Math.round((Date.now() - Date.parse(iso)) / 60_000);
@@ -66,6 +67,26 @@ export function SecurityPanel() {
       </section>
 
       <section className="panel stack">
+        <div className="panel-head"><h2>People who can sign in</h2></div>
+        <p className="hint">Each person signs in with their own name and password. Someone new signs in with the <strong>starter password</strong> once and then chooses their own.</p>
+        {d.accounts.length ? (
+          <ul className="rows devices">
+            {d.accounts.map((a) => (
+              <li key={a.id}>
+                <span><strong>{a.name}</strong> <span className="muted small">· {a.mustChange ? "reset: signs in next with the starter password" : a.lastLogin ? `last signed in ${ago(a.lastLogin)}` : "not signed in yet"}</span></span>
+                <input type="email" className="small-input" defaultValue={a.email} placeholder="email for resets" onBlur={(e) => e.target.value !== a.email && act({ action: "email", id: a.id, email: e.target.value }, "Email saved.")} aria-label={`${a.name}'s email`} />
+                <button className="b b-ghost b-sm" onClick={() => confirm(`Reset ${a.name}'s password? They'll sign in with the starter password and choose a new one.`) && act({ action: "resetAccount", id: a.id }, `${a.name} can now sign in with the starter password.`)}>Reset password</button>
+                <button className="b b-danger b-sm" onClick={() => confirm(`Remove ${a.name}? They can't sign in any more (unless they use the starter password again).`) && act({ action: "removeAccount", id: a.id }, `${a.name} removed.`)}>Remove</button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">Nobody has chosen their own password yet.</p>
+        )}
+        <StarterPassword />
+      </section>
+
+      <section className="panel stack">
         <div className="panel-head"><h2>Signed-in devices</h2><span className="muted small">{online} active now</span></div>
         <ul className="rows devices">
           {d.sessions.map((s) => {
@@ -86,5 +107,29 @@ export function SecurityPanel() {
       {msg ? <p className="alert" role="status">{msg}</p> : null}
       {err ? <p className="err" role="alert">{err}</p> : null}
     </>
+  );
+}
+
+function StarterPassword() {
+  const [f, setF] = useState({ current: "", next: "" });
+  const [msg, setMsg] = useState("");
+  async function save() {
+    try {
+      const r = await api<{ message: string }>("/api/admin/password", "POST", { kind: "starter", ...f });
+      setMsg(r.message);
+      setF({ current: "", next: "" });
+    } catch (e) {
+      setMsg((e as Error).message);
+    }
+  }
+  return (
+    <details>
+      <summary className="small">Change the starter password</summary>
+      <div className="row2" style={{ marginTop: "0.6rem" }}>
+        <label className="f"><span>Current starter password</span><input type="password" value={f.current} onChange={(e) => setF({ ...f, current: e.target.value })} /></label>
+        <label className="f"><span>New starter password</span><input type="password" value={f.next} onChange={(e) => setF({ ...f, next: e.target.value })} /></label>
+      </div>
+      <div className="row"><button className="b b-sm" disabled={!f.current || !f.next} onClick={save}>Change starter password</button>{msg ? <span className="small">{msg}</span> : null}</div>
+    </details>
   );
 }

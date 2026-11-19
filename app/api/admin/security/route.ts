@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { clearLock, endOtherSessions, endSession, listSessions, lockInfo, setLock, sharedStorage } from "@/lib/admin-security";
+import { listAccounts, markForReset, removeAccount, setEmail } from "@/lib/admin-accounts";
+import { clearLock, endAccountSessions, endOtherSessions, endSession, getSession, listSessions, lockInfo, setLock, sharedStorage } from "@/lib/admin-security";
 import { currentSession } from "@/lib/session";
 
 export async function GET() {
-  const [lock, sessions, me] = await Promise.all([lockInfo(), listSessions(), currentSession()]);
-  return NextResponse.json({ lock, sessions, me, shared: sharedStorage() });
+  const [lock, sessions, me, accounts] = await Promise.all([lockInfo(), listSessions(), currentSession(), accountList()]);
+  return NextResponse.json({ lock, sessions, me, shared: sharedStorage(), accounts });
 }
 
 // { action: "lock", kind, code } | { action: "unlock" } | { action: "signout", id } | { action: "signoutOthers" }
@@ -20,7 +21,21 @@ export async function POST(req: Request) {
   } else if (b.action === "unlock") await clearLock();
   else if (b.action === "signout" && typeof b.id === "string") await endSession(b.id);
   else if (b.action === "signoutOthers" && me) await endOtherSessions(me);
+  else if (b.action === "resetAccount" && typeof b.id === "string") {
+    await markForReset(b.id);
+    await endAccountSessions(b.id);
+  } else if (b.action === "removeAccount" && typeof b.id === "string") {
+    const mine = me ? (await getSession(me))?.account : undefined;
+    if (mine === b.id) return NextResponse.json({ error: "You can't remove yourself while signed in." }, { status: 400 });
+    await removeAccount(b.id);
+    await endAccountSessions(b.id);
+  } else if (b.action === "email" && typeof b.id === "string") await setEmail(b.id, String(b.email ?? ""));
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-  const [lock, sessions] = await Promise.all([lockInfo(), listSessions()]);
-  return NextResponse.json({ ok: true, lock, sessions, me, shared: sharedStorage() });
+  const [lock, sessions, accounts] = await Promise.all([lockInfo(), listSessions(), accountList()]);
+  return NextResponse.json({ ok: true, lock, sessions, me, shared: sharedStorage(), accounts });
+}
+
+// names, emails and last sign-in only; never password data
+async function accountList() {
+  return (await listAccounts()).map((a) => ({ id: a.id, name: a.name, email: a.email, lastLogin: a.lastLogin, mustChange: a.mustChange }));
 }

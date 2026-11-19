@@ -1,11 +1,24 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { AuthCard } from "@/components/admin/AuthCard";
+import { ChoosePassword } from "@/components/admin/AuthForms";
+import { getSession } from "@/lib/admin-security";
+import { currentSession } from "@/lib/session";
 import { AdminPing } from "@/components/admin/AdminPing";
 import { HelpButton } from "@/components/admin/HelpButton";
 import { RegisterSW } from "@/components/admin/RegisterSW";
 import { getMessages, getNotifications, getOrders, getRequests, getReviews, getSettings } from "@/lib/db";
 
 export default async function HQLayout({ children }: { children: React.ReactNode }) {
+  const sid = await currentSession();
+  const me = sid ? await getSession(sid) : null;
+  // signed in with the starter password: choose your own before anything else
+  if (me?.pending)
+    return (
+      <AuthCard title="Choose your password" note="One quick step.">
+        <ChoosePassword name={me.name} />
+      </AuthCard>
+    );
   const [s, notes, orders, requests, reviews, messages] = await Promise.all([getSettings(), getNotifications(), getOrders(), getRequests(), getReviews(), getMessages()]);
   const unread = notes.filter((n) => !n.read).length;
   const a = s.admin;

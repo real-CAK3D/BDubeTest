@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { money, shortDate } from "@/lib/format";
 import type { Design, Order, OrderStatus, Parcel } from "@/lib/types";
+import { orderCode } from "@/lib/order-code";
 import { ShippingLabel } from "./ShippingLabel";
 import { api } from "./api";
 
@@ -19,7 +20,7 @@ function mailto(o: Order) {
   return `mailto:${o.email}?subject=${encodeURIComponent(`Your order #${o.number} has shipped`)}&body=${encodeURIComponent(body)}`;
 }
 
-export function OrderList({ initial, openId, status, canEmail, designs = [], parcels = [], labelsReady = false }: { initial: Order[]; openId?: string; status?: string; canEmail: boolean; designs?: Design[]; parcels?: Parcel[]; labelsReady?: boolean }) {
+export function OrderList({ initial, openId, status, canEmail, designs = [], parcels = [], labelsReady = false, business = "" }: { initial: Order[]; openId?: string; status?: string; canEmail: boolean; designs?: Design[]; parcels?: Parcel[]; labelsReady?: boolean; business?: string }) {
   const [orders, setOrders] = useState(initial);
   const [open, setOpen] = useState<string | null>(openId ?? null);
   const [filter, setFilter] = useState<string>(status ?? "all");
@@ -76,6 +77,11 @@ export function OrderList({ initial, openId, status, canEmail, designs = [], par
               </button>
               {open === o.id ? (
                 <div className="order-body">
+                  <p className="order-code">
+                    Order code <strong>{orderCode(o, business)}</strong>
+                    <span className="muted small"> (on the receipt and packing slip; not the tracking number)</span>
+                    <a className="b b-sm" href={`/admin/slip/${encodeURIComponent(o.id)}`} target="_blank" rel="noreferrer">Packing slip</a>
+                  </p>
                   <div className="order-cols">
                     <div>
                       <h3>Items</h3>
@@ -143,6 +149,19 @@ export function OrderList({ initial, openId, status, canEmail, designs = [], par
                     </label>
                     <a className="b b-sm b-ghost" href={`https://dashboard.stripe.com/payments?query=${encodeURIComponent(o.email)}`} target="_blank" rel="noreferrer">Open in Stripe</a>
                   </div>
+                  {o.history?.length ? (
+                    <details className="order-history">
+                      <summary>History ({o.history.length})</summary>
+                      <ol>
+                        {o.history.map((h, n) => (
+                          <li key={n}>
+                            <span className="muted small">{new Date(h.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span> {h.what}
+                            {h.by ? <span className="muted small"> · {h.by}</span> : null}
+                          </li>
+                        ))}
+                      </ol>
+                    </details>
+                  ) : null}
                   <div className="ship-box">
                     <h3>Shipping</h3>
                     {o.delivery !== "pickup" ? <ShippingLabel key={o.label?.url ?? "none"} order={o} parcels={parcels} ready={labelsReady} onBought={(saved) => setOrders((l) => l.map((x) => (x.id === saved.id ? saved : x)))} /> : null}

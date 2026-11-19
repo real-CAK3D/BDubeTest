@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrders, saveOrders } from "@/lib/db";
+import { getOrders, logOn, saveOrders } from "@/lib/db";
 import { remindAbandoned } from "@/lib/abandoned";
 import { recordOrderFromSession } from "@/lib/orders";
 import { notifyOwner } from "@/lib/push";
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       const o = orders.find((x) => x.id === id);
       if (o && charge.refunded) {
         o.status = "refunded";
+        logOn(o, "Refunded in Stripe");
         await saveOrders(orders);
         await notifyOwner(`Order #${o.number} refunded`, `${o.name || o.email}`, `/admin/orders?open=${o.id}`);
       }

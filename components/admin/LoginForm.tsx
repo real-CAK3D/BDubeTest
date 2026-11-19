@@ -31,8 +31,8 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <form onSubmit={submit} className="stack">
       <label className="f">
-        <span>Your name <em className="muted">(shows which device is signed in)</em></span>
-        <input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} autoComplete="nickname" placeholder="e.g. Brandon" />
+        <span>Your name</span>
+        <input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} autoComplete="username" placeholder="e.g. Brandon" required />
       </label>
       <label className="f">
         <span>Password</span>
@@ -40,6 +40,7 @@ export function LoginForm({ next }: { next: string }) {
       </label>
       <button className="b b-primary b-block" disabled={busy}>{busy ? "Logging in…" : "Log in"}</button>
       {err ? <p className="err" role="alert">{err}</p> : null}
+      <p className="muted small">First time signing in? Use the starter password; you&apos;ll choose your own next. <a href="/admin/forgot">Forgot your password?</a></p>
     </form>
   );
 }

@@ -1,33 +1,24 @@
-import type { SocialLinks } from "@/lib/types";
+import { LinkIcon, LINK_ICONS, linkHref } from "@/components/LinkIcon";
+import type { LinkItem } from "@/lib/types";
 
-/*
- * EDIT-POINT: SOCIAL-NETWORKS
- * Social sites shown in the footer/contact. To add one (e.g. pinterest):
- * add it here, to SocialLinks in lib/types.ts, to "social" in
- * lib/site-variables-type.ts and site-variables.ts, and to the Words & logos
- * form (components/admin/ContentForm.tsx).
- */
-const NAMES: Record<keyof SocialLinks, string> = {
-  facebook: "Facebook",
-  instagram: "Instagram",
-  tiktok: "TikTok",
-  youtube: "YouTube",
-  x: "X",
-  etsy: "Etsy",
-};
-
-export function Social({ links }: { links: SocialLinks }) {
-  const entries = (Object.keys(NAMES) as (keyof SocialLinks)[]).filter((k) => links[k]);
-  if (!entries.length) return null;
+/** The links with pictures (Words & logos > Contact page > Links). */
+export function Social({ links }: { links: LinkItem[] }) {
+  const shown = links.filter((l) => !l.hidden && l.url);
+  if (!shown.length) return null;
   return (
     <ul className="social">
-      {entries.map((k) => (
-        <li key={k}>
-          <a href={links[k]} target="_blank" rel="noreferrer">
-            {NAMES[k]}
-          </a>
-        </li>
-      ))}
+      {shown.map((l) => {
+        const href = linkHref(l.icon, l.url);
+        const outside = /^https?:/.test(href);
+        return (
+          <li key={l.id}>
+            <a href={href} {...(outside ? { target: "_blank", rel: "noreferrer" } : {})}>
+              <span className="social-ic"><LinkIcon icon={l.icon} size={18} /></span>
+              {l.label || LINK_ICONS[l.icon]?.name || "Link"}
+            </a>
+          </li>
+        );
+      })}
     </ul>
   );
 }

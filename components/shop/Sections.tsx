@@ -58,7 +58,7 @@ export function Contact({ s, always = false, about = "" }: { s: SiteSettings; al
         ) : null}
         {s.location ? <li>{s.location}</li> : null}
       </ul>
-      <Social links={s.social} />
+      <Social links={s.links} />
       {s.showContactForm ? <ContactForm initial={about ? `I'd like one like your "${about}". ` : ""} /> : null}
     </section>
   );

@@ -31,7 +31,7 @@ export type NewCode = {
 
 export async function createCode(n: NewCode): Promise<{ id: string; code: string }> {
   const s = await stripe();
-  if (!s) throw new Error("Connect Stripe first (Keys page). Codes live in Stripe so the checkout page can check them.");
+  if (!s) throw new Error("Connect Stripe first (Accounts & keys). Codes live in Stripe so the checkout page can check them.");
   const settings = await getSettings();
   const code = (n.code || randomCode()).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 30);
   if (code.length < 3) throw new Error("Codes need at least 3 letters or numbers.");

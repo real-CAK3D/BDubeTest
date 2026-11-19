@@ -10,7 +10,7 @@ import { kv, storageMode } from "./store";
  * IP addresses are never stored; only a one-way fingerprint for lockouts.
  */
 
-export type AdminSession = { id: string; name: string; device: string; createdAt: string; lastSeen: string };
+export type AdminSession = { id: string; name: string; device: string; createdAt: string; lastSeen: string; account?: string; pending?: boolean };
 type Sessions = Record<string, AdminSession>;
 const SESSIONS = "adminSessions";
 
@@ -21,13 +21,13 @@ export async function listSessions(): Promise<AdminSession[]> {
   return Object.values(all).sort((a, b) => b.lastSeen.localeCompare(a.lastSeen));
 }
 
-export async function addSession(name: string, userAgent: string): Promise<string> {
+export async function addSession(name: string, userAgent: string, extra: { account?: string; pending?: boolean } = {}): Promise<string> {
   const id = randomBytes(12).toString("hex");
   const now = new Date().toISOString();
   const all = (await kv.get<Sessions>(SESSIONS)) ?? {};
   // forget sessions unused for 60 days
   for (const [k, v] of Object.entries(all)) if (Date.now() - Date.parse(v.lastSeen) > 60 * 86400_000) delete all[k];
-  all[id] = { id, name: name.trim().slice(0, 30) || "Owner", device: deviceName(userAgent), createdAt: now, lastSeen: now };
+  all[id] = { id, name: name.trim().slice(0, 30) || "Owner", device: deviceName(userAgent), createdAt: now, lastSeen: now, ...extra };
   await kv.set(SESSIONS, all);
   return id;
 }
@@ -47,6 +47,26 @@ export async function touchSession(id: string): Promise<boolean> {
     await kv.set(SESSIONS, all);
   }
   return true;
+}
+
+export async function getSession(id: string) {
+  return ((await kv.get<Sessions>(SESSIONS)) ?? {})[id] ?? null;
+}
+
+/** The person chose their own password: this device is fully signed in now. */
+export async function finishSession(id: string, account: string) {
+  const all = (await kv.get<Sessions>(SESSIONS)) ?? {};
+  if (!all[id]) return;
+  all[id].pending = false;
+  all[id].account = account;
+  await kv.set(SESSIONS, all);
+}
+
+/** Signs out every device of one person (after their password is reset or removed). */
+export async function endAccountSessions(account: string) {
+  const all = (await kv.get<Sessions>(SESSIONS)) ?? {};
+  for (const [k, v] of Object.entries(all)) if (v.account === account) delete all[k];
+  await kv.set(SESSIONS, all);
 }
 
 export async function endSession(id: string) {

@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "../shop.css";
 import { CartProvider } from "@/components/shop/CartProvider";
 import { Footer } from "@/components/shop/Footer";
+import { ChatWidget } from "@/components/shop/ChatWidget";
+import { AdminBar } from "@/components/shop/AdminBar";
 import { Presence } from "@/components/shop/Presence";
+import { signedInOwner } from "@/lib/session";
 import { Header } from "@/components/shop/Header";
 import { ThemeStyle } from "@/components/shop/ThemeStyle";
 import { shopProducts, shopSettings } from "@/lib/shop-data";
@@ -24,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const [s, products] = await Promise.all([shopSettings(), shopProducts()]);
+  const [s, products, owner] = await Promise.all([shopSettings(), shopProducts(), signedInOwner()]);
   const cartProducts = products.map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.images[0], slug: p.slug, stock: p.stock, sizes: p.sizes ?? null, designs: p.designs ?? null }));
   const used = new Set(products.flatMap((p) => (p.designs ? Object.values(p.designs.fit).flat() : [])));
   const cartDesigns = s.designs.filter((d) => d.active && used.has(d.id)).map((d) => ({ id: d.id, name: d.name, image: d.image, extra: d.extra, active: d.active, group: d.group }));
@@ -35,7 +38,8 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         <Header s={s} />
         <main className="main">{children}</main>
         <Footer s={s} />
-        <Presence />
+        {owner ? <AdminBar /> : <Presence />}
+        {s.chat.on ? <ChatWidget title={s.chat.title} greeting={s.chat.greeting} suggestions={s.chat.faqs.filter((f) => !f.hidden).slice(0, 4).map((f) => f.q)} /> : null}
       </CartProvider>
     </div>
   );

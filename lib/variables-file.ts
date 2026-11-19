@@ -50,6 +50,9 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" |
     extraPages: s.extraPages,
     menu: s.menu.map((m) => ({ page: m.id, label: m.label, ...(m.href ? { link: m.href } : {}), inMenu: m.top, inFooter: m.footer, on: !m.off })),
     categories: s.categories,
+    hiddenText: s.hiddenFields,
+    links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) })),
+    chat: { on: s.chat.on, useAI: s.chat.useAI, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, question: x.q, answer: x.a, ...(x.hidden ? { hidden: true } : {}) })) },
     discounts: {
       thankYouCode: { on: s.discounts.thankYou.on, percentOff: s.discounts.thankYou.percent, validDays: s.discounts.thankYou.days },
       military: { on: s.discounts.veteran.on, percentOff: s.discounts.veteran.percent, checkFirst: s.discounts.veteran.verify, code: s.discounts.veteran.code, heading: s.discounts.veteran.heading, text: s.discounts.veteran.text },
@@ -204,7 +207,7 @@ export function variablesFile(v: SiteVariables): string {
     field("allItemsHeading", v.homePage.allItemsHeading, "heading on the Shop page"),
     field("stepsHeading", v.homePage.stepsHeading, "heading above the steps (Workshop layout)"),
     "customSteps: [ // the custom order steps, in order (Workshop layout)",
-    ...v.homePage.customSteps.map((s) => `  { title: ${q(s.title)}, text: ${q(s.text)} },`),
+    ...v.homePage.customSteps.map((s) => `  { title: ${q(s.title)}, text: ${q(s.text)}${s.hidden ? ", hidden: true" : ""} },`),
     "],",
   ]);
   sec("Reviews", ["Customers send reviews (with a photo) from the site. They show only after you approve them in the dashboard."]);
@@ -263,8 +266,26 @@ export function variablesFile(v: SiteVariables): string {
     ...v.menu.map((m) => `    { page: ${q(m.page)}, label: ${q(m.label)}, ${m.link ? `link: ${q(m.link)}, ` : ""}inMenu: ${m.inMenu}, inFooter: ${m.inFooter}, on: ${m.on} },`),
     "  ],"
   );
+  sec("Links", ["Links with a picture in the footer and on the contact page. icon is one of: facebook, instagram, tiktok, youtube, x,", "pinterest, etsy, google, whatsapp, linkedin, threads, snapchat, amazon, phone, text, email, website, map, reviews, link.", "label: leave \"\" to use the usual name. For phone, text and email, url is just the number or address."]);
+  L.push("  links: [", ...(v.links ?? []).map((l) => `    { icon: ${q(l.icon)}, label: ${q(l.label)}, url: ${q(l.url)}${l.hidden ? ", hidden: true" : ""} },`), "  ],");
+  sec("Hidden text", ["Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos)."]);
+  L.push(`  ${field("hiddenText", v.hiddenText ?? [])}`);
   sec("Shop categories", ["In the order they show in the shop. Each product's category should match one of these."]);
   L.push(`  ${field("categories", v.categories)}`);
+  if (v.chat) {
+    sec("Chat", ["The 'Ask us' chat on the shop. It answers from these questions and answers (and the shop's own info).", "hidden: true keeps an answer but stops the chat using it."]);
+    L.push(
+      "  chat: {",
+      `    ${field("on", v.chat.on, "show the chat button on the shop")}`,
+      `    ${field("useAI", v.chat.useAI, "write natural replies with Claude (needs a key); false = reply with the closest answer as written")}`,
+      `    ${field("title", v.chat.title)}`,
+      `    ${field("greeting", v.chat.greeting)}`,
+      "    questions: [",
+      ...v.chat.questions.map((x) => `      { id: ${q(x.id)}, question: ${q(x.question)}, answer: ${q(x.answer)}${x.hidden ? ", hidden: true" : ""} },`),
+      "    ],",
+      "  },"
+    );
+  }
   if (v.discounts) {
     const d = v.discounts;
     sec("Discounts", ["Promo codes themselves are made in Dashboard > Discounts (they live in Stripe). These are the programs."]);
@@ -336,6 +357,7 @@ export function variablesFile(v: SiteVariables): string {
       `        ${field("photos", g.photos)}`,
       `        ${field("featured", g.featured)}`,
       `        ${field("productSlug", g.productSlug)}`,
+      ...(g.hidden ? [`        ${field("hidden", true, "kept, but not shown on the shop")}`] : []),
       "      },",
     ]),
     "    ],",

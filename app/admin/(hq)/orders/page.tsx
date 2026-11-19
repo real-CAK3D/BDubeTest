@@ -16,6 +16,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<{
       designs={s.designs}
       parcels={s.parcels}
       labelsReady={Boolean(shippo && s.shipFrom.street1 && s.shipFrom.zip)}
+      business={s.businessName}
     />
   );
 }

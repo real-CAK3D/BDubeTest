@@ -63,6 +63,11 @@ export async function saveOrders(list: Order[]) {
   await setPrivate("orders", list);
 }
 
+/** Adds a line to an order's history (kept with the order, newest last). */
+export function logOn(o: Order, what: string, by?: string) {
+  o.history = [...(o.history ?? []), { at: new Date().toISOString(), what: what.slice(0, 200), ...(by ? { by } : {}) }].slice(-100);
+}
+
 export async function updateOrder(id: string, patch: Partial<Order>) {
   const orders = await getOrders();
   const o = orders.find((x) => x.id === id);

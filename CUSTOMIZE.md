@@ -60,7 +60,7 @@ Find one by searching the repository for `EDIT-POINT: NAME` (on GitHub press `/`
 | `GITHUB-SYNC` | `lib/github-sync.ts` | Saving dashboard edits to GitHub |
 | `HELP` | `lib/help.ts` | The Help page and GUIDE.md (run `npm run guide` after editing) |
 | `SETUP-STEPS` | `lib/setup-steps.ts` | The Setup page and SETUP.md (run `npm run guide` after editing) |
-| `API-KEYS` | `lib/keys.ts` | The keys listed on the Keys page; how to use a new service's key |
+| `API-KEYS` | `lib/keys.ts` | The keys listed on Accounts & keys; how to use a new service's key |
 | `STRIPE-CATALOG` | `lib/stripe-catalog.ts` | How products made in Stripe map to shop items |
 | `EMAILS` | `lib/email.ts` | Wording of the "your order shipped" email |
 

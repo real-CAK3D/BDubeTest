@@ -1,3 +1,4 @@
+import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import webpush from "web-push";
@@ -12,6 +13,14 @@ async function test(envName: string, value: string): Promise<string | null> {
       return null;
     } catch (e) {
       return `Stripe didn't accept that key: ${(e as Error).message}`;
+    }
+  }
+  if (envName === "ANTHROPIC_API_KEY") {
+    try {
+      await new Anthropic({ apiKey: value }).models.list({ limit: 1 });
+      return null;
+    } catch (e) {
+      return e instanceof Anthropic.AuthenticationError ? "Anthropic didn't accept that key." : `Couldn't check the key: ${(e as Error).message}`;
     }
   }
   if (envName === "SHIPPO_API_KEY") {

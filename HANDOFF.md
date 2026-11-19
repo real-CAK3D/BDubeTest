@@ -75,6 +75,7 @@ Optional: rename it under the repository's **Settings > General > Repository nam
    |---|---|
    | `ADMIN_PASSWORD` | The dashboard password. Use `bdube123` for now; change it any time in **Settings > Password & security**. |
    | `AUTH_SECRET` | 40 or more random characters. Mash the keyboard; you'll never type it again. **Never change it once you have real orders**: customer details are stored encrypted with it. |
+   | `OWNER_RESET_CODE` | Optional. A secret phrase that lets you reset a forgotten password from the sign-in page if you have no email set. |
 
 6. Click **Deploy** and wait about two minutes.
 7. Choose your web address: open the project's **Settings > Domains**, click **Add Domain**, and type the name you want ending in `.vercel.app`, for example `bdubytest.vercel.app` once Part 1, step 3 has freed it up. Vercel tells you right away if a name is taken.
@@ -83,12 +84,12 @@ Optional: rename it under the repository's **Settings > General > Repository nam
 
 ### Step 3: Log in to your dashboard, 1 minute
 1. Open your web address with `/admin` on the end, for example `https://bdubytest.vercel.app/admin`.
-2. Type your name (so you can tell your phones apart later) and the password (`bdube123` for now).
-3. Change the password in **Settings > Password & security**. Your wife signs in with the same password on her phone; both of you can be signed in at once.
+2. Type **your name** and the starter password (`bdube123`).
+3. The dashboard asks you to **choose your own password** (and an email for resets). Your wife does the same on her phone with her name and the same starter password, then picks her own. Both of you can be signed in at once.
 4. On your iPhone, open the same address in **Safari** and tap **Share > Add to Home Screen**. It becomes an app called Shop HQ.
 5. Optional but recommended: in **Settings > Password & security**, turn on the **lock screen** (a 4-digit PIN asked for before the password).
 
-Hidden way in from the shop: tap the **version and build number** at the very bottom of any page **7 times** in a row. There's no visible login link, so customers never see one.
+Hidden way in from the shop: tap the **version and build number** at the very bottom of any page **15 times** quickly. There's no visible login link, so customers never see one. Once signed in, the shop shows you a **Shop HQ** button in the corner (customers never get it).
 
 ### Step 4: Supabase (database and photo storage), 5 minutes
 This is what makes your changes, orders and photos permanent. Until it's done, edits can disappear when Vercel restarts.
@@ -134,7 +135,7 @@ Your edits show on the site right away. With this token, every change is also wr
 6. In your dashboard, open **Keys**, paste it into **GitHub token** and press **Save**.
 7. Open **Settings > Accounts & links** and press **Save to GitHub now**. From then on it happens after every save.
 
-When the token expires, make a new one the same way and press **Replace** on the Keys page.
+When the token expires, make a new one the same way and press **Replace** on Accounts & keys.
 
 ### Step 7: Phone notifications, 2 minutes
 1. Open **Shop HQ** from your iPhone home screen (step 3). It has to be the home-screen app, not a Safari tab.

@@ -66,6 +66,15 @@ export const KEY_DEFS: KeyDef[] = [
     secret: true,
   },
   {
+    envName: "ANTHROPIC_API_KEY",
+    label: "Anthropic API key (optional)",
+    group: "Chat",
+    where: "Lets the shop's chat write natural answers with Claude from your questions and answers. Without it, the chat replies with the closest answer as written. Get one at console.anthropic.com > API keys (starts with sk-ant-). It's pay-as-you-go; set a monthly spend limit there.",
+    link: "https://console.anthropic.com/settings/keys",
+    prefix: /^sk-ant-/,
+    secret: true,
+  },
+  {
     envName: "SHIPPO_API_KEY",
     label: "Shippo API token (optional)",
     group: "Shipping labels",

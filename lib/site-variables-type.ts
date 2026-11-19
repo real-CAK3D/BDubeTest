@@ -65,7 +65,7 @@ export type SiteVariables = {
     aboutButton: string;
     allItemsHeading: string;
     stepsHeading: string;
-    customSteps: { title: string; text: string }[];
+    customSteps: { title: string; text: string; hidden?: boolean }[];
   };
   reviews: { show: boolean; heading: string; text: string };
   customOrders: { show: boolean; heading: string; intro: string; notice: string; types: string[] };
@@ -85,6 +85,9 @@ export type SiteVariables = {
   extraPages: { slug: string; title: string; body: string; inFooter: boolean }[];
   menu: { page: string; label: string; link?: string; inMenu: boolean; inFooter: boolean; on: boolean }[];
   categories: string[];
+  hiddenText?: string[];
+  links?: { icon: string; label: string; url: string; hidden?: boolean }[];
+  chat?: { on: boolean; useAI: boolean; title: string; greeting: string; questions: { id: string; question: string; answer: string; hidden?: boolean }[] };
   discounts?: {
     thankYouCode: { on: boolean; percentOff: number; validDays: number };
     military: { on: boolean; percentOff: number; checkFirst: boolean; code: string; heading: string; text: string };
@@ -98,7 +101,7 @@ export type SiteVariables = {
   gallery: {
     heading: string;
     text: string;
-    items: { slug: string; title: string; category: string; description: string; photos: string[]; featured: boolean; productSlug: string }[];
+    items: { slug: string; title: string; category: string; description: string; photos: string[]; featured: boolean; productSlug: string; hidden?: boolean }[];
   };
   images: { logo: string; patch: string; tabIcon: string; welcomePhoto: string; aboutPhoto: string };
   look: { theme: ThemeId; layout: LayoutId };

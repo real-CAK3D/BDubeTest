@@ -41,6 +41,7 @@ export function GalleryManager({ initial, products }: { initial: SiteSettings; p
           <section className="panel stack">
             <h2>Where it shows</h2>
             <label className="check"><input type="checkbox" checked={g.featured} onChange={(e) => update(open, { featured: e.target.checked })} /> In the rotating showcase on the home page</label>
+            <label className="check"><input type="checkbox" checked={!g.hidden} onChange={(e) => update(open, { hidden: !e.target.checked })} /> Show on the shop (untick to hide it but keep it)</label>
             <p className="hint">The showcase appears once at least 3 pieces are in it.</p>
             <h2>Buying one</h2>
             <label className="f">
@@ -84,7 +85,7 @@ export function GalleryManager({ initial, products }: { initial: SiteSettings; p
                 <span className="plist-thumb">{/* eslint-disable-next-line @next/next/no-img-element */}{g.photos[0] ? <img src={g.photos[0]} alt="" /> : null}</span>
                 <span className="plist-name">
                   <strong>{g.title || "Untitled"}</strong>
-                  <span className="muted">{[g.category, `${g.photos.length} photo${g.photos.length === 1 ? "" : "s"}`, g.featured ? "In showcase" : null].filter(Boolean).join(", ")}</span>
+                  <span className="muted">{[g.category, `${g.photos.length} photo${g.photos.length === 1 ? "" : "s"}`, g.featured ? "In showcase" : null, g.hidden ? "Hidden" : null].filter(Boolean).join(", ")}</span>
                 </span>
               </button>
               <span className="order-btns">

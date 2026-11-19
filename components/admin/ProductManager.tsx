@@ -34,7 +34,7 @@ function toDraft(p: Product): Draft {
   };
 }
 
-export function ProductManager({ initial, currency, views, lowAt, stripeOn, stripeTest, library, categories: savedCats, blanks = [] }: { initial: Product[]; currency: string; views: Record<string, number>; lowAt: number; stripeOn: boolean; stripeTest: boolean; library: Design[]; categories: string[]; blanks?: Blank[] }) {
+export function ProductManager({ initial, currency, views, lowAt, stripeOn, stripeTest, library, categories: savedCats, blanks = [], openId }: { openId?: string; initial: Product[]; currency: string; views: Record<string, number>; lowAt: number; stripeOn: boolean; stripeTest: boolean; library: Design[]; categories: string[]; blanks?: Blank[] }) {
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
@@ -51,7 +51,10 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
     setSyncing(false);
   }
   const [list, setList] = useState(initial);
-  const [editing, setEditing] = useState<Draft | null>(null);
+  const [editing, setEditing] = useState<Draft | null>(() => {
+    const p = openId ? initial.find((x) => x.id === openId) : undefined;
+    return p ? toDraft(p) : null;
+  });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
@@ -172,6 +175,7 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
               onSizes={(sizesDraft, designs) => set({ sizesDraft, designs })}
               onDesigns={(designs) => set({ designs })}
             />
+            <div id="previews" />
             <PreviewEditor value={editing.preview ?? null} onChange={(preview) => set({ preview })} photos={editing.images} library={library} />
             <h2>Other choice</h2>
             <p className="hint">One more pick-list if needed: color, wood, finish...</p>

@@ -1,5 +1,6 @@
 import "server-only";
 import { getActiveProducts, getProductBySlug, getSettings } from "./db";
+import type { SiteSettings } from "./types";
 import { wmProduct, wmSettings } from "./watermark";
 
 /*
@@ -8,7 +9,14 @@ import { wmProduct, wmSettings } from "./watermark";
  * dashboard reads lib/db.ts directly so it never saves a watermarked address.
  */
 export async function shopSettings() {
-  return wmSettings(await getSettings());
+  return hideHidden(wmSettings(await getSettings()));
+}
+
+/** What the owner hid (instead of deleting) isn't shown to customers. */
+function hideHidden(s: SiteSettings): SiteSettings {
+  const out = { ...s, customSteps: s.customSteps.filter((x) => !x.hidden), gallery: s.gallery.filter((g) => !g.hidden) } as SiteSettings;
+  for (const f of s.hiddenFields) if (typeof (out as Record<string, unknown>)[f] === "string") (out as Record<string, unknown>)[f] = "";
+  return out;
 }
 
 export async function shopProducts() {

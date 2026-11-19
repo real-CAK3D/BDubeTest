@@ -6,7 +6,7 @@ Already running and want to know how something works? See [GUIDE.md](GUIDE.md). 
 
 Online shop plus a private dashboard for running it. Customers pay with card, Apple Pay or Google Pay through Stripe. The owner logs in at `/admin` (it can be added to an iPhone home screen like an app) to handle products, photos, text, themes, orders, customers, money, messages, discounts and API keys, and gets a notification on his phone for each order.
 
-Customers never see the dashboard. There's no login link: tap the version number at the bottom of the shop 7 times, or go to `/admin`. Optional PIN lock screen, lockouts after wrong tries, a list of signed-in devices that can be signed out remotely, and customer details stored encrypted. Everything under `/admin` needs the owner's password, and search engines are told to skip it.
+Customers never see the dashboard. There's no login link: tap the version number at the bottom of the shop 15 times, or go to `/admin`; signed-in owners get a Shop HQ button on the shop. Optional PIN lock screen, lockouts after wrong tries, a list of signed-in devices that can be signed out remotely, and customer details stored encrypted. Everything under `/admin` needs the owner's password, and search engines are told to skip it.
 
 ## The standard setup
 
@@ -17,7 +17,7 @@ Customers never see the dashboard. There's no login link: tap the version number
 | **Supabase** | Database and photo storage | Vercel > Storage > Supabase. The site creates its own table and photo bucket on first run |
 | **Stripe** | Payments, Apple Pay, Google Pay, products, coupons, tax | Paste the secret key on the dashboard's **Keys** page; products and the webhook connect by themselves |
 
-You only type two environment variables yourself (`ADMIN_PASSWORD` and `AUTH_SECRET`). Supabase adds its own. Other keys can be pasted on the dashboard's Keys page (stored encrypted) or set in Vercel if you'd rather; Vercel's win if both are set.
+You only type two environment variables yourself (`ADMIN_PASSWORD` and `AUTH_SECRET`). Supabase adds its own. Other keys can be pasted on the dashboard's Accounts & keys (stored encrypted) or set in Vercel if you'd rather; Vercel's win if both are set.
 
 Notification keys are made automatically. The Supabase table can also be made by hand with [`supabase/schema.sql`](supabase/schema.sql) if ever needed.
 

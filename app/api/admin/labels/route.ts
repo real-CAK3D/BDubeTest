@@ -18,7 +18,9 @@ export async function POST(req: Request) {
     if (b.action === "buy") {
       const label = await buyLabel(String(b.rateId));
       const carrier = carrierName(String(b.rate?.carrier ?? ""));
+      const history = [...(o.history ?? []), { at: new Date().toISOString(), what: `Label bought: ${carrier} ${String(b.rate?.service ?? "")}, $${((Number(b.rate?.amount) || 0) / 100).toFixed(2)}, tracking ${label.tracking || "?"}` }];
       const saved = await updateOrder(o.id, {
+        history,
         trackingNumber: label.tracking || o.trackingNumber,
         carrier,
         label: { url: label.url, carrier, service: String(b.rate?.service ?? ""), cost: Math.round(Number(b.rate?.amount) || 0), boughtAt: new Date().toISOString() },

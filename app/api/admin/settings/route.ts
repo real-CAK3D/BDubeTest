@@ -9,7 +9,7 @@ const str = (v: unknown, max: number) => String(v ?? "").slice(0, max);
 const slugOf = (v: unknown) => String(v ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50);
 
 function cleanList(k: "customSteps" | "extraPages" | "gallery", rows: Row[]) {
-  if (k === "customSteps") return rows.slice(0, 8).map((x) => ({ title: str(x.title, 60), text: str(x.text, 300) }));
+  if (k === "customSteps") return rows.slice(0, 8).map((x) => ({ title: str(x.title, 60), text: str(x.text, 300), ...(x.hidden ? { hidden: true } : {}) }));
   if (k === "extraPages")
     return rows.slice(0, 20).map((x) => ({ slug: slugOf(x.slug || x.title) || "page", title: str(x.title, 80), body: str(x.body, 20000), inFooter: Boolean(x.inFooter) }));
   return rows.slice(0, 200).map((x) => ({
@@ -20,6 +20,7 @@ function cleanList(k: "customSteps" | "extraPages" | "gallery", rows: Row[]) {
     photos: (Array.isArray(x.photos) ? x.photos : []).filter((u): u is string => typeof u === "string").slice(0, 12),
     featured: Boolean(x.featured),
     productSlug: slugOf(x.productSlug),
+    ...(x.hidden ? { hidden: true } : {}),
   }));
 }
 
@@ -80,6 +81,7 @@ export async function PUT(req: Request) {
   const patch: Record<string, unknown> = {};
   for (const k of Object.keys(DEFAULT_SETTINGS) as (keyof SiteSettings)[]) {
     if (!(k in body)) continue;
+    if (k === "social" && "links" in body) continue; // worked out from the links instead
     const v = body[k];
     const def = DEFAULT_SETTINGS[k];
     if (typeof def === "number") patch[k] = Math.max(0, Math.round(Number(v) || 0));
@@ -93,6 +95,18 @@ export async function PUT(req: Request) {
     else if (k === "shipCountries" || k === "expenseCategories" || k === "customOrderTypes")
       patch[k] = Array.isArray(v) ? v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 50) : def;
     else if (k === "admin") patch[k] = cleanAdmin((v ?? {}) as Row);
+    else if (k === "links") {
+      const rows = (Array.isArray(v) ? (v as unknown as Row[]) : []).slice(0, 20);
+      patch[k] = rows
+        .map((l, i) => ({ id: str(l.id, 20) || `l${i + 1}`, icon: /^[a-z]{1,20}$/.test(String(l.icon)) ? String(l.icon) : "link", label: str(l.label, 40).trim(), url: str(l.url, 500).trim(), ...(l.hidden ? { hidden: true } : {}) }))
+        .filter((l) => l.url && !/^(javascript|data):/i.test(l.url));
+      // the older social fields stay in step (the chat and a few pages read Facebook from there)
+      const social = { ...(body.social ?? DEFAULT_SETTINGS.social) } as Record<string, string>;
+      for (const key of ["facebook", "instagram", "tiktok", "youtube", "x", "etsy"]) social[key] = (patch[k] as { icon: string; url: string; hidden?: boolean }[]).find((l) => l.icon === key && !l.hidden)?.url ?? "";
+      patch.social = social;
+    }
+    else if (k === "hiddenFields")
+      patch[k] = (Array.isArray(v) ? v : []).map(String).filter((f) => f in DEFAULT_SETTINGS && typeof DEFAULT_SETTINGS[f as keyof SiteSettings] === "string" && f !== "businessName").slice(0, 80);
     else if (k === "shipFrom") {
       const a = (v ?? {}) as Row;
       patch[k] = Object.fromEntries(["name", "company", "street1", "street2", "city", "state", "zip", "phone", "email"].map((f) => [f, str(a[f], 100).trim()]));
@@ -104,6 +118,20 @@ export async function PUT(req: Request) {
         height: Math.max(0.5, Number(p.height) || 1),
         weightOz: Math.max(1, Number(p.weightOz) || 1),
       }));
+    else if (k === "chat") {
+      const c = (v ?? {}) as unknown as Row;
+      const seen = new Set<string>();
+      patch[k] = {
+        on: Boolean(c.on),
+        useAI: Boolean(c.useAI),
+        title: str(c.title, 60),
+        greeting: str(c.greeting, 300),
+        faqs: (Array.isArray(c.faqs) ? (c.faqs as Row[]) : [])
+          .slice(0, 400)
+          .map((x) => ({ id: slugOf(x.id || x.q) || Math.random().toString(36).slice(2, 8), q: str(x.q, 300).trim(), a: str(x.a, 2000).trim(), hidden: Boolean(x.hidden) }))
+          .filter((x) => x.q && !seen.has(x.id) && seen.add(x.id)),
+      };
+    }
     else if (k === "discounts") {
       const d = (v ?? {}) as unknown as DiscountPrograms;
       const pct = (x: unknown) => Math.min(90, Math.max(0, Math.round(Number(x) || 0)));

@@ -3,6 +3,8 @@ import { useState } from "react";
 
 type Result = {
   number: number;
+  code: string;
+  barcode: string;
   date: string;
   status: string;
   delivery: string;
@@ -41,7 +43,7 @@ export function OrderLookup() {
   return (
     <>
       <form className="review-form lookup" onSubmit={look}>
-        <label className="field"><span>Order number</span><input name="number" required inputMode="numeric" placeholder="e.g. 1042" /></label>
+        <label className="field"><span>Order number or code</span><input name="number" required placeholder="e.g. 1042 or DFC1042-7KQ3" /></label>
         <label className="field"><span>Email used at checkout</span><input name="email" type="email" required autoComplete="email" /></label>
         <button className="btn btn-lg" disabled={busy}>{busy ? "Looking…" : "Find my order"}</button>
         {err ? <p className="error full" role="alert">{err}</p> : null}
@@ -49,6 +51,7 @@ export function OrderLookup() {
       {r ? (
         <div className="form-done order-result" role="status">
           <p><strong>Order #{r.number}</strong> <span className="muted">placed {new Date(r.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span></p>
+          <div className="receipt-code" dangerouslySetInnerHTML={{ __html: r.barcode }} />
           <p>{(SAY[r.status] ?? (() => r.status))(r.delivery === "pickup")}</p>
           {r.tracking ? (
             <p>

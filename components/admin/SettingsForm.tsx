@@ -39,31 +39,8 @@ function PasswordForm() {
         {msg ? <span role="status">{msg}</span> : null}
         {err ? <span className="err" role="alert">{err}</span> : null}
       </div>
-      <p className="hint">At least 8 characters. Once changed here, the ADMIN_PASSWORD in Vercel is no longer used. Everyone who signs in (you and your wife) uses this same password; each phone shows separately under Signed-in devices.</p>
+      <p className="hint">Your own password (at least 8 characters). Each person has their own; the starter password for new people is below.</p>
     </form>
-  );
-}
-
-function GitHubSave({ token, last }: { token: boolean; last: SyncStatus | null }) {
-  const [st, setSt] = useState(last);
-  const [busy, setBusy] = useState(false);
-  async function run() {
-    setBusy(true);
-    try {
-      const r = await api<{ message: string }>("/api/admin/github", "POST");
-      setSt({ at: new Date().toISOString(), ok: true, message: r.message });
-    } catch (e) {
-      setSt({ at: new Date().toISOString(), ok: false, message: (e as Error).message });
-    }
-    setBusy(false);
-  }
-  return (
-    <div className="integ">
-      <div className="integ-head"><strong>Saving edits to GitHub</strong><span className={`dot ${token && st?.ok ? "ok" : "no"}`}>{token ? (st?.ok ? "On" : "Check below") : "Needs a token"}</span></div>
-      <p className="muted">Every save in the dashboard is also written to site-variables.ts on GitHub. {token ? "" : <>Add a GitHub token on the <Link href="/admin/keys">Keys</Link> page first (Setup has the steps).</>}</p>
-      {st ? <p className={st.ok ? "small" : "err small"}>{new Date(st.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}: {st.message}</p> : null}
-      <div className="row wrap"><button className="b b-sm" onClick={run} disabled={!token || busy}>{busy ? "Saving…" : "Save to GitHub now"}</button></div>
-    </div>
   );
 }
 
@@ -82,7 +59,7 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
   return (
     <>
       <div className="page-head"><h1>Settings</h1></div>
-      <p className="muted">Store settings also live in <code>site-variables.ts</code> on GitHub. Whichever is changed most recently wins. API keys are on the <Link href="/admin/keys">Keys</Link> page.</p>
+      <p className="muted">Store settings also live in <code>site-variables.ts</code> on GitHub. Whichever is changed most recently wins. Logins, API keys and links to your accounts are on the <Link href="/admin/keys">Accounts &amp; keys</Link> page.</p>
 
       <Tabs
         label="Settings sections"
@@ -132,7 +109,7 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
         </section>
         <section className="panel stack">
           <div className="panel-head"><h2>Shipping labels</h2></div>
-          <p className="hint">Your return address and box sizes, for buying labels from an order (needs a free Shippo token on the Keys page). Private: never shown on the shop or saved to GitHub.</p>
+          <p className="hint">Your return address and box sizes, for buying labels from an order (needs a free Shippo token on Accounts & keys). Private: never shown on the shop or saved to GitHub.</p>
           <h3 className="sub">Ship from</h3>
           <div className="row2">
             {([["name", "Your name"], ["company", "Business name (optional)"], ["street1", "Street address"], ["street2", "Apt, suite (optional)"], ["city", "City"], ["state", "State (2 letters)"], ["zip", "ZIP"], ["phone", "Phone (carriers ask for it)"], ["email", "Email"]] as const).map(([k, label]) => (
@@ -196,50 +173,10 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
   
           </>
           ) },
-          { id: "accounts", label: "Accounts & links", content: (
-        <>
-        <section className="panel">
-          <div className="panel-head"><h2>Your accounts</h2><Link href="/admin/setup">Setup guide</Link></div>
-          <div className="integrations">
-            {accounts.map((a) => (
-              <div key={a.name} className="integ">
-                <div className="integ-head"><strong>{a.name}</strong></div>
-                <p className="muted">{a.note}</p>
-                <div className="row wrap">
-                  {a.links.map(([label, url], i) => <a key={url} className={`b b-sm ${i ? "b-ghost" : ""}`} href={url} target="_blank" rel="noreferrer">{label}</a>)}
-                </div>
-              </div>
-            ))}
-            <GitHubSave token={github.token} last={github.last} />
-          </div>
-          <div className="row2" style={{ marginTop: "1rem" }}>
-            <label className="f"><span>GitHub repository <em className="muted">(owner/name, if not detected)</em></span><input value={s.githubRepo} onChange={(e) => set({ githubRepo: e.target.value })} placeholder="owner/repo" /></label>
-            <label className="f"><span>Vercel project <em className="muted">(team/project)</em></span><input value={s.vercelProject} onChange={(e) => set({ vercelProject: e.target.value })} placeholder="my-team/my-shop" /></label>
-          </div>
-        </section>
-  
-          <section className="panel">
-          <div className="panel-head"><h2>My links</h2></div>
-          <p className="muted">Shortcuts to anything else you use: shipping labels, suppliers, your bank, an Etsy shop.</p>
-          <ul className="linklist">
-            {s.customLinks.map((l, i) => (
-              <li key={i} className="row">
-                <input aria-label="Link name" value={l.label} onChange={(e) => set({ customLinks: s.customLinks.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })} placeholder="Name" />
-                <input aria-label="Link address" type="url" value={l.url} onChange={(e) => set({ customLinks: s.customLinks.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)) })} placeholder="https://" />
-                {l.url ? <a className="b b-sm" href={l.url} target="_blank" rel="noreferrer">Open</a> : null}
-                <button type="button" className="b b-sm b-ghost" onClick={() => set({ customLinks: s.customLinks.filter((_, j) => j !== i) })}>Remove</button>
-              </li>
-            ))}
-          </ul>
-          <button type="button" className="b b-sm" onClick={() => set({ customLinks: [...s.customLinks, { label: "", url: "" }] })}>Add a link</button>
-        </section>
-  
-          </>
-          ) },
           { id: "password", label: "Password & security", content: (
         <>
         <section className="panel">
-          <div className="panel-head"><h2>Password</h2></div>
+          <div className="panel-head"><h2>Your password</h2></div>
           <PasswordForm />
         </section>
         <SecurityPanel />

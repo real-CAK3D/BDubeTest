@@ -1,4 +1,5 @@
 import type { SiteVariables } from "./site-variables-type";
+import { DEFAULT_CHAT } from "./chat-defaults";
 import { DEFAULT_DISCOUNTS } from "./discount-defaults";
 import { DEFAULT_WATERMARK } from "./watermark";
 import type { Product, SiteSettings } from "./types";
@@ -13,6 +14,9 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
+    chat: v.chat
+      ? { on: v.chat.on, useAI: v.chat.useAI, title: v.chat.title, greeting: v.chat.greeting, faqs: v.chat.questions.map((f) => ({ id: f.id, q: f.question, a: f.answer, hidden: Boolean(f.hidden) })) }
+      : structuredClone(DEFAULT_CHAT),
     discounts: v.discounts
       ? {
           thankYou: { on: v.discounts.thankYouCode.on, percent: v.discounts.thankYouCode.percentOff, days: v.discounts.thankYouCode.validDays },
@@ -47,7 +51,11 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
     categoriesHeading: v.homePage.categoriesHeading,
     aboutButton: v.homePage.aboutButton,
     stepsHeading: v.homePage.stepsHeading,
-    customSteps: v.homePage.customSteps.map((s) => ({ title: s.title, text: s.text })),
+    customSteps: v.homePage.customSteps.map((s) => ({ title: s.title, text: s.text, ...(s.hidden ? { hidden: true } : {}) })),
+    hiddenFields: [...(v.hiddenText ?? [])],
+    links: v.links
+      ? v.links.map((l, i) => ({ id: `l${i + 1}`, icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) }))
+      : (Object.entries(v.social) as [string, string][]).filter(([, u]) => u).map(([k, u], i) => ({ id: `l${i + 1}`, icon: k, label: "", url: u })),
     showCustomOrders: v.customOrders.show,
     customOrderHeading: v.customOrders.heading,
     customOrderIntro: v.customOrders.intro,

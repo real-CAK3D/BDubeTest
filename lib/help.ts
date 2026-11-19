@@ -273,9 +273,12 @@ export const HELP: HelpGroup[] = [
         summary: "Who can get in, and how your customers' details are kept private.",
         blocks: [
           { h: "Getting in" },
-          { p: "There's no login link on the shop. Tap the **version number** at the very bottom of any page 7 times in a row (it counts down from the 4th tap), or go to your address with `/admin` on the end. The Shop HQ app on your home screen opens straight in." },
-          { h: "Password" },
-          { p: "**Settings > Password & security** changes it (at least 8 characters). You and your wife use the same password; each of you types your own name when signing in, so you can tell your phones apart." },
+          { p: "There's no login link on the shop. Tap the **version number** at the very bottom of any page **15 times** quickly (no more than a second or so between taps; nothing on screen counts), or go to your address with `/admin` on the end. The Shop HQ app on your home screen opens straight in. Once you're signed in on a phone, the shop shows you (and only you) a **Shop HQ** button in the corner to jump back to the dashboard, and an edit shortcut for the page you're on; the shop icon in the dashboard's top bar goes the other way." },
+          { h: "Your own password" },
+          { p: "The first time each of you signs in, type **your name** and the **starter password** (`bdube123` until you change it). The dashboard then asks you to **choose your own password** (and an email, for resets). From then on you sign in with your name and your own password; your wife does the same with hers." },
+          { p: "**Settings > Password & security** lists everyone who can sign in. **Reset** makes that person use the starter password again next time (handy if your wife forgets hers); **Remove** takes them off. The **starter password** can be changed there too." },
+          { h: "Forgot your password?" },
+          { p: "Tap **Forgot your password?** on the sign-in page. If you saved an email, a reset link is emailed (needs Resend on Accounts & keys) and works for 30 minutes. No email? Use the **reset code** instead: that's the `OWNER_RESET_CODE` variable in Vercel, if you added one. Or simply ask the other person to tap **Reset** next to your name." },
           { h: "Lock screen (optional)" },
           { p: "Turn on a **4-digit PIN** or a **passcode** that has to be entered before the password box even shows. Five wrong tries lock it for 15 minutes; the same goes for the password. Forgot the PIN? Anyone still signed in can turn it off there." },
           { h: "Signed-in devices" },
@@ -353,8 +356,10 @@ export const HELP: HelpGroup[] = [
       {
         id: "previews",
         title: "Previews: design on a photo, 3D, scans and 360°",
+        match: ["/admin/studio"],
         summary: "Extra ways for customers to see an item, set at the bottom of each item in Products.",
         blocks: [
+          { p: "Quickest way in: **3D & 360** in the dashboard menu lists every item and what it has; **Set up** opens that item's **Previews** section." },
           {
             list: [
               "**Design on a photo**: pick a photo of the plain item and drag across it where the design goes. Customers see the design they pick drawn on the photo.",
@@ -365,6 +370,78 @@ export const HELP: HelpGroup[] = [
           },
           { p: "Each one you set up adds a tab above the item's photos. When a customer picks a design, the Preview or 3D tab opens on its own." },
           { tip: "Free 3D models of products are on Poly Pizza (free to use) and Sketchfab (check each model's license). A scan of your own finished piece shows the real thing, which sells best." },
+        ],
+      },
+      {
+        id: "chat",
+        title: "Chat (Ask us)",
+        match: ["/admin/chat"],
+        summary: "A chat button on the shop that answers customers' questions from your own answers.",
+        blocks: [
+          { p: "Customers tap **Ask us** in the corner of the shop and type a question. The chat answers from **your questions & answers** plus what the shop already knows (items, prices, shipping, discounts). It starts with 25 common questions filled in; change them to fit." },
+          { h: "Adding an answer" },
+          { steps: ["Open **Chat** in the dashboard.", "Tap **Add a question**, type the question how a customer would ask it, and your answer.", "Save. The chat uses it straight away, even if the customer words the question differently."] },
+          { p: "**What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it." },
+          { h: "Smart replies (optional)" },
+          { p: "With an **Anthropic API key** on Accounts & keys, the chat writes natural replies using only your answers and shop facts; it never makes up prices or promises. Without a key it still works: it shows the closest matching answer, or points to the contact page. Try it on the **Settings & try it** tab." },
+          { tip: "Hide an answer (the switch) instead of deleting it if it's only out of date for now, like a holiday shipping note." },
+        ],
+      },
+      {
+        id: "hiding",
+        title: "Hide instead of delete",
+        match: ["/admin/content", "/admin/gallery"],
+        summary: "Take text, steps, photos, links or chat answers off the shop without losing them.",
+        blocks: [
+          { p: "Most things have an **eye** or **Shown / Hidden** switch. Hidden things stay saved in the dashboard and in `site-variables.ts` but customers don't see them. Flip it back any time." },
+          { list: ["**Words & logos**: the eye next to each text box.", "**How it works steps**: Hide next to a step.", "**Our work**: untick **Show on the shop**.", "**Links**: the eye next to a link.", "**Chat**: the switch next to an answer."] },
+        ],
+      },
+      {
+        id: "links",
+        title: "Links (Facebook, Instagram, phone...)",
+        match: ["/admin/content"],
+        summary: "Your social pages and contact links, each with its own icon.",
+        blocks: [
+          { p: "In **Words & logos > Links**, tap **Add link**, pick an icon (Facebook, Instagram, TikTok, YouTube, Google, Etsy, phone, text message, email, map, reviews, website...), and type the address. For **phone** and **text** just type the number; for **email** the address. Drag the arrows to reorder; the eye hides one." },
+          { p: "They show in the shop's footer and anywhere you add a Links section." },
+        ],
+      },
+      {
+        id: "codes",
+        title: "Order codes, QR codes, packing slips and labels",
+        match: ["/admin/orders", "/admin/scan", "/admin/item-labels"],
+        summary: "One code per order that ties the receipt, packing slip and box together.",
+        blocks: [
+          { p: "Every order gets an **order code** like `DFC1042-7KQ3` (your initials, the order number, and 4 check letters so a typo can't open the wrong order). It's different from the **tracking number**, which comes from the post office." },
+          {
+            list: [
+              "**Customer's receipt** (the thank-you page) shows the code as a **barcode**. They can also type it on **Order status**.",
+              "**Packing slip** (button on each order): print it and put it in the box. It has the barcode and a **QR code**.",
+              "**Scan** (dashboard menu): point the phone camera at the barcode or QR on a slip or receipt and that order opens, with its full **History**: paid, code used, label bought, tracking, shipped, refunds, and who did each.",
+              "**Item labels**: print a QR + barcode sticker for each item and size, for your shelves or bags.",
+            ],
+          },
+          { tip: "The QR codes only hold a link into your dashboard, not the customer's details. A lost slip shows nothing to anyone who isn't signed in." },
+          { p: "Real **UPC** barcodes (the ones stores scan) have to be bought from GS1 for each product; you don't need them to sell online. The Code 128 barcodes used here are free and work with any scanner." },
+        ],
+      },
+      {
+        id: "insights",
+        title: "Insights (charts)",
+        match: ["/admin/insights"],
+        summary: "Charts of sales, what's selling, busy hours and where orders ship.",
+        blocks: [
+          {
+            list: [
+              "**Sales over time**: pinch or drag to zoom. Green markers are your biggest orders, red are refunds. **Add a note** (\"Craft fair\", \"Facebook post\") and it shows on the chart so you can see what worked.",
+              "**What's selling**: pie charts by category, design, payment type, or shipped vs pickup.",
+              "**Best sellers**: the items sold most.",
+              "**Busy days & hours**: when orders come in.",
+              "**Where orders go**: a US map shaded by state with a dot for each town.",
+            ],
+          },
+          { p: "Tap the buttons at the top to show or hide each chart; the phone remembers your choice. Pick 7, 30, 90 or 365 days at the top right." },
         ],
       },
       {
@@ -523,15 +600,23 @@ export const HELP: HelpGroup[] = [
           },
           { p: "Orders over the free-shipping amount ship free. **Local pickup** adds a pickup choice in the cart with no shipping charge; the note tells customers where and when. If the address entered at Stripe has a different ZIP than the one quoted, the order shows a warning so you can check the postage." },
           { h: "Getting to the dashboard" },
-          { p: "Go to your site address with `/admin` on the end, or tap the **version and build number** at the very bottom of any shop page 7 times in a row (it counts down from the 4th tap). There's no visible login link, so customers never find it. On a phone, add the dashboard to your home screen (see **The phone app**)." },
+          { p: "Go to your site address with `/admin` on the end, or tap the **version and build number** at the very bottom of any shop page 15 times quickly. There's no visible login link, so customers never find it. On a phone, add the dashboard to your home screen (see **The phone app**)." },
         ],
       },
       {
         id: "keys",
-        title: "Keys",
+        title: "Accounts & keys",
         match: ["/admin/keys"],
-        summary: "Where API keys for Stripe and other services go.",
+        summary: "One spot for every service: sign-in links, API keys, saved logins and your own links.",
         blocks: [
+          { p: "Each service (Stripe, Supabase, Vercel, GitHub, Anthropic for the chat, Shippo, Resend, Facebook and Google listings) has a card showing whether it's connected, links to sign in or make a key, and a box to paste the key." },
+          {
+            list: [
+              "**Saved logins**: usernames and passwords for any site (supplier, Etsy, the laser's software...). Stored encrypted; the password only shows when you tap **Show**.",
+              "**My links**: bookmarks to the pages you use (Stripe payouts, USPS pickup...).",
+              "**Other keys**: any other service's key.",
+            ],
+          },
           { p: "An API key is a long password that lets the shop talk to another service. Paste it in, press **Save**, and the site checks it before storing it encrypted. Nobody, including you, can read a saved key back; you can only replace or remove it." },
           {
             list: [
@@ -695,7 +780,7 @@ export const HELP: HelpGroup[] = [
             ],
           },
           { p: "**Custom orders** has the request form. **Order status** in the footer lets customers look up an order with their order number and email. The shop has a search box once there are more than 6 items." },
-          { p: "There's no link to the dashboard on the shop. The hidden way in is tapping the version number at the bottom 7 times, and it still needs your password (and your PIN, if the lock screen is on). Search engines are told not to list it." },
+          { p: "There's no link to the dashboard on the shop. The hidden way in is tapping the version number at the bottom 15 times, and it still needs your password (and your PIN, if the lock screen is on). Search engines are told not to list it." },
         ],
       },
     ],

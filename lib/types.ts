@@ -49,6 +49,12 @@ export type DiscountPrograms = {
 export type Abandoned = { id: string; createdAt: string; email: string; name: string; amount: number; items: string; url: string; emailedAt?: string; recovered?: boolean };
 export type VetRequest = { id: string; createdAt: string; name: string; email: string; group: string; note: string; status: "new" | "approved" | "declined"; code?: string };
 export type GiftCard = { id: string; code: string; promoId: string; amount: number; createdAt: string; fromName: string; buyerEmail: string; toName: string; toEmail: string; message: string; orderNumber?: number; sentAt?: string };
+// A link with a picture (footer and contact page): Facebook, a phone number, an email...
+export type LinkItem = { id: string; icon: string; label: string; url: string; hidden?: boolean };
+// The "Ask us" chat on the shop
+export type Faq = { id: string; q: string; a: string; hidden: boolean };
+export type ChatSettings = { on: boolean; useAI: boolean; title: string; greeting: string; faqs: Faq[] };
+export type ChatLogEntry = { at: string; q: string; answered: boolean; faq?: string };
 // One entry in the shop's page list (top menu and footer).
 export type MenuItem = { id: string; label: string; href?: string; top: boolean; footer: boolean; off?: boolean };
 // How the owner's dashboard looks and what it shows.
@@ -136,6 +142,7 @@ export type Order = {
   giftNote?: string;
   shipNote?: string; // e.g. shipping ZIP differs from the one quoted
   nextCode?: string; // thank-you code for their next order
+  history?: { at: string; what: string; by?: string }[]; // everything that happened to the order, oldest first
   giftCodes?: string[]; // gift card codes bought in this order
   bulkPercent?: number; // bulk discount applied
   shipTo?: ShipTo; // the address in parts, for shipping labels
@@ -170,7 +177,7 @@ export type SocialLinks = {
 };
 
 export type CustomLink = { label: string; url: string };
-export type Step = { title: string; text: string };
+export type Step = { title: string; text: string; hidden?: boolean };
 export type ShippingTier = { upToMiles: number; price: number }; // price in cents
 // A finished piece shown in "Our work". Not necessarily for sale.
 export type GalleryItem = {
@@ -181,6 +188,7 @@ export type GalleryItem = {
   photos: string[];
   featured: boolean; // in the rotating showcase on the home page
   productSlug: string; // optional: shop item to buy one like it
+  hidden?: boolean; // kept, but not shown on the shop
 };
 // Extra pages the owner adds himself (FAQ, Events...), shown at /pages/<slug>
 export type InfoPage = { slug: string; title: string; body: string; inFooter: boolean };
@@ -206,6 +214,8 @@ export type SiteSettings = {
   aboutButton: string;
   stepsHeading: string;
   customSteps: Step[];
+  hiddenFields: string[];
+  links: LinkItem[]; // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)
   showReviews: boolean;
   reviewsHeading: string;
   reviewsText: string;
@@ -237,6 +247,7 @@ export type SiteSettings = {
   designs: Design[]; // design library for decals / engravings
   watermark: Watermark;
   discounts: DiscountPrograms;
+  chat: ChatSettings;
   showContactForm: boolean;
   showNewsletter: boolean;
   newsletterText: string;

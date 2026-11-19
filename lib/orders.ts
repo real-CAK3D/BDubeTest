@@ -96,6 +96,9 @@ export async function recordOrderFromSession(sessionId: string) {
     currency: session.currency ?? "usd",
     paymentMethod: paymentMethod ?? undefined,
     status: "paid",
+    history: [
+      { at: new Date().toISOString(), what: `Paid ${money(session.amount_total ?? 0, session.currency ?? "usd")}${paymentMethod ? ` by ${paymentMethod}` : ""}${promoCode ? `, code ${promoCode}` : ""}` },
+    ],
   });
   if (!order) return null; // already recorded
 
@@ -144,7 +147,16 @@ export async function recordOrderFromSession(sessionId: string) {
       .then((c) => c.code)
       .catch(() => undefined);
   }
-  if (giftCodes.length || nextCode) await updateOrder(order.id, { ...(giftCodes.length ? { giftCodes } : {}), ...(nextCode ? { nextCode } : {}) });
+  if (giftCodes.length || nextCode)
+    await updateOrder(order.id, {
+      ...(giftCodes.length ? { giftCodes } : {}),
+      ...(nextCode ? { nextCode } : {}),
+      history: [
+        ...(order.history ?? []),
+        ...(giftCodes.length ? [{ at: new Date().toISOString(), what: `Gift card code${giftCodes.length > 1 ? "s" : ""} made: ${giftCodes.join(", ")}` }] : []),
+        ...(nextCode ? [{ at: new Date().toISOString(), what: `Thank-you code given: ${nextCode}` }] : []),
+      ],
+    });
 
   const count = items.reduce((n, i) => n + i.quantity, 0);
   /*

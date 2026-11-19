@@ -12,7 +12,7 @@ import type { SiteSettings } from "./types";
 type Point = { lat: number; lng: number; place: string };
 const cache = new Map<string, Point | null>();
 
-async function locate(country: string, zip: string): Promise<Point | null> {
+export async function locate(country: string, zip: string): Promise<Point | null> {
   const key = `${country}:${zip}`;
   if (cache.has(key)) return cache.get(key)!;
   let pt: Point | null = null;

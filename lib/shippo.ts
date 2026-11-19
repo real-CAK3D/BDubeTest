@@ -12,7 +12,7 @@ const API = "https://api.goshippo.com";
 
 async function call<T>(path: string, body: unknown): Promise<T> {
   const key = await getKey("SHIPPO_API_KEY");
-  if (!key) throw new Error("Add your Shippo token on the Keys page first.");
+  if (!key) throw new Error("Add your Shippo token on Accounts & keys first.");
   const r = await fetch(API + path, { method: "POST", headers: { authorization: `ShippoToken ${key}`, "content-type": "application/json" }, body: JSON.stringify(body) });
   const data = (await r.json().catch(() => ({}))) as T & { detail?: string };
   if (!r.ok) throw new Error(`Shippo: ${data.detail ?? JSON.stringify(data).slice(0, 200)}`);

@@ -6,7 +6,7 @@ import { SESSION_COOKIE, verifySessionToken } from "./lib/auth";
 // devices: a device signed out from Settings > Security is out straight away.
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (pathname === "/admin/login") return NextResponse.next();
+  if (pathname === "/admin/login" || pathname === "/admin/forgot" || pathname === "/admin/reset") return NextResponse.next();
   const sid = await verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value);
   const ok = sid ? await touchSession(sid).catch(() => false) : false;
   if (ok) {

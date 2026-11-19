@@ -3,7 +3,9 @@ import { ClearCart } from "@/components/shop/ClearCart";
 import { recordOrderFromSession } from "@/lib/orders";
 import { getOrders } from "@/lib/db";
 import { shopSettings } from "@/lib/shop-data";
+import { barcodeSvg } from "@/lib/codes";
 import { money } from "@/lib/format";
+import { orderCode } from "@/lib/order-code";
 
 export const metadata = { title: "Thank you" };
 
@@ -25,6 +27,11 @@ export default async function Success({ searchParams }: { searchParams: Promise<
           <p className="lede">
             Order #{order.number} is confirmed. A receipt is on its way to {order.email}.
           </p>
+          <div className="receipt-code">
+            <span className="muted small">Your order code</span>
+            <div dangerouslySetInnerHTML={{ __html: barcodeSvg(orderCode(order, s.businessName)) }} />
+            <span className="muted small">Keep this for questions or pickup. Order status works with this code too.</span>
+          </div>
           <ul className="receipt">
             {order.items.map((i, n) => (
               <li key={n}>

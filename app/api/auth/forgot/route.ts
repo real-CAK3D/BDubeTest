@@ -4,9 +4,10 @@ import { endAccountSessions, lockedFor, recordFail, visitorKey } from "@/lib/adm
 import { getSettings } from "@/lib/db";
 import { emailReady, sendEmail } from "@/lib/email";
 import { siteUrl } from "@/lib/stripe";
+import { mutating } from "@/lib/store";
 
 // { name } emails a reset link (if that person saved an email); { name, code, password } uses OWNER_RESET_CODE
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const who = visitorKey(req, "forgot");
   const wait = await lockedFor(who);
   if (wait) return NextResponse.json({ error: `Too many tries. Try again in ${wait} minutes.` }, { status: 429 });
@@ -37,3 +38,5 @@ export async function POST(req: Request) {
   }
   return NextResponse.json(generic);
 }
+
+export const POST = mutating(handlePOST);

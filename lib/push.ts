@@ -2,6 +2,7 @@ import "server-only";
 import webpush from "web-push";
 import { getNotifications, getPushSubs, newId, saveNotifications, savePushSubs } from "./db";
 import { getKey, saveKey } from "./keys";
+import { withLock } from "./store";
 
 export async function vapidKeys() {
   const [pub, priv] = await Promise.all([getKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY"), getKey("VAPID_PRIVATE_KEY")]);
@@ -19,7 +20,7 @@ export async function ensureVapidKeys() {
 }
 export const pushConfigured = async () => Boolean(await vapidKeys());
 
-export async function notifyOwner(title: string, body: string, url = "/admin") {
+async function _notifyOwner(title: string, body: string, url = "/admin") {
   const list = await getNotifications();
   list.unshift({ id: newId(), createdAt: new Date().toISOString(), title, body, url, read: false });
   await saveNotifications(list);
@@ -40,4 +41,9 @@ export async function notifyOwner(title: string, body: string, url = "/admin") {
     })
   );
   if (dead.length) await savePushSubs(subs.filter((s) => !dead.includes(s.endpoint)));
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function notifyOwner(...a: Parameters<typeof _notifyOwner>) {
+  return withLock("notifications", () => _notifyOwner(...a));
 }

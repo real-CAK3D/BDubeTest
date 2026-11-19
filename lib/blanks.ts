@@ -3,6 +3,7 @@ import { getProducts, getSettings } from "./db";
 import { notifyOwner } from "./push";
 import { kv } from "./store";
 import type { Blank, OrderItem } from "./types";
+import { withLock } from "./store";
 
 /*
  * EDIT-POINT: BLANKS
@@ -29,7 +30,7 @@ export function blankFor(p: { blank?: string; sizes?: { name: string; blank?: st
 }
 
 /** Takes the sold items' blanks off the shelf. */
-export async function useBlanks(items: OrderItem[]) {
+async function _useBlanks(items: OrderItem[]) {
   const [blanks, products, settings] = await Promise.all([getBlanks(), getProducts(), getSettings()]);
   if (!blanks.length) return;
   const low: string[] = [];
@@ -42,4 +43,9 @@ export async function useBlanks(items: OrderItem[]) {
   }
   await saveBlanks(blanks);
   if (low.length) await notifyOwner("Blanks running low", low.join(", "), "/admin/blanks");
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function useBlanks(...a: Parameters<typeof _useBlanks>) {
+  return withLock("write", () => _useBlanks(...a));
 }

@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { getReviews, getSettings, newId, saveReviews } from "@/lib/db";
 import { tooMany } from "@/lib/guard";
 import { notifyOwner } from "@/lib/push";
-import { saveImage } from "@/lib/upload";
+import { savePublicImage } from "@/lib/upload";
+import { mutating } from "@/lib/store";
 
 // Customers send reviews here (multipart form). They wait for the owner's approval.
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const s = await getSettings();
   if (!s.showReviews) return NextResponse.json({ error: "Reviews are turned off right now." }, { status: 403 });
   const form = await req.formData().catch(() => null);
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
   const file = form.get("photo");
   if (file instanceof File && file.size > 0) {
     try {
-      photo = await saveImage(file, "reviews");
+      photo = await savePublicImage(file, "reviews");
     } catch (e) {
       return NextResponse.json({ error: (e as Error).message }, { status: 400 });
     }
@@ -37,3 +38,5 @@ export async function POST(req: Request) {
   await notifyOwner(`New review from ${name} (${"★".repeat(rating)})`, `${text.slice(0, 100)} Approve it in Reviews.`, "/admin/reviews");
   return NextResponse.json({ ok: true });
 }
+
+export const POST = mutating(handlePOST);

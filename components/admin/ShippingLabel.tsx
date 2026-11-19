@@ -21,7 +21,7 @@ export function ShippingLabel({ order, parcels, ready, onBought }: { order: Orde
         <span className="muted small">{order.label.carrier} {order.label.service} · {money(order.label.cost, order.currency)} · bought {new Date(order.label.boughtAt).toLocaleDateString()}</span>
       </div>
     );
-  if (!ready) return <p className="muted small">Buy postage right here: add a Shippo token on the <a href="/admin/keys">Keys</a> page and your return address in Settings &gt; Store.</p>;
+  if (!ready) return <p className="muted small">Buy postage right here: add a Shippo token on the <a href="/admin/keys">Accounts &amp; keys</a> page and your return address in Settings &gt; Store.</p>;
   if (!order.shipTo) return null;
 
   async function getRates() {

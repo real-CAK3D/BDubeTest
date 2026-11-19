@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { getRequests, saveRequests } from "@/lib/db";
 import type { RequestStatus } from "@/lib/types";
+import { mutating } from "@/lib/store";
 
 const STATUSES: RequestStatus[] = ["new", "quoted", "accepted", "declined", "done"];
 
 // { id, status?, note? } or { id, delete: true }
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   let list = await getRequests();
   const r = list.find((x) => x.id === b.id);
@@ -18,3 +19,5 @@ export async function POST(req: Request) {
   await saveRequests(list);
   return NextResponse.json({ ok: true, request: b.delete ? null : r });
 }
+
+export const POST = mutating(handlePOST);

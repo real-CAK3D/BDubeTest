@@ -3,8 +3,9 @@ import { syncToGitHub } from "@/lib/github-sync";
 import { getProducts, saveProducts } from "@/lib/db";
 import { cleanProduct as clean, uniqueSlug } from "@/lib/products";
 import type { Product } from "@/lib/types";
+import { mutating } from "@/lib/store";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   after(() => syncToGitHub("products"));
   const list = await getProducts();
   const p = clean(await req.json());
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
   return NextResponse.json(p);
 }
 
-export async function PUT(req: Request) {
+async function handlePUT(req: Request) {
   after(() => syncToGitHub("products"));
   const body = (await req.json()) as Partial<Product>;
   const list = await getProducts();
@@ -27,7 +28,7 @@ export async function PUT(req: Request) {
   return NextResponse.json(p);
 }
 
-export async function DELETE(req: Request) {
+async function handleDELETE(req: Request) {
   after(() => syncToGitHub("products"));
   const id = new URL(req.url).searchParams.get("id");
   const list = await getProducts();
@@ -36,7 +37,7 @@ export async function DELETE(req: Request) {
 }
 
 // Category tools: { action: "renameCategory", from, to } moves every item from one category to another.
-export async function PATCH(req: Request) {
+async function handlePATCH(req: Request) {
   after(() => syncToGitHub("categories"));
   const b = (await req.json().catch(() => ({}))) as { action?: string; from?: string; to?: string };
   if (b.action !== "renameCategory" || typeof b.from !== "string") return NextResponse.json({ error: "Unknown action." }, { status: 400 });
@@ -48,3 +49,11 @@ export async function PATCH(req: Request) {
   await saveProducts(list);
   return NextResponse.json({ ok: true, moved: n });
 }
+
+export const POST = mutating(handlePOST);
+
+export const PUT = mutating(handlePUT);
+
+export const DELETE = mutating(handleDELETE);
+
+export const PATCH = mutating(handlePATCH);

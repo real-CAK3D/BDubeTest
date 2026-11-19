@@ -5,6 +5,7 @@ import { emailReady, sendEmail } from "./email";
 import { getPrivate, setPrivate } from "./private-data";
 import { siteUrl, stripe } from "./stripe";
 import type { GiftCard, VetRequest } from "./types";
+import { withLock } from "./store";
 
 /*
  * EDIT-POINT: DISCOUNTS
@@ -90,7 +91,7 @@ export async function emailCode(code: string, label: string, to: string[], note:
 export const getVetRequests = () => getPrivate<VetRequest[]>("vetRequests", []);
 export const saveVetRequests = (l: VetRequest[]) => setPrivate("vetRequests", l.slice(0, 2000));
 
-export async function addVetRequest(r: Omit<VetRequest, "id" | "createdAt" | "status">) {
+async function _addVetRequest(r: Omit<VetRequest, "id" | "createdAt" | "status">) {
   const list = await getVetRequests();
   list.unshift({ ...r, id: newId(), createdAt: new Date().toISOString(), status: "new" });
   await saveVetRequests(list);
@@ -102,7 +103,7 @@ export const getGiftCards = () => getPrivate<GiftCard[]>("giftCards", []);
 export const saveGiftCards = (l: GiftCard[]) => setPrivate("giftCards", l.slice(0, 5000));
 
 /** Makes a one-time code worth `amount` cents, saves it, and emails the recipient if email is set up. */
-export async function issueGiftCard(g: Omit<GiftCard, "id" | "code" | "promoId" | "createdAt" | "sentAt">): Promise<GiftCard> {
+async function _issueGiftCard(g: Omit<GiftCard, "id" | "code" | "promoId" | "createdAt" | "sentAt">): Promise<GiftCard> {
   const { id, code } = await createCode({ code: randomCode("GIFT", 8), name: `Gift card $${(g.amount / 100).toFixed(0)}`, amount: g.amount, maxUses: 1, kind: "gift" });
   const card: GiftCard = { ...g, id: newId(), code, promoId: id, createdAt: new Date().toISOString() };
   const s = await getSettings();
@@ -134,4 +135,12 @@ export async function issueGiftCard(g: Omit<GiftCard, "id" | "code" | "promoId" 
   list.unshift(card);
   await saveGiftCards(list);
   return card;
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function addVetRequest(...a: Parameters<typeof _addVetRequest>) {
+  return withLock("write", () => _addVetRequest(...a));
+}
+export function issueGiftCard(...a: Parameters<typeof _issueGiftCard>) {
+  return withLock("write", () => _issueGiftCard(...a));
 }

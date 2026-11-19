@@ -18,6 +18,30 @@ export async function saveImage(file: File, folder: string): Promise<string> {
   return saveFile(file, folder, file.type);
 }
 
+/**
+ * For uploads from customers (reviews, custom requests, their own artwork): the
+ * picture is opened and saved again as a plain JPG (or PNG when it has see-through
+ * parts), so only real photos get stored: no SVG, no files pretending to be images.
+ */
+export async function savePublicImage(file: File, folder: string): Promise<string> {
+  if (file.size > 12_000_000) throw new Error("That photo is over 12 MB. Try a smaller one.");
+  const sharp = (await import("sharp")).default;
+  let out: Buffer;
+  let png = false;
+  try {
+    const img = sharp(Buffer.from(await file.arrayBuffer()), { limitInputPixels: 60_000_000 }).rotate();
+    const meta = await img.metadata();
+    if (!meta.format || !["jpeg", "png", "webp", "gif", "heif", "avif", "tiff"].includes(meta.format)) throw new Error("not a photo");
+    png = meta.format === "png" || (meta.hasAlpha === true && meta.format !== "jpeg");
+    const sized = img.resize({ width: 2400, height: 2400, fit: "inside", withoutEnlargement: true });
+    out = png ? await sized.png({ compressionLevel: 9 }).toBuffer() : await sized.jpeg({ quality: 85, mozjpeg: true }).toBuffer();
+  } catch {
+    throw new Error("That file isn't a photo we can use. Try a JPG or PNG.");
+  }
+  const type = png ? "image/png" : "image/jpeg";
+  return saveFile(new File([new Uint8Array(out)], png ? "photo.png" : "photo.jpg", { type }), folder, type);
+}
+
 async function saveFile(file: File, folder: string, contentType: string): Promise<string> {
   if (file.size > 4_400_000)
     throw new Error("That file is over 4 MB, the most the site can take in one go. Export a smaller version, or put it in the public/models folder on GitHub and paste its link instead.");

@@ -5,6 +5,7 @@ import { cleanProduct, uniqueSlug } from "./products";
 import { kv } from "./store";
 import { stripe } from "./stripe";
 import type { Product } from "./types";
+import { withLock } from "./store";
 
 /*
  *  EDIT-POINT: STRIPE-CATALOG
@@ -87,7 +88,7 @@ function applyProduct(list: Product[], sp: Stripe.Product, currency: string): "a
   return "added";
 }
 
-export async function syncStripeCatalog() {
+async function _syncStripeCatalog() {
   const s = await stripe();
   if (!s) throw new Error("Add your Stripe secret key first (Dashboard > Keys).");
   const [list, settings] = await Promise.all([getProducts(), getSettings()]);
@@ -109,7 +110,7 @@ export async function syncStripeCatalog() {
   return counts;
 }
 
-export async function syncStripeProduct(productId: string, deleted = false) {
+async function _syncStripeProduct(productId: string, deleted = false) {
   const s = await stripe();
   if (!s) return;
   const [list, settings] = await Promise.all([getProducts(), getSettings()]);
@@ -154,4 +155,12 @@ export async function listDiscounts(): Promise<{ codes: Discount[]; coupons: { i
     }),
     coupons: coupons.data.map((c) => ({ id: c.id, name: c.name ?? c.id, label: describe(c), valid: c.valid })),
   };
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function syncStripeCatalog(...a: Parameters<typeof _syncStripeCatalog>) {
+  return withLock("write", () => _syncStripeCatalog(...a));
+}
+export function syncStripeProduct(...a: Parameters<typeof _syncStripeProduct>) {
+  return withLock("write", () => _syncStripeProduct(...a));
 }

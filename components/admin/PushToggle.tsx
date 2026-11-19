@@ -56,7 +56,7 @@ export function PushToggle({ vapidKey, configured, deviceCount }: { vapidKey: st
     }
   }
 
-  if (!configured) return <p className="muted">Phone alerts need notification keys first. Open <a href="/admin/keys">Keys</a> and press <strong>Create notification keys</strong>. New orders still show under the bell icon.</p>;
+  if (!configured) return <p className="muted">Phone alerts need notification keys first. Open <a href="/admin/keys">Accounts &amp; keys</a> and press <strong>Create notification keys</strong>. New orders still show under the bell icon.</p>;
 
   return (
     <div className="stack">

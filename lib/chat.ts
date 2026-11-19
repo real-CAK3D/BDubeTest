@@ -9,6 +9,7 @@ import { fillPolicy } from "./policy-text";
 import { getPrivate, setPrivate } from "./private-data";
 import { getKey } from "./keys";
 import type { ChatLogEntry, Product, SiteSettings } from "./types";
+import { withLock } from "./store";
 
 /*
  * EDIT-POINT: CHAT
@@ -234,13 +235,13 @@ export async function answer(history: ChatTurn[], opts: { state?: unknown; req?:
 
 export const getChatLog = () => getPrivate<ChatLogEntry[]>("chatLog", []);
 
-export async function logQuestion(e: ChatLogEntry) {
+async function _logQuestion(e: ChatLogEntry) {
   const list = await getChatLog();
   list.unshift(e);
   await setPrivate("chatLog", list.slice(0, 1000));
 }
 
-export async function clearChatLog(q?: string) {
+async function _clearChatLog(q?: string) {
   const list = await getChatLog();
   await setPrivate("chatLog", q ? list.filter((x) => x.q !== q) : []);
 }
@@ -295,4 +296,12 @@ export async function chatSuggestions(log: ChatLogEntry[], s: SiteSettings): Pro
   });
   // the most useful first: asked often, or several wordings
   return groups.filter((g) => g.asked > 1 || g.questions.length > 1 || g.faqId).sort((a, b) => b.asked - a.asked).slice(0, 20);
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function logQuestion(...a: Parameters<typeof _logQuestion>) {
+  return withLock("chatLog", () => _logQuestion(...a));
+}
+export function clearChatLog(...a: Parameters<typeof _clearChatLog>) {
+  return withLock("chatLog", () => _clearChatLog(...a));
 }

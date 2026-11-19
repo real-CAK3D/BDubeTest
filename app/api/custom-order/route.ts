@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { getRequests, getSettings, newId, saveRequests } from "@/lib/db";
 import { isEmail, tooMany } from "@/lib/guard";
 import { notifyOwner } from "@/lib/push";
-import { saveImage } from "@/lib/upload";
+import { savePublicImage } from "@/lib/upload";
+import { mutating } from "@/lib/store";
 
 // The custom order request form (multipart). Requests land in Dashboard > Requests.
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const s = await getSettings();
   if (!s.showCustomOrders) return NextResponse.json({ error: "We're not taking custom requests right now." }, { status: 403 });
   const f = await req.formData().catch(() => null);
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
   for (const file of f.getAll("photos").slice(0, 3)) {
     if (file instanceof File && file.size > 0) {
       try {
-        photos.push(await saveImage(file, "requests"));
+        photos.push(await savePublicImage(file, "requests"));
       } catch (e) {
         return NextResponse.json({ error: (e as Error).message }, { status: 400 });
       }
@@ -58,3 +59,5 @@ export async function POST(req: Request) {
   await notifyOwner(`Custom request #${number}: ${quantity > 1 ? `${quantity} x ` : ""}${kind || "custom piece"}`, `${name}: ${details.slice(0, 100)}`, "/admin/requests");
   return NextResponse.json({ ok: true, number });
 }
+
+export const POST = mutating(handlePOST);

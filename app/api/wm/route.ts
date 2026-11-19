@@ -18,7 +18,9 @@ function allowed(u: URL, self: URL) {
   if (u.origin === self.origin) return true;
   const sb = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (sb && u.origin === new URL(sb).origin && u.pathname.includes("/storage/v1/object/public/")) return true;
-  return u.protocol === "https:" && u.hostname.endsWith(".public.blob.vercel-storage.com");
+  // Vercel Blob: only this shop's own store (its id is part of the store's token), not anyone's
+  const store = process.env.BLOB_READ_WRITE_TOKEN?.match(/^vercel_blob_rw_([a-z0-9]+)_/i)?.[1]?.toLowerCase();
+  return Boolean(store) && u.protocol === "https:" && u.hostname === `${store}.public.blob.vercel-storage.com`;
 }
 
 async function load(u: URL) {

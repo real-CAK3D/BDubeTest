@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getExpenses, newId, saveExpenses } from "@/lib/db";
+import { mutating } from "@/lib/store";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json();
   const list = await getExpenses();
   const e = {
@@ -17,8 +18,12 @@ export async function POST(req: Request) {
   return NextResponse.json(e);
 }
 
-export async function DELETE(req: Request) {
+async function handleDELETE(req: Request) {
   const id = new URL(req.url).searchParams.get("id");
   await saveExpenses((await getExpenses()).filter((e) => e.id !== id));
   return NextResponse.json({ ok: true });
 }
+
+export const POST = mutating(handlePOST);
+
+export const DELETE = mutating(handleDELETE);

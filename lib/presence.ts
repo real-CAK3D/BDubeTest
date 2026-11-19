@@ -1,5 +1,6 @@
 import "server-only";
 import { kv } from "./store";
+import { withLock } from "./store";
 
 /*
  * Who is looking at the shop right now. Each browser tab sends a random,
@@ -10,7 +11,7 @@ type Presence = Record<string, { t: number; path: string }>;
 const KEY = "presence";
 export const LIVE_MS = 90_000;
 
-export async function heartbeat(id: string, path: string) {
+async function _heartbeat(id: string, path: string) {
   const all = (await kv.get<Presence>(KEY)) ?? {};
   const now = Date.now();
   for (const [k, v] of Object.entries(all)) if (now - v.t > LIVE_MS) delete all[k];
@@ -25,4 +26,9 @@ export async function shoppersNow() {
   const pages: Record<string, number> = {};
   for (const v of live) pages[v.path] = (pages[v.path] ?? 0) + 1;
   return { count: live.length, pages: Object.entries(pages).sort((a, b) => b[1] - a[1]).map(([path, n]) => ({ path, n })) };
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function heartbeat(...a: Parameters<typeof _heartbeat>) {
+  return withLock("presence", () => _heartbeat(...a));
 }

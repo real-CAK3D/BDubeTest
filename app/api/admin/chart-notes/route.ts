@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { newId } from "@/lib/db";
 import { getChartNotes, saveChartNotes } from "@/lib/insights";
+import { mutating } from "@/lib/store";
 
 // Notes pinned to a day on the sales chart ("Craft fair", "Facebook ad started")
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   let list = await getChartNotes();
   if (b.action === "delete") list = list.filter((n) => n.id !== b.id);
@@ -12,3 +13,5 @@ export async function POST(req: Request) {
   await saveChartNotes(list.sort((a, b) => a.date.localeCompare(b.date)));
   return NextResponse.json(list);
 }
+
+export const POST = mutating(handlePOST);

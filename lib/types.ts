@@ -144,6 +144,10 @@ export type Order = {
   shipNote?: string; // e.g. shipping ZIP differs from the one quoted
   nextCode?: string; // thank-you code for their next order
   history?: { at: string; what: string; by?: string }[]; // everything that happened to the order, oldest first
+  // set while the steps after payment (stock, gift card codes, thank-you code, notification) are still running;
+  // a retry picks up whatever isn't done yet
+  pending?: boolean;
+  steps?: { stock?: boolean; gifts?: boolean; thanks?: boolean; notified?: boolean };
   giftCodes?: string[]; // gift card codes bought in this order
   bulkPercent?: number; // bulk discount applied
   shipTo?: ShipTo; // the address in parts, for shipping labels

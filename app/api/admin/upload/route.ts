@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { saveImage } from "@/lib/upload";
+import { mutating } from "@/lib/store";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const form = await req.formData();
   const file = form.get("file");
   const folder = String(form.get("folder") || "images").replace(/[^a-z0-9-]/gi, "");
@@ -12,3 +13,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
+
+export const POST = mutating(handlePOST);

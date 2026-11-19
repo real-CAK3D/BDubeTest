@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { getBlanks, saveBlanks } from "@/lib/blanks";
 import { newId } from "@/lib/db";
 import type { Blank } from "@/lib/types";
+import { mutating } from "@/lib/store";
 
 export async function GET() {
   return NextResponse.json(await getBlanks());
 }
 
 // The whole list, saved at once
-export async function PUT(req: Request) {
+async function handlePUT(req: Request) {
   const body = await req.json().catch(() => []);
   const list: Blank[] = (Array.isArray(body) ? body : []).slice(0, 500).map((b: Partial<Blank>) => ({
     id: typeof b.id === "string" && b.id ? b.id.slice(0, 40) : newId(),
@@ -21,3 +22,5 @@ export async function PUT(req: Request) {
   await saveBlanks(list);
   return NextResponse.json(list);
 }
+
+export const PUT = mutating(handlePUT);

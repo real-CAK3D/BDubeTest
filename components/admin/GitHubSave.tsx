@@ -20,7 +20,7 @@ export function GitHubSave({ token, last }: { token: boolean; last: SyncStatus |
   return (
     <div className="integ">
       <div className="integ-head"><strong>Saving edits to GitHub</strong><span className={`dot ${token && st?.ok ? "ok" : "no"}`}>{token ? (st?.ok ? "On" : "Check below") : "Needs a token"}</span></div>
-      <p className="muted">Every save in the dashboard is also written to site-variables.ts on GitHub. {token ? "" : <>Add a GitHub token on the <Link href="/admin/keys">Keys</Link> page first (Setup has the steps).</>}</p>
+      <p className="muted">Every save in the dashboard is also written to site-variables.ts on GitHub. {token ? "" : <>Add a GitHub token on the <Link href="/admin/keys">Accounts &amp; keys</Link> page first (Setup has the steps).</>}</p>
       {st ? <p className={st.ok ? "small" : "err small"}>{new Date(st.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}: {st.message}</p> : null}
       <div className="row wrap"><button className="b b-sm" onClick={run} disabled={!token || busy}>{busy ? "Saving…" : "Save to GitHub now"}</button></div>
     </div>

@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { listAccounts, markForReset, removeAccount, setEmail } from "@/lib/admin-accounts";
+import { inviteUntil, listAccounts, markForReset, openInvite, removeAccount, setEmail } from "@/lib/admin-accounts";
 import { clearLock, endAccountSessions, endOtherSessions, endSession, getSession, listSessions, lockInfo, setLock, sharedStorage } from "@/lib/admin-security";
 import { currentSession } from "@/lib/session";
+import { mutating } from "@/lib/store";
 
 export async function GET() {
   const [lock, sessions, me, accounts] = await Promise.all([lockInfo(), listSessions(), currentSession(), accountList()]);
-  return NextResponse.json({ lock, sessions, me, shared: sharedStorage(), accounts });
+  return NextResponse.json({ lock, sessions, me, shared: sharedStorage(), accounts, invite: await inviteUntil() });
 }
 
 // { action: "lock", kind, code } | { action: "unlock" } | { action: "signout", id } | { action: "signoutOthers" }
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   const me = await currentSession();
   if (b.action === "lock") {
@@ -30,12 +31,15 @@ export async function POST(req: Request) {
     await removeAccount(b.id);
     await endAccountSessions(b.id);
   } else if (b.action === "email" && typeof b.id === "string") await setEmail(b.id, String(b.email ?? ""));
+  else if (b.action === "invite") await openInvite(b.close ? 0 : 24);
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   const [lock, sessions, accounts] = await Promise.all([lockInfo(), listSessions(), accountList()]);
-  return NextResponse.json({ ok: true, lock, sessions, me, shared: sharedStorage(), accounts });
+  return NextResponse.json({ ok: true, lock, sessions, me, shared: sharedStorage(), accounts, invite: await inviteUntil() });
 }
 
 // names, emails and last sign-in only; never password data
 async function accountList() {
   return (await listAccounts()).map((a) => ({ id: a.id, name: a.name, email: a.email, lastLogin: a.lastLogin, mustChange: a.mustChange }));
 }
+
+export const POST = mutating(handlePOST);

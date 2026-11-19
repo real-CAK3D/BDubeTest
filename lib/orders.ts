@@ -2,15 +2,25 @@ import "server-only";
 import type Stripe from "stripe";
 import { markRecovered } from "./abandoned";
 import { useBlanks } from "./blanks";
-import { addOrderOnce, getProducts, getSettings, saveProducts, updateOrder } from "./db";
+import { addOrderOnce, getOrders, getProducts, getSettings, saveProducts, updateOrder } from "./db";
 import { createCode, issueGiftCard, randomCode } from "./discounts";
 import { money } from "./format";
 import { notifyOwner } from "./push";
 import { stripe } from "./stripe";
-import type { OrderItem } from "./types";
+import { withLock } from "./store";
+import type { Order, OrderItem } from "./types";
 
-// Safe to call twice for the same session; addOrderOnce dedupes.
-export async function recordOrderFromSession(sessionId: string) {
+/**
+ * Records a paid checkout as an order. Safe to call any number of times, from
+ * any server at once (the thank-you page and Stripe's webhook both call it):
+ * one call at a time per checkout, the order is only created once, and each
+ * step after payment is marked done so a retry finishes only what's missing.
+ */
+export function recordOrderFromSession(sessionId: string) {
+  return withLock(`checkout:${sessionId}`, () => record(sessionId), { ttl: 60_000, wait: 45_000 });
+}
+
+async function record(sessionId: string) {
   const s = await stripe();
   if (!s) return null;
   const session = await s.checkout.sessions.retrieve(sessionId, {
@@ -65,7 +75,7 @@ export async function recordOrderFromSession(sessionId: string) {
     ? wallet === "apple_pay" ? "Apple Pay" : wallet === "google_pay" ? "Google Pay" : wallet
     : pm?.card ? `${pm.card.brand} •••• ${pm.card.last4}` : pm?.type;
 
-  const order = await addOrderOnce({
+  const created = await addOrderOnce({
     id: session.id,
     createdAt: new Date((session.created ?? Date.now() / 1000) * 1000).toISOString(),
     email: session.customer_details?.email ?? "",
@@ -96,78 +106,109 @@ export async function recordOrderFromSession(sessionId: string) {
     currency: session.currency ?? "usd",
     paymentMethod: paymentMethod ?? undefined,
     status: "paid",
+    pending: true,
+    steps: {},
     history: [
       { at: new Date().toISOString(), what: `Paid ${money(session.amount_total ?? 0, session.currency ?? "usd")}${paymentMethod ? ` by ${paymentMethod}` : ""}${promoCode ? `, code ${promoCode}` : ""}` },
     ],
   });
-  if (!order) return null; // already recorded
+  let order: Order | null = created;
+  if (!order) {
+    // already recorded: finish any step a failed earlier try left undone
+    order = (await getOrders()).find((o) => o.id === session.id) ?? null;
+    if (!order?.pending) return null;
+  }
+  const steps = { ...(order.steps ?? {}) };
+  const done = async (patch: Partial<Order>) => {
+    order = (await updateOrder(order!.id, { ...patch, steps: { ...steps } })) ?? order;
+  };
+  const settings = await getSettings();
+  let failed = "";
 
   // Reduce stock and warn when it's getting low
-  const [products, settings] = await Promise.all([getProducts(), getSettings()]);
   const low: string[] = [];
-  for (const it of items) {
-    const p = products.find((x) => x.id === it.productId);
-    if (p && p.stock !== null) {
-      p.stock = Math.max(0, p.stock - it.quantity);
-      if (p.stock <= settings.lowStockAlert) low.push(`${p.name} (${p.stock} left)`);
-    }
-  }
-  await saveProducts(products);
-  await useBlanks(items).catch((e) => console.error("blanks:", e));
-  if (session.recovered_from) await markRecovered(session.recovered_from).catch(() => {});
-
-  // Gift cards bought in this order: make each code and email it
-  const giftCodes: string[] = [];
-  for (const li of session.line_items?.data ?? []) {
-    const meta = ((li.price?.product as Stripe.Product | undefined)?.metadata ?? {}) as Record<string, string>;
-    if (meta.kind !== "giftcard") continue;
-    for (let n = 0; n < (li.quantity ?? 1); n++) {
-      try {
-        const card = await issueGiftCard({
-          amount: li.price?.unit_amount ?? 0,
-          fromName: meta.fromName ?? "",
-          buyerEmail: order.email,
-          toName: meta.toName ?? "",
-          toEmail: meta.toEmail ?? "",
-          message: meta.message ?? "",
-          orderNumber: order.number,
-        });
-        giftCodes.push(card.code);
-      } catch (e) {
-        console.error("gift card:", e);
+  if (!steps.stock) {
+    await withLock("write", async () => {
+      const products = await getProducts();
+      for (const it of items) {
+        const p = products.find((x) => x.id === it.productId);
+        if (p && p.stock !== null) {
+          p.stock = Math.max(0, p.stock - it.quantity);
+          if (p.stock <= settings.lowStockAlert) low.push(`${p.name} (${p.stock} left)`);
+        }
       }
+      await saveProducts(products);
+    });
+    await useBlanks(items).catch((e) => console.error("blanks:", e));
+    if (session.recovered_from) await markRecovered(session.recovered_from).catch(() => {});
+    steps.stock = true;
+    await done({});
+  }
+
+  // Gift cards bought in this order: make each code and email it (saved one by one, so a retry never makes extras)
+  if (!steps.gifts) {
+    const giftCodes = [...(order.giftCodes ?? [])];
+    let need = 0;
+    for (const li of session.line_items?.data ?? []) {
+      const meta = ((li.price?.product as Stripe.Product | undefined)?.metadata ?? {}) as Record<string, string>;
+      if (meta.kind !== "giftcard") continue;
+      for (let n = 0; n < (li.quantity ?? 1); n++, need++) {
+        if (need < giftCodes.length) continue; // made on an earlier try
+        try {
+          const card = await issueGiftCard({
+            amount: li.price?.unit_amount ?? 0,
+            fromName: meta.fromName ?? "",
+            buyerEmail: order.email,
+            toName: meta.toName ?? "",
+            toEmail: meta.toEmail ?? "",
+            message: meta.message ?? "",
+            orderNumber: order.number,
+          });
+          giftCodes.push(card.code);
+          await done({ giftCodes, history: [...(order.history ?? []), { at: new Date().toISOString(), what: `Gift card code made: ${card.code}` }] });
+        } catch (e) {
+          console.error("gift card:", e);
+          failed = `gift card code: ${(e as Error).message}`;
+        }
+      }
+    }
+    if (!failed) {
+      steps.gifts = true;
+      await done({});
+    } else {
+      await notifyOwner(`Order #${order.number}: a gift card code wasn't made yet`, "It will be tried again automatically. If it keeps failing, check Stripe on Accounts & keys.", `/admin/orders?open=${order.id}`);
     }
   }
 
   // A thank-you code for their next order
-  let nextCode: string | undefined;
   const ty = settings.discounts.thankYou;
-  if (ty.on && items.some((i) => i.productId)) {
-    nextCode = await createCode({ code: randomCode("THANKS", 5), name: `Thank-you ${ty.percent}% off`, percent: ty.percent, maxUses: 1, expiresDays: ty.days, kind: "thanks" })
-      .then((c) => c.code)
-      .catch(() => undefined);
+  if (!steps.thanks) {
+    if (ty.on && items.some((i) => i.productId) && !order.nextCode) {
+      const nextCode = await createCode({ code: randomCode("THANKS", 5), name: `Thank-you ${ty.percent}% off`, percent: ty.percent, maxUses: 1, expiresDays: ty.days, kind: "thanks" })
+        .then((c) => c.code)
+        .catch(() => undefined);
+      if (nextCode) await done({ nextCode, history: [...(order.history ?? []), { at: new Date().toISOString(), what: `Thank-you code given: ${nextCode}` }] });
+    }
+    steps.thanks = true;
+    await done({});
   }
-  if (giftCodes.length || nextCode)
-    await updateOrder(order.id, {
-      ...(giftCodes.length ? { giftCodes } : {}),
-      ...(nextCode ? { nextCode } : {}),
-      history: [
-        ...(order.history ?? []),
-        ...(giftCodes.length ? [{ at: new Date().toISOString(), what: `Gift card code${giftCodes.length > 1 ? "s" : ""} made: ${giftCodes.join(", ")}` }] : []),
-        ...(nextCode ? [{ at: new Date().toISOString(), what: `Thank-you code given: ${nextCode}` }] : []),
-      ],
-    });
 
   const count = items.reduce((n, i) => n + i.quantity, 0);
   /*
    * EDIT-POINT: NOTIFICATION-TEXT
    * Wording of the phone notification sent for each new order and low stock.
    */
-  await notifyOwner(
-    `New order #${order.number}: ${money(order.total, order.currency)}`,
-    `${order.name || order.email} bought ${count} item${count === 1 ? "" : "s"}.`,
-    `/admin/orders?open=${order.id}`
-  );
-  if (low.length) await notifyOwner("Running low on stock", low.join(", "), "/admin/products");
-  return { ...order, ...(giftCodes.length ? { giftCodes } : {}), ...(nextCode ? { nextCode } : {}) };
+  if (!steps.notified) {
+    await notifyOwner(
+      `New order #${order.number}: ${money(order.total, order.currency)}`,
+      `${order.name || order.email} bought ${count} item${count === 1 ? "" : "s"}.`,
+      `/admin/orders?open=${order.id}`
+    );
+    if (low.length) await notifyOwner("Running low on stock", low.join(", "), "/admin/products");
+    steps.notified = true;
+  }
+  await done({ pending: failed ? true : undefined });
+  // something still owed: make Stripe send the webhook again so it's finished then
+  if (failed) throw new Error(`Order #${order.number} not finished (${failed}); will retry.`);
+  return order;
 }

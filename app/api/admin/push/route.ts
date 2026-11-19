@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getPushSubs, savePushSubs, type PushSub } from "@/lib/db";
 import { notifyOwner, pushConfigured } from "@/lib/push";
+import { mutating } from "@/lib/store";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json();
   if (b.test) {
     if (!(await pushConfigured())) return NextResponse.json({ error: "Notification keys aren't set up yet." }, { status: 400 });
@@ -17,8 +18,12 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true, devices: subs.length });
 }
 
-export async function DELETE(req: Request) {
+async function handleDELETE(req: Request) {
   const { endpoint } = await req.json();
   await savePushSubs((await getPushSubs()).filter((s) => s.endpoint !== endpoint));
   return NextResponse.json({ ok: true });
 }
+
+export const POST = mutating(handlePOST);
+
+export const DELETE = mutating(handleDELETE);

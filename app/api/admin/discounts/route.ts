@@ -5,6 +5,7 @@ import { getAbandoned } from "@/lib/abandoned";
 import { emailReady } from "@/lib/email";
 import { isEmail } from "@/lib/guard";
 import { listDiscounts } from "@/lib/stripe-catalog";
+import { mutating } from "@/lib/store";
 
 // Everyone he could send a code to: past buyers and email sign-ups (one entry per email)
 async function customers() {
@@ -34,7 +35,7 @@ export async function GET() {
   return NextResponse.json({ ...codes, vets, gifts, customers: people, canEmail, abandoned });
 }
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   const s = await getSettings();
   try {
@@ -90,3 +91,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
+
+export const POST = mutating(handlePOST);

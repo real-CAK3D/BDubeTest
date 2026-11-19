@@ -4,11 +4,12 @@ import { getOrders, getSettings, logOn, saveOrders } from "@/lib/db";
 import { currentSession } from "@/lib/session";
 import { emailReady, sendEmail, shippedEmail } from "@/lib/email";
 import type { OrderStatus } from "@/lib/types";
+import { mutating } from "@/lib/store";
 
 const STATUSES: OrderStatus[] = ["paid", "shipped", "delivered", "refunded", "cancelled"];
 
 // { id, status?, note?, trackingNumber?, carrier?, emailCustomer? }
-export async function PATCH(req: Request) {
+async function handlePATCH(req: Request) {
   const b = await req.json();
   const orders = await getOrders();
   const o = orders.find((x) => x.id === b.id);
@@ -45,3 +46,5 @@ export async function PATCH(req: Request) {
   await saveOrders(orders);
   return NextResponse.json({ ...o, emailed });
 }
+
+export const PATCH = mutating(handlePATCH);

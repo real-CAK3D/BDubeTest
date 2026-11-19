@@ -55,7 +55,7 @@ export function DiscountsManager({ initial, stripeOn }: { initial: SiteSettings;
       {err ? <p className="err" role="alert">{err}</p> : null}
     </>
   );
-  const needStripe = !stripeOn ? <div className="panel"><p>Codes live in Stripe so its checkout page can check them. Connect Stripe on the <a href="/admin/keys">Keys</a> page first.</p></div> : null;
+  const needStripe = !stripeOn ? <div className="panel"><p>Codes live in Stripe so its checkout page can check them. Connect Stripe on the <a href="/admin/keys">Accounts &amp; keys</a> page first.</p></div> : null;
   const newVets = data?.vets.filter((v) => v.status === "new").length ?? 0;
 
   return (

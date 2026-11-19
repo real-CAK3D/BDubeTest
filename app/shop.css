@@ -752,3 +752,5 @@ model-viewer.viewer3d-stage { --poster-color: transparent; }
 .chat-by { display: block; font-size: 0.72rem; font-weight: 700; opacity: 0.75; margin-bottom: 0.1rem; }
 .chat-msg.person { border-left: 3px solid #e0262b; }
 .chat-end { background: none; border: 1px solid currentColor; border-radius: 999px; color: inherit; padding: 0.15rem 0.65rem; font: inherit; font-size: 0.78rem; cursor: pointer; }
+/* room under the last bit of each page so the floating chat button never covers it */
+@media (max-width: 700px) { .main { padding-bottom: 72px; } }

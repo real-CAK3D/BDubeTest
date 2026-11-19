@@ -4,6 +4,7 @@ import { getMessages, newId, saveMessages } from "./db";
 import { getPrivate, setPrivate } from "./private-data";
 import { notifyOwner } from "./push";
 import { kv } from "./store";
+import { withLock } from "./store";
 
 /*
  * EDIT-POINT: LIVE-CHAT
@@ -37,7 +38,7 @@ export const AGENT_MS = 75_000; // an admin who hasn't checked in for this long 
 
 // ---------- who's available ----------
 
-export async function agentHere(sessionId: string, name: string, on?: boolean) {
+async function _agentHere(sessionId: string, name: string, on?: boolean) {
   const all = (await kv.get<Agents>(AGENTS)) ?? {};
   const now = Date.now();
   for (const [k, v] of Object.entries(all)) if (now - v.at > 24 * 3600_000) delete all[k];
@@ -47,7 +48,7 @@ export async function agentHere(sessionId: string, name: string, on?: boolean) {
   return all[sessionId].on;
 }
 
-export async function agentLeave(sessionId: string) {
+async function _agentLeave(sessionId: string) {
   const all = (await kv.get<Agents>(AGENTS)) ?? {};
   if (all[sessionId]) {
     all[sessionId].at = 0;
@@ -72,7 +73,7 @@ async function save(list: LiveChat[]) {
 const same = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const clean = (s: unknown, n: number) => String(s ?? "").replace(/[\u0000-\u0008\u000b-\u001f]/g, "").trim().slice(0, n);
 
-export async function startChat(opts: { name?: string; text?: string; page?: string; earlier?: string[] }) {
+async function _startChat(opts: { name?: string; text?: string; page?: string; earlier?: string[] }) {
   const list = await load();
   const now = new Date().toISOString();
   const name = clean(opts.name, 60);
@@ -105,7 +106,7 @@ export async function customerChat(id: string, token: string) {
   return c && same(c.token, token) ? c : null;
 }
 
-export async function customerSend(id: string, token: string, text: string) {
+async function _customerSend(id: string, token: string, text: string) {
   const list = await load();
   const c = list.find((x) => x.id === id);
   if (!c || !same(c.token, token) || c.status === "closed") return null;
@@ -120,7 +121,7 @@ export async function customerSend(id: string, token: string, text: string) {
   return c;
 }
 
-export async function customerEnd(id: string, token: string) {
+async function _customerEnd(id: string, token: string) {
   const list = await load();
   const c = list.find((x) => x.id === id);
   if (!c || !same(c.token, token)) return;
@@ -139,7 +140,7 @@ export async function listChats() {
   return (await load()).map(({ token: _t, ...c }) => ({ ...c, unread: c.msgs.length - c.adminRead }));
 }
 
-export async function adminSend(id: string, text: string, by: string) {
+async function _adminSend(id: string, text: string, by: string) {
   const list = await load();
   const c = list.find((x) => x.id === id);
   if (!c) return null;
@@ -154,7 +155,7 @@ export async function adminSend(id: string, text: string, by: string) {
   return c;
 }
 
-export async function adminRead(id: string) {
+async function _adminRead(id: string) {
   const list = await load();
   const c = list.find((x) => x.id === id);
   if (c && c.adminRead !== c.msgs.length) {
@@ -163,7 +164,7 @@ export async function adminRead(id: string) {
   }
 }
 
-export async function adminClose(id: string, by: string) {
+async function _adminClose(id: string, by: string) {
   const list = await load();
   const c = list.find((x) => x.id === id);
   if (!c) return;
@@ -174,12 +175,12 @@ export async function adminClose(id: string, by: string) {
   await save(list);
 }
 
-export async function adminDelete(id: string) {
+async function _adminDelete(id: string) {
   await save((await load()).filter((c) => c.id !== id));
 }
 
 /** Copies the conversation into the Inbox, to answer by email later. */
-export async function chatToInbox(id: string) {
+async function _chatToInbox(id: string) {
   const c = (await load()).find((x) => x.id === id);
   if (!c) return false;
   const msgs = await getMessages();
@@ -187,4 +188,40 @@ export async function chatToInbox(id: string) {
   msgs.unshift({ id: newId(), createdAt: new Date().toISOString(), name: c.name, email: c.email, message: `Live chat from ${new Date(c.createdAt).toLocaleString("en-US")}\n\n${transcript}`.slice(0, 5000), read: false });
   await saveMessages(msgs);
   return true;
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function agentHere(...a: Parameters<typeof _agentHere>) {
+  return withLock("liveAgents", () => _agentHere(...a));
+}
+export function agentLeave(...a: Parameters<typeof _agentLeave>) {
+  return withLock("liveAgents", () => _agentLeave(...a));
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function startChat(...a: Parameters<typeof _startChat>) {
+  return withLock("liveChats", () => _startChat(...a));
+}
+export function customerSend(...a: Parameters<typeof _customerSend>) {
+  return withLock("liveChats", () => _customerSend(...a));
+}
+export function customerEnd(...a: Parameters<typeof _customerEnd>) {
+  return withLock("liveChats", () => _customerEnd(...a));
+}
+export function adminSend(...a: Parameters<typeof _adminSend>) {
+  return withLock("liveChats", () => _adminSend(...a));
+}
+export function adminRead(...a: Parameters<typeof _adminRead>) {
+  return withLock("liveChats", () => _adminRead(...a));
+}
+export function adminClose(...a: Parameters<typeof _adminClose>) {
+  return withLock("liveChats", () => _adminClose(...a));
+}
+export function adminDelete(...a: Parameters<typeof _adminDelete>) {
+  return withLock("liveChats", () => _adminDelete(...a));
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function chatToInbox(...a: Parameters<typeof _chatToInbox>) {
+  return withLock("write", () => _chatToInbox(...a));
 }

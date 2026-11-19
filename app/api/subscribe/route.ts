@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSubscribers, saveSubscribers } from "@/lib/db";
 import { isEmail, tooMany } from "@/lib/guard";
+import { mutating } from "@/lib/store";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   if (b.website) return NextResponse.json({ ok: true });
   if (tooMany(req, 8)) return NextResponse.json({ error: "Please try again later." }, { status: 429 });
@@ -15,3 +16,5 @@ export async function POST(req: Request) {
   }
   return NextResponse.json({ ok: true });
 }
+
+export const POST = mutating(handlePOST);

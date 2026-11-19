@@ -48,7 +48,7 @@ export function LiveDesk({ openId }: { openId?: string }) {
     <>
       <div className="page-head">
         <h1>Live chat</h1>
-        <span className={`pill ${agents.length ? "s-live" : ""}`}>{agents.length ? `Available: ${agents.join(", ")}` : "Nobody available (turn on Live in the top bar)"}</span>
+        <span className={`pill ${agents.length ? "s-live" : ""}`} style={{ textTransform: "none" }}>{agents.length ? `Available: ${agents.join(", ")}` : "Nobody available (turn on Live in the top bar)"}</span>
       </div>
       <p className="muted lead">
         While the <strong>Live</strong> switch in the top bar is on (pulsing red) and the dashboard is open on screen, customers see a red pulse on the shop&apos;s chat button and can talk to you here. Close the dashboard or switch to Away and the chat helper takes over again; anyone who wanted a person can leave their email instead.

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getMessages, getSubscribers, saveMessages, saveSubscribers } from "@/lib/db";
+import { mutating } from "@/lib/store";
 
 // { action: "read", id? } marks one (or all) read; { action: "delete", id }; { action: "unsubscribe", email }
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   if (b.action === "unsubscribe") {
     await saveSubscribers((await getSubscribers()).filter((s) => s.email !== b.email));
@@ -14,3 +15,5 @@ export async function POST(req: Request) {
   await saveMessages(list);
   return NextResponse.json({ ok: true });
 }
+
+export const POST = mutating(handlePOST);

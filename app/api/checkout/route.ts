@@ -33,7 +33,13 @@ export async function POST(req: Request) {
   if (body.giftCard) return buyGiftCard(s, settings, body.giftCard, req);
 
   // bulk discount: the more items in one order, the bigger the discount (Dashboard > Discounts)
-  const totalQty = (Array.isArray(items) ? items.slice(0, 50) : []).reduce((n, it) => n + Math.max(1, Math.min(99, Math.floor(Number(it.quantity) || 1))), 0);
+  // only real items for sale count, in the quantity that can actually be bought
+  const totalQty = (Array.isArray(items) ? items.slice(0, 50) : []).reduce((n, it) => {
+    const p = products.find((x) => x.id === it.productId);
+    if (!p) return n;
+    const q = Math.max(1, Math.min(99, Math.floor(Number(it.quantity) || 1)));
+    return n + (p.stock !== null ? Math.max(0, Math.min(q, p.stock)) : q);
+  }, 0);
   const bulk = bulkPercent(settings.discounts.bulk, totalQty);
 
   const shelf = await getBlanks();

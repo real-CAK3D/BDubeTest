@@ -6,6 +6,7 @@ import { getPrivate, setPrivate } from "./private-data";
 import { notifyOwner } from "./push";
 import { stripe } from "./stripe";
 import type { Abandoned } from "./types";
+import { withLock } from "./store";
 
 /*
  * EDIT-POINT: CHECKOUT-REMINDERS
@@ -18,7 +19,7 @@ export const getAbandoned = () => getPrivate<Abandoned[]>("abandoned", []);
 const saveAbandoned = (l: Abandoned[]) => setPrivate("abandoned", l.slice(0, 1000));
 
 /** A reminded customer came back through the link and paid. */
-export async function markRecovered(sessionId: string) {
+async function _markRecovered(sessionId: string) {
   const list = await getAbandoned();
   const a = list.find((x) => x.id === sessionId);
   if (!a) return;
@@ -26,13 +27,14 @@ export async function markRecovered(sessionId: string) {
   await saveAbandoned(list);
 }
 
-export async function remindAbandoned(sessionId: string) {
+async function _remindAbandoned(sessionId: string) {
   const s = await stripe();
   if (!s) return;
   const session = await s.checkout.sessions.retrieve(sessionId, { expand: ["line_items"] });
   const email = session.customer_details?.email;
   const url = session.after_expiration?.recovery?.url;
   if (!email || !url || session.metadata?.kind === "giftcard") return;
+  if ((await getAbandoned()).some((x) => x.id === sessionId)) return; // already handled (Stripe can send the same event twice)
   if (session.consent?.promotions === "opt_out") return; // they said no to emails
   const settings = await getSettings();
   const items = (session.line_items?.data ?? []).map((li) => `${li.quantity} x ${li.description}`).join(", ");
@@ -74,4 +76,12 @@ export async function remindAbandoned(sessionId: string) {
   list.unshift(rec);
   await saveAbandoned(list);
   await notifyOwner("Unfinished checkout", `${rec.name || email} left ${money(rec.amount, session.currency ?? "usd")} in their cart${rec.emailedAt ? " (reminder sent)" : ""}.`, "/admin/discounts?tab=reminders");
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function markRecovered(...a: Parameters<typeof _markRecovered>) {
+  return withLock("write", () => _markRecovered(...a));
+}
+export function remindAbandoned(...a: Parameters<typeof _remindAbandoned>) {
+  return withLock("write", () => _remindAbandoned(...a));
 }

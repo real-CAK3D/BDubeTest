@@ -8,7 +8,10 @@ export const SESSION_COOKIE = "owner_session";
 export const SESSION_DAYS = 60;
 
 function secret() {
-  return process.env.AUTH_SECRET || "fallback:" + (process.env.ADMIN_PASSWORD || "changeme");
+  if (process.env.AUTH_SECRET) return process.env.AUTH_SECRET;
+  // on the live site a guessable key would let anyone fake a login, so it's required there
+  if (process.env.VERCEL) throw new Error("AUTH_SECRET isn't set. Add it in Vercel > Settings > Environment Variables, then redeploy.");
+  return "fallback:" + (process.env.ADMIN_PASSWORD || "changeme"); // your own computer only
 }
 
 async function hmac(data: string) {
@@ -36,7 +39,11 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   if (!token) return null;
   const [exp, sid, sig] = token.split(".");
   if (!exp || !sid || !sig || Number(exp) < Date.now()) return null;
-  return (await same(sig, await hmac(`${exp}.${sid}`))) ? sid : null;
+  try {
+    return (await same(sig, await hmac(`${exp}.${sid}`))) ? sid : null;
+  } catch {
+    return null; // no AUTH_SECRET: nobody is signed in
+  }
 }
 
 // The PIN lock hands out a short pass that lets the login screen show.
@@ -52,7 +59,7 @@ export async function verifyGateToken(token: string | undefined | null) {
   if (!token) return false;
   const [exp, sig] = token.split(".");
   if (!exp || !sig || Number(exp) < Date.now()) return false;
-  return same(sig, await hmac(`gate.${exp}`));
+  return same(sig, await hmac(`gate.${exp}`)).catch(() => false);
 }
 
 async function same(a: string, b: string) {

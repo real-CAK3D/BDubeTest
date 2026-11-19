@@ -663,7 +663,7 @@ body:has(.hq-shell[data-mode="dark"]) { background: #0F1311; }
 .live-switch.on { border-color: rgba(224, 38, 43, 0.7); }
 @media (max-width: 520px) { .live-switch-text { display: none; } .live-switch { padding: 0.45rem; } }
 .live-toast { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 80; display: flex; align-items: center; gap: 0.7rem; max-width: calc(100vw - 32px); padding: 0.8rem 1rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid #e0262b; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
-.pill.s-live { background: rgba(224, 38, 43, 0.12); color: #b51d22; text-transform: none; }
+.pill.s-live { background: rgba(224, 38, 43, 0.12); color: #b51d22; }
 .live-desk { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: start; }
 @media (max-width: 820px) { .live-desk { grid-template-columns: 1fr; } }
 .live-list ul { list-style: none; margin: 0.7rem 0 0; padding: 0; display: grid; gap: 0.3rem; }

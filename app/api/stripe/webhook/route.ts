@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getOrders, logOn, saveOrders } from "@/lib/db";
+import { mutate } from "@/lib/store";
 import { remindAbandoned } from "@/lib/abandoned";
 import { recordOrderFromSession } from "@/lib/orders";
 import { notifyOwner } from "@/lib/push";
@@ -33,14 +34,16 @@ export async function POST(req: Request) {
     const sessions = await s.checkout.sessions.list({ payment_intent: String(charge.payment_intent), limit: 1 });
     const id = sessions.data[0]?.id;
     if (id) {
-      const orders = await getOrders();
-      const o = orders.find((x) => x.id === id);
-      if (o && charge.refunded) {
+      const o = await mutate(async () => {
+        const orders = await getOrders();
+        const o = orders.find((x) => x.id === id);
+        if (!o || !charge.refunded || o.status === "refunded") return null; // Stripe can send the same event twice
         o.status = "refunded";
         logOn(o, "Refunded in Stripe");
         await saveOrders(orders);
-        await notifyOwner(`Order #${o.number} refunded`, `${o.name || o.email}`, `/admin/orders?open=${o.id}`);
-      }
+        return o;
+      });
+      if (o) await notifyOwner(`Order #${o.number} refunded`, `${o.name || o.email}`, `/admin/orders?open=${o.id}`);
     }
   }
   if (event.type === "product.created" || event.type === "product.updated") {

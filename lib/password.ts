@@ -9,11 +9,8 @@ type Hash = { salt: string; hash: string; changedAt: string };
 const KEY = "ownerPassword";
 
 export async function getPasswordHash() {
-  try {
-    return await kv.get<Hash>(KEY);
-  } catch {
-    return null;
-  }
+  // a database error must not quietly bring back the starter password from Vercel
+  return await kv.get<Hash>(KEY);
 }
 
 function hashOf(pw: string, salt: string) {

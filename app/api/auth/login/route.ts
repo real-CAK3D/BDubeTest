@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { checkOwn, findAccount, touchLogin } from "@/lib/admin-accounts";
+import { checkOwn, findAccount, newPeopleAllowed, touchLogin } from "@/lib/admin-accounts";
 import { addSession, clearFails, lockedFor, lockInfo, recordFail, visitorKey } from "@/lib/admin-security";
 import { createSessionToken, GATE_COOKIE, SESSION_COOKIE, SESSION_DAYS, verifyGateToken } from "@/lib/auth";
 import { checkPassword } from "@/lib/password";
@@ -7,6 +7,14 @@ import { checkPassword } from "@/lib/password";
 // Name + password. A new name (or one that was reset) signs in with the starter
 // password and is asked to choose their own straight away.
 export async function POST(req: Request) {
+  try {
+    return await login(req);
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message.includes("AUTH_SECRET") ? (e as Error).message : "Something went wrong signing in. Please try again." }, { status: 500 });
+  }
+}
+
+async function login(req: Request) {
   const { password, name } = await req.json().catch(() => ({ password: "" }));
   const who = visitorKey(req, "login");
   const wait = await lockedFor(who);
@@ -24,6 +32,12 @@ export async function POST(req: Request) {
   let pending = false;
   if (account && !account.mustChange) ok = checkOwn(account, password);
   else {
+    // a name we don't know: only while new people are allowed in (see Settings > Password & security)
+    if (!account && !(await newPeopleAllowed())) {
+      await new Promise((r) => setTimeout(r, 800));
+      await recordFail(who);
+      return NextResponse.json({ error: "We don't know that name. Check the spelling, or ask one of the owners to tap “Let someone new sign in” in Settings > Password & security." }, { status: 401 });
+    }
     ok = await checkPassword(password); // the starter password
     pending = true;
   }

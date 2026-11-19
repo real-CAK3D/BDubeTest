@@ -6,6 +6,7 @@ import { shopSettings } from "@/lib/shop-data";
 import { barcodeSvg } from "@/lib/codes";
 import { money } from "@/lib/format";
 import { orderCode } from "@/lib/order-code";
+import { fillPolicy } from "@/lib/policy-text";
 
 export const metadata = { title: "Thank you" };
 
@@ -21,7 +22,7 @@ export default async function Success({ searchParams }: { searchParams: Promise<
   return (
     <section className="section success">
       <ClearCart />
-      <h1>Thank you{order?.name ? `, ${order.name.split(" ")[0]}` : ""}.</h1>
+      <h1>{order || session_id ? "Thank you" : "Thanks for stopping by"}{order?.name ? `, ${order.name.split(" ")[0]}` : ""}.</h1>
       {order ? (
         <>
           <p className="lede">
@@ -62,10 +63,12 @@ export default async function Success({ searchParams }: { searchParams: Promise<
             </div>
           ) : null}
         </>
+      ) : session_id ? (
+        <p className="lede">Your payment went through. A receipt is on its way to your inbox, and you can check on your order any time on <Link href="/order-status">Order status</Link>.</p>
       ) : (
-        <p className="lede">Your order is confirmed. A receipt is on its way to your inbox.</p>
+        <p className="lede">There&apos;s no order to show here. If you just paid, your receipt email has everything, or check <Link href="/order-status">Order status</Link>.</p>
       )}
-      <p>{s.shippingPolicy}</p>
+      {order || session_id ? <p>{fillPolicy(s.shippingPolicy, s)}</p> : null}
       <Link href="/" className="btn">Back to the shop</Link>
     </section>
   );

@@ -7,6 +7,7 @@ import { orderCode } from "./order-code";
 import { fillPolicy } from "./policy-text";
 import { notifyOwner } from "./push";
 import { quoteShipping } from "./shipping";
+import { withLock } from "./store";
 import type { SiteSettings } from "./types";
 
 /*
@@ -95,7 +96,7 @@ async function orderLookup(history: ActionTurn[], req: Request, s: SiteSettings)
   const when = new Date(o.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric" });
   const track = o.trackingNumber ? `\n\nTracking${o.carrier ? ` (${o.carrier})` : ""}: ${o.trackingNumber}${trackingLink(o.carrier, o.trackingNumber) ? `\n${trackingLink(o.carrier, o.trackingNumber)}` : ""}` : "";
   return {
-    reply: `Order ${orderCode(o, s.businessName)} from ${when} (${items.join(", ")}) ${(SAY[o.status] ?? (() => `is ${o.status}.`))(pickup)}${track}`,
+    reply: `Order ${orderCode(o, s.businessName)} from ${when}${items.length ? ` (${items.join(", ")})` : ""} ${(SAY[o.status] ?? (() => `is ${o.status}.`))(pickup)}${track}`,
     answered: true,
   };
 }
@@ -222,5 +223,5 @@ async function intake(history: ActionTurn[], state: ChatState, req: Request, s: 
 
 /** Runs before the normal answers. Returns a reply when an action handled the message. */
 export async function act(history: ActionTurn[], state: ChatState, req: Request, s: SiteSettings): Promise<ActionReply | null> {
-  return (await intake(history, state, req, s)) ?? (await orderLookup(history, req, s)) ?? (await zipQuote(history, s));
+  return (await withLock("write", () => intake(history, state, req, s))) ?? (await orderLookup(history, req, s)) ?? (await zipQuote(history, s));
 }

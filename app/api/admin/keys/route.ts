@@ -4,6 +4,7 @@ import webpush from "web-push";
 import { checkFormat, KEY_DEFS, keyStatuses, removeKey, saveKey, validName } from "@/lib/keys";
 import { connectStripeWebhook } from "@/lib/stripe-webhook";
 import { syncStripeCatalog } from "@/lib/stripe-catalog";
+import { mutating } from "@/lib/store";
 
 async function test(envName: string, value: string): Promise<string | null> {
   if (envName === "STRIPE_SECRET_KEY") {
@@ -30,7 +31,7 @@ export async function GET() {
 }
 
 // { action: "save", name, value } | { action: "remove", name } | { action: "test", name, value? } | { action: "vapid" }
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   const name = String(b.name ?? "").trim().toUpperCase();
   try {
@@ -74,3 +75,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
+
+export const POST = mutating(handlePOST);

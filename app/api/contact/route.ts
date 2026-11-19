@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getMessages, newId, saveMessages } from "@/lib/db";
 import { isEmail, tooMany } from "@/lib/guard";
 import { notifyOwner } from "@/lib/push";
+import { mutating } from "@/lib/store";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   if (b.website) return NextResponse.json({ ok: true }); // bot trap
   if (tooMany(req)) return NextResponse.json({ error: "Too many messages. Please try again later." }, { status: 429 });
@@ -18,3 +19,5 @@ export async function POST(req: Request) {
   await notifyOwner(`Message from ${name || email}`, message.slice(0, 120), "/admin/inbox");
   return NextResponse.json({ ok: true });
 }
+
+export const POST = mutating(handlePOST);

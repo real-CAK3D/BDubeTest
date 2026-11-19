@@ -4,6 +4,7 @@ import { kv } from "./store";
 import { DEFAULT_ADMIN } from "./site-structure";
 import { fileSettings, syncVariables } from "./sync";
 import type { AppNotification, CustomRequest, Expense, Message, Order, Product, Review, SiteSettings, Subscriber } from "./types";
+import { withLock } from "./store";
 
 // Starting values come from site-variables.ts (the SITE-VARIABLES edit point).
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -68,7 +69,7 @@ export function logOn(o: Order, what: string, by?: string) {
   o.history = [...(o.history ?? []), { at: new Date().toISOString(), what: what.slice(0, 200), ...(by ? { by } : {}) }].slice(-100);
 }
 
-export async function updateOrder(id: string, patch: Partial<Order>) {
+async function _updateOrder(id: string, patch: Partial<Order>) {
   const orders = await getOrders();
   const o = orders.find((x) => x.id === id);
   if (!o) return null;
@@ -78,7 +79,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
 }
 
 // Returns null if we already have it (webhook and thank-you page both call this).
-export async function addOrderOnce(order: Omit<Order, "number">): Promise<Order | null> {
+async function _addOrderOnce(order: Omit<Order, "number">): Promise<Order | null> {
   const orders = await getOrders();
   if (orders.some((o) => o.id === order.id)) return null;
   const number = (orders.reduce((m, o) => Math.max(m, o.number), 1000) || 1000) + 1;
@@ -164,4 +165,12 @@ export async function getRequests(): Promise<CustomRequest[]> {
 }
 export async function saveRequests(list: CustomRequest[]) {
   await setPrivate("requests", list.slice(0, 2000));
+}
+
+// one change at a time (see withLock in lib/store.ts)
+export function updateOrder(...a: Parameters<typeof _updateOrder>) {
+  return withLock("write", () => _updateOrder(...a));
+}
+export function addOrderOnce(...a: Parameters<typeof _addOrderOnce>) {
+  return withLock("write", () => _addOrderOnce(...a));
 }

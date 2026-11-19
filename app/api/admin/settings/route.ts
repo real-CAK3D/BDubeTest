@@ -3,6 +3,7 @@ import { syncToGitHub } from "@/lib/github-sync";
 import { DEFAULT_SETTINGS, getSettings, saveSettings } from "@/lib/db";
 import { DEFAULT_ADMIN } from "@/lib/site-structure";
 import type { AdminPrefs, DiscountPrograms, SiteSettings } from "@/lib/types";
+import { mutating } from "@/lib/store";
 
 type Row = Record<string, unknown>;
 const str = (v: unknown, max: number) => String(v ?? "").slice(0, max);
@@ -75,7 +76,7 @@ export async function GET() {
   return NextResponse.json(await getSettings());
 }
 
-export async function PUT(req: Request) {
+async function handlePUT(req: Request) {
   after(() => syncToGitHub("site content"));
   const body = (await req.json()) as Partial<SiteSettings>;
   const patch: Record<string, unknown> = {};
@@ -175,3 +176,5 @@ export async function PUT(req: Request) {
   }
   return NextResponse.json(await saveSettings(patch as Partial<SiteSettings>));
 }
+
+export const PUT = mutating(handlePUT);

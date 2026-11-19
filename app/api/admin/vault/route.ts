@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { newId } from "@/lib/db";
 import { getVault, saveVault, type VaultEntry } from "@/lib/vault";
+import { mutating } from "@/lib/store";
 
 const clip = (v: unknown, n: number) => String(v ?? "").slice(0, n);
 // the list never includes passwords; "reveal" returns one when asked
@@ -11,7 +12,7 @@ export async function GET() {
 }
 
 // { action: "save", entry } | { action: "delete", id } | { action: "reveal", id }
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const b = await req.json().catch(() => ({}));
   const list = await getVault();
   if (b.action === "reveal") return NextResponse.json({ password: list.find((x) => x.id === b.id)?.password ?? "" });
@@ -40,3 +41,5 @@ export async function POST(req: Request) {
   }
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
+
+export const POST = mutating(handlePOST);

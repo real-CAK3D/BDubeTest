@@ -4,7 +4,7 @@ import type { AdminSession, LockInfo } from "@/lib/admin-security";
 import { api } from "./api";
 
 type Account = { id: string; name: string; email: string; lastLogin?: string; mustChange: boolean };
-type Data = { lock: LockInfo; sessions: AdminSession[]; me: string | null; shared?: boolean; accounts: Account[] };
+type Data = { lock: LockInfo; sessions: AdminSession[]; me: string | null; shared?: boolean; accounts: Account[]; invite?: number };
 const ONLINE_MS = 5 * 60_000;
 const ago = (iso: string) => {
   const m = Math.round((Date.now() - Date.parse(iso)) / 60_000);
@@ -68,7 +68,17 @@ export function SecurityPanel() {
 
       <section className="panel stack">
         <div className="panel-head"><h2>People who can sign in</h2></div>
-        <p className="hint">Each person signs in with their own name and password. Someone new signs in with the <strong>starter password</strong> once and then chooses their own.</p>
+        <p className="hint">Each person signs in with their own name and password. Someone new signs in with the <strong>starter password</strong> once and then chooses their own. Once two of you have your own passwords, new names can only sign in while you let them:</p>
+        <div className="row wrap">
+          {d.invite ? (
+            <>
+              <span className="pill s-paid" style={{ textTransform: "none" }}>New people can sign in until {new Date(d.invite).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}</span>
+              <button className="b b-ghost b-sm" onClick={() => act({ action: "invite", close: true }, "Closed. Only the people below can sign in.")}>Close it now</button>
+            </>
+          ) : (
+            <button className="b b-sm" onClick={() => act({ action: "invite" }, "For the next 24 hours, someone new can sign in with their name and the starter password.")}>Let someone new sign in (24 hours)</button>
+          )}
+        </div>
         {d.accounts.length ? (
           <ul className="rows devices">
             {d.accounts.map((a) => (

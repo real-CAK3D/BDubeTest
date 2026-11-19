@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { kv } from "./store";
+import { kv, storageMode } from "./store";
 
 /*
  * EDIT-POINT: ADMIN-SECURITY
@@ -32,11 +32,16 @@ export async function addSession(name: string, userAgent: string): Promise<strin
   return id;
 }
 
+// Without a shared database (Supabase not connected yet on Vercel), each server
+// keeps its own scratch copy, so the device list can't be relied on: a validly
+// signed login is enough until Supabase is connected.
+export const sharedStorage = () => storageMode !== "file" || !process.env.VERCEL;
+
 /** Is this session still allowed? Also marks it as active (at most once a minute). */
 export async function touchSession(id: string): Promise<boolean> {
   const all = (await kv.get<Sessions>(SESSIONS)) ?? {};
   const s = all[id];
-  if (!s) return false;
+  if (!s) return !sharedStorage();
   if (Date.now() - Date.parse(s.lastSeen) > 60_000) {
     s.lastSeen = new Date().toISOString();
     await kv.set(SESSIONS, all);

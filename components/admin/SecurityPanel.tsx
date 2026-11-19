@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { AdminSession, LockInfo } from "@/lib/admin-security";
 import { api } from "./api";
 
-type Data = { lock: LockInfo; sessions: AdminSession[]; me: string | null };
+type Data = { lock: LockInfo; sessions: AdminSession[]; me: string | null; shared?: boolean };
 const ONLINE_MS = 5 * 60_000;
 const ago = (iso: string) => {
   const m = Math.round((Date.now() - Date.parse(iso)) / 60_000);
@@ -41,6 +41,9 @@ export function SecurityPanel() {
   const online = d.sessions.filter((s) => Date.now() - Date.parse(s.lastSeen) < ONLINE_MS).length;
   return (
     <>
+      {d.shared === false ? (
+        <p className="alert">Connect Supabase first (Setup, step 4). Until then the lock screen, the device list and signing devices out can&apos;t be relied on, because the site has nowhere permanent to remember them.</p>
+      ) : null}
       <section className="panel stack">
         <div className="panel-head"><h2>Lock screen</h2><span className={`pill ${d.lock.on ? "s-shipped" : ""}`}>{d.lock.on ? "On" : "Off"}</span></div>
         <p className="hint">

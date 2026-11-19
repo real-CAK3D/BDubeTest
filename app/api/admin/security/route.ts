@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { clearLock, endOtherSessions, endSession, listSessions, lockInfo, setLock } from "@/lib/admin-security";
+import { clearLock, endOtherSessions, endSession, listSessions, lockInfo, setLock, sharedStorage } from "@/lib/admin-security";
 import { currentSession } from "@/lib/session";
 
 export async function GET() {
   const [lock, sessions, me] = await Promise.all([lockInfo(), listSessions(), currentSession()]);
-  return NextResponse.json({ lock, sessions, me });
+  return NextResponse.json({ lock, sessions, me, shared: sharedStorage() });
 }
 
 // { action: "lock", kind, code } | { action: "unlock" } | { action: "signout", id } | { action: "signoutOthers" }
@@ -22,5 +22,5 @@ export async function POST(req: Request) {
   else if (b.action === "signoutOthers" && me) await endOtherSessions(me);
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   const [lock, sessions] = await Promise.all([lockInfo(), listSessions()]);
-  return NextResponse.json({ ok: true, lock, sessions, me });
+  return NextResponse.json({ ok: true, lock, sessions, me, shared: sharedStorage() });
 }

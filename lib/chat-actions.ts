@@ -74,6 +74,8 @@ async function orderLookup(history: ActionTurn[], req: Request, s: SiteSettings)
   const num = code ? Number(code[2]) : Number(recent.match(NUMBER)?.[1] ?? bare ?? NaN);
   const email = recent.match(EMAIL)?.[0].toLowerCase();
   if (!(wantsTrack || askedForIt || CODE.test(last))) return null;
+  // "my package showed up smashed" is a problem to report, not a lookup
+  if (!askedForIt && !CODE.test(last) && /\b(broke|broken|smash|crack|damage|dent|scratch|wrong|missing|ruin|shatter|leak|defect|faded|peel)/i.test(last)) return null;
   if (!num && !email) return wantsTrack && /\border|package|purchase\b/i.test(last) ? { reply: "I can look that up for you. Send me your order number (or the code on your receipt) and the email you used.", answered: true } : null;
   if (!num) return { reply: "Thanks! What's your order number? It's on your receipt email (or use the code under the barcode).", answered: true };
   if (!email) return { reply: `Got order ${code ? code[0].toUpperCase() : `#${num}`}. What email did you use for it? (I need both, so nobody else can look up your order.)`, answered: true };

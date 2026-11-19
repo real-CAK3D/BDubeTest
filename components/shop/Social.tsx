@@ -1,24 +1,21 @@
-import { LinkIcon, LINK_ICONS, linkHref } from "@/components/LinkIcon";
+import Link from "next/link";
+import { LinkIcon } from "@/components/LinkIcon";
 import type { LinkItem } from "@/lib/types";
 
-/** The links with pictures (Words & logos > Contact page > Links). */
+/** One "Socials" button (with the first few icons) that opens the Socials page. */
 export function Social({ links }: { links: LinkItem[] }) {
   const shown = links.filter((l) => !l.hidden && l.url);
   if (!shown.length) return null;
   return (
-    <ul className="social">
-      {shown.map((l) => {
-        const href = linkHref(l.icon, l.url);
-        const outside = /^https?:/.test(href);
-        return (
-          <li key={l.id}>
-            <a href={href} {...(outside ? { target: "_blank", rel: "noreferrer" } : {})}>
-              <span className="social-ic"><LinkIcon icon={l.icon} size={18} /></span>
-              {l.label || LINK_ICONS[l.icon]?.name || "Link"}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
+    <p className="socials-btn-wrap">
+      <Link href="/socials" className="socials-btn">
+        <span className="socials-icons" aria-hidden>
+          {shown.slice(0, 4).map((l) => (
+            <span key={l.id} className="social-ic"><LinkIcon icon={l.icon} size={16} /></span>
+          ))}
+        </span>
+        Socials
+      </Link>
+    </p>
   );
 }

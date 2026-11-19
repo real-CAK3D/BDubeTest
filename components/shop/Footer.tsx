@@ -5,6 +5,7 @@ import type { SiteSettings } from "@/lib/types";
 import { Logo } from "./Logo";
 import { Newsletter } from "./Newsletter";
 import { Social } from "./Social";
+import { pageOn } from "@/lib/site-structure";
 import { VersionTap } from "./VersionTap";
 
 export function Footer({ s }: { s: SiteSettings }) {
@@ -33,7 +34,7 @@ export function Footer({ s }: { s: SiteSettings }) {
         ) : null}
         <div className="footer-side">
           {s.showNewsletter ? <Newsletter text={s.newsletterText} /> : null}
-          <Social links={s.links} />
+          <Social links={pageOn(s, "socials") ? s.links : []} />
         </div>
       </div>
       {/*

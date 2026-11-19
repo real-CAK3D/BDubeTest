@@ -39,7 +39,7 @@ export type BrainShop = {
   email: string;
   phone: string;
   location: string;
-  facebook: boolean;
+  facebook: boolean; // has social links (shown on /socials)
   designs: BrainDesign[];
 };
 /** How close in meaning (about 0.2 unrelated to 0.8 the same) the question is to each answer id, item slug and design id. */
@@ -281,7 +281,7 @@ const TOPICS: Topic[] = [
     say: (s) => (s.customOrders ? `Yes, we love custom work!${s.customOrderNotice ? ` ${s.customOrderNotice}` : ""} Want me to send your idea to us for a price right now? Just say yes. (Or use /custom-order.)` : null),
     offer: (s) => (s.customOrders ? "custom" : undefined),
   },
-  { test: (w, raw) => raw.some((x) => ["contact", "email", "phone", "call", "reach", "talk", "human", "person", "someone", "owner"].includes(x)), say: (s) => `I can pass a message to us right now; just say yes. Or reach us ${list([s.email ? `by email at ${s.email}` : "", s.phone ? `by phone at ${s.phone}` : "", "through /contact", s.facebook ? "on our Facebook page" : ""].filter(Boolean))}.`, offer: () => "message" },
+  { test: (w, raw) => raw.some((x) => ["contact", "email", "phone", "call", "reach", "talk", "human", "person", "someone", "owner"].includes(x)), say: (s) => `I can pass a message to us right now; just say yes. Or reach us ${list([s.email ? `by email at ${s.email}` : "", s.phone ? `by phone at ${s.phone}` : "", "through /contact", s.facebook ? "on our socials (/socials)" : ""].filter(Boolean))}.`, offer: () => "message" },
   { test: (w, raw) => raw.some((x) => ["located", "location", "based", "address", "city"].includes(x)), say: (s) => (s.location ? `We're based in ${s.location}.${s.localPickup ? " Local pickup is free." : ""}` : null) },
   { test: (w) => has(w, "pay"), say: () => "We take all major cards, Apple Pay and Google Pay, through a secure Stripe checkout." },
 ];

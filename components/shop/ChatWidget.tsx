@@ -6,8 +6,8 @@ type LiveMsg = { at: string; from: "customer" | "admin" | "system"; text: string
 type Live = { id: string; token: string; from: number; started: number; status: "waiting" | "open" | "closed"; msgs: LiveMsg[] };
 
 // shop pages (/contact, /product/...) and web addresses in a reply become links
-const LINK = /(https?:\/\/[^\s)]+[^\s).,!?]|\/(?:product|shop|contact|custom-order|gift-cards|military|order-status|policies|pages|gallery|about|cart)(?:\/[\w-]+)*)/g;
-const LABEL: Record<string, string> = { product: "View item", shop: "the shop", contact: "Contact", "custom-order": "Custom orders", "gift-cards": "Gift cards", military: "Military discount", "order-status": "Order status", policies: "Policies", pages: "this page", gallery: "Our work", about: "About us", cart: "your cart" };
+const LINK = /(https?:\/\/[^\s)]+[^\s).,!?]|\/(?:product|shop|contact|custom-order|gift-cards|military|order-status|policies|pages|gallery|about|cart|socials)(?:\/[\w-]+)*)/g;
+const LABEL: Record<string, string> = { product: "View item", shop: "the shop", contact: "Contact", "custom-order": "Custom orders", "gift-cards": "Gift cards", military: "Military discount", "order-status": "Order status", policies: "Policies", pages: "this page", gallery: "Our work", about: "About us", cart: "your cart", socials: "Socials" };
 function linkify(text: string) {
   return text.split(LINK).map((part, i) =>
     i % 2 ? (

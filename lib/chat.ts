@@ -48,7 +48,7 @@ const brainShop = (s: SiteSettings, products: Product[]): BrainShop => ({
   email: s.contactEmail,
   phone: s.contactPhone,
   location: s.location,
-  facebook: Boolean(s.social.facebook) || (s.links ?? []).some((l) => l.icon === "facebook" && !l.hidden),
+  facebook: (s.links ?? []).some((l) => !l.hidden && l.url),
 });
 
 // ---------- what the shop knows about itself ----------
@@ -72,7 +72,7 @@ function shopFacts(s: SiteSettings, products: Product[]) {
     `Payment: cards, Apple Pay and Google Pay through Stripe.`,
     s.shippingPolicy ? `Shipping policy: ${fillPolicy(s.shippingPolicy, s)}` : "",
     s.returnPolicy ? `Returns policy: ${fillPolicy(s.returnPolicy, s)}` : "",
-    `To reach a person: the Contact page${s.social.facebook ? " or the shop's Facebook group" : ""}.`,
+    `To reach a person: the Contact page${(s.links ?? []).some((l) => !l.hidden && l.url) ? ". Social media links (Facebook and more) are on the Socials page, /socials" : ""}.`,
   ]
     .filter(Boolean)
     .join("\n\n");

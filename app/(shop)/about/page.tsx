@@ -35,7 +35,7 @@ function AboutLinks({ s }: { s: SiteSettings }) {
     on("custom") && { href: "/custom-order", title: "Custom orders", text: "Tell us what you have in mind." },
     on("review") && { href: "/review", title: "Leave a review", text: "Got something from us? We'd love to hear about it." },
     ...s.extraPages.filter((p) => on(`page:${p.slug}`)).map((p) => ({ href: `/pages/${p.slug}`, title: p.title, text: p.body.split("\n")[0].slice(0, 70) })),
-    s.social.facebook && { href: s.social.facebook, title: "Facebook", text: "New pieces and behind-the-scenes from the workshop." },
+    on("socials") && s.links.some((l) => !l.hidden && l.url) && { href: "/socials", title: "Socials", text: "Follow along: new pieces and behind-the-scenes from the workshop." },
     on("contact") && { href: "/contact", title: "Contact", text: "Questions, big orders, or just to say hello." },
   ].filter(Boolean) as { href: string; title: string; text: string }[];
   if (!cards.length) return null;

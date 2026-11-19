@@ -2,6 +2,7 @@ import { paragraphs } from "@/lib/format";
 import type { SiteSettings } from "@/lib/types";
 import { ContactForm } from "./ContactForm";
 import { Social } from "./Social";
+import { pageOn } from "@/lib/site-structure";
 
 export function VeteranBadge({ s }: { s: SiteSettings }) {
   if (!s.showVeteranBadge) return null;
@@ -58,7 +59,7 @@ export function Contact({ s, always = false, about = "" }: { s: SiteSettings; al
         ) : null}
         {s.location ? <li>{s.location}</li> : null}
       </ul>
-      <Social links={s.links} />
+      <Social links={pageOn(s, "socials") ? s.links : []} />
       {s.showContactForm ? <ContactForm initial={about ? `I'd like one like your "${about}". ` : ""} /> : null}
     </section>
   );

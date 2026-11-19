@@ -754,3 +754,21 @@ model-viewer.viewer3d-stage { --poster-color: transparent; }
 .chat-end { background: none; border: 1px solid currentColor; border-radius: 999px; color: inherit; padding: 0.15rem 0.65rem; font: inherit; font-size: 0.78rem; cursor: pointer; }
 /* room under the last bit of each page so the floating chat button never covers it */
 @media (max-width: 700px) { .main { padding-bottom: 72px; } }
+
+/* Socials: one button, and a link-tree style page */
+.socials-btn-wrap { margin: 0.8rem 0 0; }
+.socials-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.4rem 1rem 0.4rem 0.45rem; border: 1.5px solid var(--line); border-radius: 999px; text-decoration: none; font-weight: 700; color: inherit; }
+.socials-btn:hover { border-color: var(--stitch, var(--accent)); }
+.socials-icons { display: inline-flex; }
+.socials-icons .social-ic { width: 26px; height: 26px; margin-right: -7px; border: 2px solid var(--bg); }
+.socials-icons .social-ic:last-child { margin-right: 0; }
+.linktree { max-width: 560px; margin: 0 auto; text-align: center; }
+.linktree-head { display: grid; justify-items: center; gap: 0.4rem; margin-bottom: 1.6rem; }
+.linktree-head h1 { margin: 0.4rem 0 0; }
+.linktree-head .lede { margin: 0; }
+.linktree-list { list-style: none; margin: 0 0 1.6rem; padding: 0; display: grid; gap: 0.75rem; }
+.linktree-list a { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.8rem; padding: 0.85rem 1.1rem; border-radius: 14px; background: var(--surface); border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 1.05rem; text-align: left; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transition: transform 0.12s, border-color 0.12s; }
+.linktree-list a:hover { transform: translateY(-2px); border-color: var(--accent); }
+.linktree-list .social-ic { width: 38px; height: 38px; }
+.linktree-arrow { font-size: 1.5rem; color: var(--muted); }
+.linktree-shop { margin-top: 0.4rem; }

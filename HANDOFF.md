@@ -39,10 +39,10 @@ Good to know:
 - The shop doesn't care which account owns it. It reads the owner and repository name from Vercel by itself.
 
 ### 3. Free up the web address
-The address `bdubytest.vercel.app` belongs to your Vercel project. Once your project stops using it, he can claim it.
+The address `bdubetest.vercel.app` belongs to your Vercel project. Once your project stops using it, he can claim it.
 
 1. In Vercel, open your project, then **Settings > Domains**.
-2. Click **⋯** next to `bdubytest.vercel.app`, then **Remove**.
+2. Click **⋯** next to `bdubetest.vercel.app` (and any other `.vercel.app` names listed), then **Remove**.
 3. After his site is working (Part 2, step 2), delete your project under **Settings > General**, at the bottom (**Delete Project**). The transferred repository is no longer linked to it anyway.
 
 ### 4. Optional
@@ -76,14 +76,15 @@ Optional: rename it under the repository's **Settings > General > Repository nam
    | `ADMIN_PASSWORD` | The dashboard password. Use `bdube123` for now; change it any time in **Settings > Password & security**. |
    | `AUTH_SECRET` | 40 or more random characters. Mash the keyboard; you'll never type it again. **Never change it once you have real orders**: customer details are stored encrypted with it. |
    | `OWNER_RESET_CODE` | Optional. A secret phrase that lets you reset a forgotten password from the sign-in page if you have no email set. |
+   | `NEXT_PUBLIC_SITE_URL` | Your web address, e.g. `https://bdubetest.vercel.app` (add it after step 7 picks the name). Emails and gift cards link to it. If you change your address later, change this too and redeploy. |
 
 6. Click **Deploy** and wait about two minutes.
-7. Choose your web address: open the project's **Settings > Domains**, click **Add Domain**, and type the name you want ending in `.vercel.app`, for example `bdubytest.vercel.app` once Part 1, step 3 has freed it up. Vercel tells you right away if a name is taken.
+7. Choose your web address: open the project's **Settings > Domains**, click **Add Domain**, and type the name you want ending in `.vercel.app`, for example `bdubetest.vercel.app` once Part 1, step 3 has freed it up. Vercel tells you right away if a name is taken.
 
 > Want your own domain like `dubefamilycreations.com`? On the same **Domains** page, click **Buy** (about $12 a year) or **Add** one you already own. Vercel walks you through it.
 
 ### Step 3: Log in to your dashboard, 1 minute
-1. Open your web address with `/admin` on the end, for example `https://bdubytest.vercel.app/admin`.
+1. Open your web address with `/admin` on the end, for example `https://bdubetest.vercel.app/admin`.
 2. Type **your name** and the starter password (`bdube123`).
 3. The dashboard asks you to **choose your own password** (and an email for resets). Your wife does the same on her phone with her name and the same starter password, then picks her own. Both of you can be signed in at once.
 4. On your iPhone, open the same address in **Safari** and tap **Share > Add to Home Screen**. It becomes an app called Shop HQ.

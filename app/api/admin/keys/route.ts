@@ -14,6 +14,10 @@ async function test(envName: string, value: string): Promise<string | null> {
       return `Stripe didn't accept that key: ${(e as Error).message}`;
     }
   }
+  if (envName === "SHIPPO_API_KEY") {
+    const r = await fetch("https://api.goshippo.com/addresses/?results=1", { headers: { authorization: `ShippoToken ${value}` } }).catch(() => null);
+    return r?.ok ? null : "Shippo didn't accept that token.";
+  }
   if (envName === "RESEND_API_KEY") {
     const r = await fetch("https://api.resend.com/domains", { headers: { authorization: `Bearer ${value}` } }).catch(() => null);
     return r?.ok ? null : "Resend didn't accept that key.";

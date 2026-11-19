@@ -4,35 +4,22 @@
  *  The dashboard keeps this file up to date: when something is changed on the
  *  phone, it's saved here too, so GitHub always matches the live site.
  *
- *  HOW TO CHANGE THE SITE WITH CHATGPT
- *  1. On GitHub, open this file and click the "Copy raw file" button.
- *  2. Paste it into ChatGPT and say what you want, for example:
- *       "Add a walnut pen for $35, 10 in stock, in Woodwork. Write the descriptions."
- *       "Rewrite my about story. I was an MP from 2006 to 2014."
- *       "Put everything in Leather on sale for 15% off."
- *       "Switch to the Dress Blues theme."
- *  3. Copy the whole file ChatGPT gives back.
- *  4. On GitHub, click the pencil (Edit), select everything, paste, then click
- *     "Commit changes". The site updates by itself in about a minute.
- *     Wait for that before changing things in the dashboard, or the dashboard
- *     will save over your edit.
+ *  Day to day, change things in the dashboard; nothing here needs touching.
+ *  This file is the backup copy, with history on GitHub, and is used when the
+ *  shop is set up somewhere new.
  *
- *  If something goes wrong, nothing breaks: Vercel won't publish a file with a
- *  mistake in it, and the current site stays up. Open the commit on GitHub and
- *  click "Revert", or ask ChatGPT to fix the error message Vercel emails you.
- *
- *  RULES FOR CHATGPT (read these before editing this file)
- *  - Return the COMPLETE file every time, from the first line to the last.
- *  - Only change the values the owner asked about. Keep every key, every
- *    comment, the import line and the "satisfies SiteVariables" line at the end.
+ *  IF YOU EDIT IT BY HAND ON GITHUB
+ *  Click the pencil, change only the values you mean to, and "Commit changes".
+ *  The site updates by itself in about a minute. If there's a mistake, Vercel
+ *  won't publish it and the current site stays up; open the commit and click
+ *  "Revert". Rules:
+ *  - Keep every key, every comment, the import line and the "satisfies
+ *    SiteVariables" line at the end.
  *  - Text goes in "double quotes". Use \n\n inside text for a new paragraph.
- *    Write apostrophes as ' and avoid curly quotes.
  *  - Prices are plain numbers in dollars: 35 or 35.5 (no $ sign, no quotes).
- *  - Each product needs a unique "slug": lowercase words joined by dashes,
- *    e.g. "walnut-pen". The slug becomes the item's web address. Don't change
- *    the slug of an existing item unless asked.
- *  - Removing a product from the list removes it from the shop. To hide it but
- *    keep it, set visible: false.
+ *  - Each product needs a unique "slug": lowercase words joined by dashes.
+ *    The slug becomes the item's web address.
+ *  - Removing a product removes it from the shop; visible: false hides it.
  *  - theme must be one of:
  *      logo match: "dube-family"
  *      military: "olive-drab", "ocp-field", "dress-blues", "black-gold", "desert-camo", "woodland-camo"
@@ -47,8 +34,6 @@
  *    or links that are already in this file.
  *  - Policy text can use {business}, {email} and {state}; they're filled in
  *    automatically. These are plain starting points, not legal advice.
- *  - If a request can't be done in this file, say so and name the closest
- *    "EDIT-POINT" from CUSTOMIZE.md instead of guessing.
  *
  *  HOW THIS FILE AND THE DASHBOARD WORK TOGETHER
  *  When this file changes on GitHub, only the values that changed here are
@@ -171,11 +156,39 @@ export const SITE_VARIABLES = {
     { page: "page:faq", label: "FAQ", inMenu: false, inFooter: true, on: true },
     { page: "status", label: "Order status", inMenu: false, inFooter: true, on: true },
     { page: "review", label: "Leave a review", inMenu: false, inFooter: false, on: true },
+    { page: "military", label: "Military discount", inMenu: false, inFooter: true, on: true },
+    { page: "giftcards", label: "Gift cards", inMenu: false, inFooter: true, on: true },
   ],
 
   // Shop categories
   // In the order they show in the shop. Each product's category should match one of these.
   categories: ["Drinkware", "Home decor", "Leather goods", "Patriotic & military", "Gifts & keepsakes"],
+
+  // Discounts
+  // Promo codes themselves are made in Dashboard > Discounts (they live in Stripe). These are the programs.
+  discounts: {
+    thankYouCode: { on: false, percentOff: 10, validDays: 60 }, // a code for their next order after each purchase
+    military: {
+      on: true, // the Military & first responder page
+      percentOff: 10,
+      checkFirst: true, // true: they ask and you approve each one; false: everyone sees the code below
+      code: "", // the shared code when checkFirst is false
+      heading: "Military & first responder discount",
+      text: "Thank you for your service. Veterans, active duty, Guard and Reserve, police, firefighters and EMTs get {percent}% off.", // {percent} is filled in
+    },
+    bulk: [ // the more items in one order, the bigger the discount
+      { fromItems: 10, percentOff: 5 },
+      { fromItems: 25, percentOff: 10 },
+      { fromItems: 50, percentOff: 15 },
+    ],
+    giftCards: {
+      on: true, // the Gift cards page
+      amounts: [25, 50, 100], // dollars
+      heading: "Gift cards",
+      text: "Let them pick their own piece. Sent by email with a code to use at checkout.",
+    },
+    checkoutReminders: { on: true, afterHours: 2 }, // email people who left checkout without paying (1 to 24 hours later)
+  },
 
   // Watermark
   // A stamp on shop photos so they can't be reused without credit. The original photos are never changed.
@@ -183,9 +196,9 @@ export const SITE_VARIABLES = {
     on: false, // true stamps shop photos; false shows them clean
     text: "", // "" uses the business name
     withLogo: true, // add the logo next to the text
-    position: "corner", // "corner" | "center" | "tiled"
-    opacity: 45, // 5 (faint) to 90 (strong)
-    size: 28, // 10 to 60, as a % of the photo's width
+    position: "tiled", // "corner" | "center" (one big diagonal) | "tiled" (diagonal all over)
+    opacity: 30, // 5 (faint) to 90 (strong)
+    size: 30, // 10 to 60, how big the stamp is
     onOurWork: true, // Our work photos too
     onDesigns: false, // design library artwork too
   },

@@ -1,10 +1,11 @@
 import type { SiteVariables } from "./site-variables-type";
+import { DEFAULT_DISCOUNTS } from "./discount-defaults";
 import { DEFAULT_WATERMARK } from "./watermark";
 import type { Product, SiteSettings } from "./types";
 
 const cents = (d: number | null | undefined) => (d == null ? null : Math.max(0, Math.round(d * 100)));
 
-export type FileSettings = Omit<SiteSettings, "admin">;
+export type FileSettings = Omit<SiteSettings, "admin" | "shipFrom" | "parcels">;
 
 const idOf = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50);
 
@@ -12,6 +13,15 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
+    discounts: v.discounts
+      ? {
+          thankYou: { on: v.discounts.thankYouCode.on, percent: v.discounts.thankYouCode.percentOff, days: v.discounts.thankYouCode.validDays },
+          veteran: { on: v.discounts.military.on, percent: v.discounts.military.percentOff, verify: v.discounts.military.checkFirst, code: v.discounts.military.code, heading: v.discounts.military.heading, text: v.discounts.military.text },
+          bulk: v.discounts.bulk.map((t) => ({ minQty: t.fromItems, percent: t.percentOff })),
+          giftCards: { on: v.discounts.giftCards.on, amounts: [...v.discounts.giftCards.amounts], heading: v.discounts.giftCards.heading, text: v.discounts.giftCards.text },
+          reminders: v.discounts.checkoutReminders ? { on: v.discounts.checkoutReminders.on, hours: v.discounts.checkoutReminders.afterHours } : { ...DEFAULT_DISCOUNTS.reminders },
+        }
+      : structuredClone(DEFAULT_DISCOUNTS),
     watermark: v.watermark
       ? {
           on: v.watermark.on,
@@ -102,7 +112,7 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   };
 }
 
-export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize" | "sizes" | "designs" | "preview"> & { images?: string[] };
+export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize" | "sizes" | "designs" | "preview" | "blank"> & { images?: string[] };
 
 // duplicate slugs: first one wins
 export function variablesToProducts(v: SiteVariables): FileProduct[] {
@@ -129,7 +139,8 @@ export function variablesToProducts(v: SiteVariables): FileProduct[] {
       active: p.visible ?? true,
       option: p.choice && p.choice.label && p.choice.options.length ? { label: p.choice.label, values: p.choice.options } : null,
       personalize: p.engraving ? { label: p.engraving.label, maxLength: p.engraving.maxLength, required: p.engraving.required } : null,
-      sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: cents(x.price) ?? 0 })) : null,
+      sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: cents(x.price) ?? 0, ...(x.blank ? { blank: x.blank } : {}) })) : null,
+      ...(p.blank ? { blank: p.blank } : {}),
       designs: p.designs
         ? {
             label: p.designs.label,

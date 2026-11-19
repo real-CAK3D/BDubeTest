@@ -1,10 +1,15 @@
+import { cookies } from "next/headers";
+import { LockScreen } from "@/components/admin/LockScreen";
 import { LoginForm } from "@/components/admin/LoginForm";
+import { lockInfo } from "@/lib/admin-security";
+import { GATE_COOKIE, verifyGateToken } from "@/lib/auth";
 import { getSettings } from "@/lib/db";
 
 export const metadata = { title: "Owner login" };
 
 export default async function Login({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const [{ next }, s] = await Promise.all([searchParams, getSettings()]);
+  const [{ next }, s, lock, jar] = await Promise.all([searchParams, getSettings(), lockInfo(), cookies()]);
+  const locked = lock.on && !(await verifyGateToken(jar.get(GATE_COOKIE)?.value));
   return (
     <div className="login">
       <div className="login-card">
@@ -15,8 +20,17 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           </svg>
         </div>
         <h1>{s.businessName}</h1>
-        <p className="muted">Owner login. Customers never see this page.</p>
-        <LoginForm next={next && next.startsWith("/admin") && next !== "/admin" ? next : s.admin.startPage || "/admin"} />
+        {locked ? (
+          <>
+            <p className="muted">Enter the {lock.kind === "pin" ? "4-digit PIN" : "passcode"} to continue.</p>
+            <LockScreen kind={lock.kind} />
+          </>
+        ) : (
+          <>
+            <p className="muted">Owner login. Customers never see this page.</p>
+            <LoginForm next={next && next.startsWith("/admin") && next !== "/admin" ? next : s.admin.startPage || "/admin"} />
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminPing } from "@/components/admin/AdminPing";
 import { HelpButton } from "@/components/admin/HelpButton";
 import { RegisterSW } from "@/components/admin/RegisterSW";
 import { getMessages, getNotifications, getOrders, getRequests, getReviews, getSettings } from "@/lib/db";
@@ -18,6 +19,7 @@ export default async function HQLayout({ children }: { children: React.ReactNode
   return (
     <div className="hq-shell" data-mode={a.mode} data-density={a.density} data-text={a.textSize} style={accent ? ({ "--owner-accent": accent } as React.CSSProperties) : undefined}>
       <RegisterSW />
+      <AdminPing />
       <header className="hq-top">
         <Link href="/admin" className="hq-brand">
           <span className="hq-star" aria-hidden>★</span>

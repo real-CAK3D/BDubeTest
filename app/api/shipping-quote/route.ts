@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getActiveProducts, getSettings } from "@/lib/db";
 import { tooMany } from "@/lib/guard";
+import { bulkPercent } from "@/lib/discount-defaults";
 import { unitPrice } from "@/lib/pricing";
 import { quoteShipping } from "@/lib/shipping";
 
@@ -14,5 +15,7 @@ export async function POST(req: Request) {
     const each = p ? unitPrice(p, it.size, it.design, s.designs) : null;
     return n + (each ?? 0) * Math.max(1, Math.min(99, Number(it.quantity) || 1));
   }, 0);
-  return NextResponse.json(await quoteShipping(s, { zip: String(b.zip ?? ""), country: "US", subtotal }));
+  const qty = (Array.isArray(b.items) ? b.items : []).slice(0, 50).reduce((n: number, it: { quantity?: number }) => n + Math.max(1, Math.min(99, Number(it.quantity) || 1)), 0);
+  const pct = bulkPercent(s.discounts.bulk, qty);
+  return NextResponse.json(await quoteShipping(s, { zip: String(b.zip ?? ""), country: "US", subtotal: Math.round((subtotal * (100 - pct)) / 100) }));
 }

@@ -6,7 +6,7 @@ const cleanSizes = (v: unknown) => {
   if (!Array.isArray(v)) return null;
   const seen = new Set<string>();
   const out = v
-    .map((x) => ({ name: String(x?.name ?? "").trim().slice(0, 40), price: Math.max(0, Math.round(Number(x?.price) || 0)) }))
+    .map((x) => ({ name: String(x?.name ?? "").trim().slice(0, 40), price: Math.max(0, Math.round(Number(x?.price) || 0)), ...(x?.blank ? { blank: String(x.blank).slice(0, 40) } : {}) }))
     .filter((x) => x.name && !seen.has(x.name) && seen.add(x.name))
     .slice(0, 20);
   return out.length ? out : null;
@@ -75,6 +75,7 @@ export function cleanProduct(input: Partial<Product>, existing?: Product): Produ
         }
       : null,
     sizes,
+    ...(input.blank && !sizes ? { blank: String(input.blank).slice(0, 40) } : {}),
     designs: cleanDesigns(input.designs, sizes),
     preview: cleanPreview(input.preview),
     stripeProductId: existing?.stripeProductId ?? input.stripeProductId,

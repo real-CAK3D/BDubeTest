@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getOrders, saveOrders } from "@/lib/db";
+import { remindAbandoned } from "@/lib/abandoned";
 import { recordOrderFromSession } from "@/lib/orders";
 import { notifyOwner } from "@/lib/push";
 import { getKey } from "@/lib/keys";
@@ -23,6 +24,9 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
     await recordOrderFromSession(event.data.object.id);
+  }
+  if (event.type === "checkout.session.expired") {
+    await remindAbandoned(event.data.object.id).catch((e) => console.error("reminder:", e));
   }
   if (event.type === "charge.refunded") {
     const charge = event.data.object;

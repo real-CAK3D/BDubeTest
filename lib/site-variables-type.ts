@@ -40,7 +40,8 @@ export type VariableProduct = {
   visible?: boolean;
   choice?: { label: string; options: string[] } | null;
   engraving?: { label: string; maxLength: number; required: boolean } | null;
-  sizes?: { name: string; price: number }[] | null;
+  sizes?: { name: string; price: number; blank?: string }[] | null;
+  blank?: string;
   designs?: { label: string; required: boolean; bySize: Record<string, string[]>; customerUpload?: boolean; customerUploadPrice?: number } | null;
   preview?: {
     mockup?: { photo: string; x: number; y: number; width: number; height: number } | null;
@@ -84,6 +85,13 @@ export type SiteVariables = {
   extraPages: { slug: string; title: string; body: string; inFooter: boolean }[];
   menu: { page: string; label: string; link?: string; inMenu: boolean; inFooter: boolean; on: boolean }[];
   categories: string[];
+  discounts?: {
+    thankYouCode: { on: boolean; percentOff: number; validDays: number };
+    military: { on: boolean; percentOff: number; checkFirst: boolean; code: string; heading: string; text: string };
+    bulk: { fromItems: number; percentOff: number }[];
+    giftCards: { on: boolean; amounts: number[]; heading: string; text: string };
+    checkoutReminders?: { on: boolean; afterHours: number };
+  };
   watermark?: { on: boolean; text: string; withLogo: boolean; position: "corner" | "center" | "tiled"; opacity: number; size: number; onOurWork: boolean; onDesigns: boolean };
   designs: { id: string; name: string; image: string; group: string; extraPrice: number; show: boolean; note?: string }[];
   footer: { note: string };

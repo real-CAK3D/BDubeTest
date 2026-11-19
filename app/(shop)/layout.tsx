@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../shop.css";
 import { CartProvider } from "@/components/shop/CartProvider";
 import { Footer } from "@/components/shop/Footer";
+import { Presence } from "@/components/shop/Presence";
 import { Header } from "@/components/shop/Header";
 import { ThemeStyle } from "@/components/shop/ThemeStyle";
 import { shopProducts, shopSettings } from "@/lib/shop-data";
@@ -34,6 +35,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         <Header s={s} />
         <main className="main">{children}</main>
         <Footer s={s} />
+        <Presence />
       </CartProvider>
     </div>
   );

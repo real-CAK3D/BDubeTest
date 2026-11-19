@@ -693,3 +693,11 @@ model-viewer.viewer3d-stage { --poster-color: transparent; }
 .about-links strong { font-family: var(--font-display); text-transform: var(--display-case); letter-spacing: var(--display-tracking); }
 .about-links span { color: var(--muted); font-size: 0.92rem; }
 .share { display: flex; gap: 0.9rem; align-items: center; flex-wrap: wrap; margin: 0.4rem 0 1.2rem; }
+.version-tap { background: none; border: 0; padding: 0; margin-left: auto; color: inherit; opacity: 0.45; font: inherit; font-size: 0.85em; cursor: default; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+.code-box { margin: 1.2rem 0; padding: 1rem 1.2rem; border: 2px dashed var(--accent); border-radius: var(--radius); display: grid; gap: 0.4rem; justify-items: start; max-width: 32rem; }
+.code-box code { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.08em; background: var(--surface-2); padding: 0.3rem 0.7rem; border-radius: 6px; user-select: all; }
+.cart-sum .saving dd { color: var(--accent); }
+.bulk-note { font-size: 0.9rem; color: var(--muted); margin: 0 0 0.6rem; }
+
+.size-chips label.out { opacity: 0.45; cursor: not-allowed; text-decoration: line-through; }

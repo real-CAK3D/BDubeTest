@@ -75,8 +75,8 @@ export function AppearanceForm({ initial, themes, layouts, sample }: { initial: 
 
 const POSITIONS = [
   { id: "corner", label: "Bottom corner" },
-  { id: "center", label: "Middle" },
-  { id: "tiled", label: "All over" },
+  { id: "center", label: "One big diagonal" },
+  { id: "tiled", label: "Diagonal all over" },
 ] as const;
 
 /** Watermark: a stamp on shop photos that can be switched on and off at any time. */
@@ -98,7 +98,7 @@ function WatermarkPanel({ s, set, sample }: { s: SiteSettings; set: (p: Partial<
       </div>
       <div className="row2">
         <label className="f"><span>How strong: {w.opacity}%</span><input type="range" min={5} max={90} value={w.opacity} onChange={(e) => up({ opacity: Number(e.target.value) })} /></label>
-        <label className="f"><span>Size: {w.size}% of the photo</span><input type="range" min={10} max={60} value={w.size} onChange={(e) => up({ size: Number(e.target.value) })} /></label>
+        <label className="f"><span>Size: {w.size}</span><input type="range" min={10} max={60} value={w.size} onChange={(e) => up({ size: Number(e.target.value) })} /></label>
       </div>
       <label className="check"><input type="checkbox" checked={w.onGallery} onChange={(e) => up({ onGallery: e.target.checked })} /> Also on Our work photos</label>
       <label className="check"><input type="checkbox" checked={w.onDesigns} onChange={(e) => up({ onDesigns: e.target.checked })} /> Also on design artwork</label>

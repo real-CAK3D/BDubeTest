@@ -14,6 +14,8 @@ export const BUILTIN_PAGES: { id: string; label: string; href: string; canTurnOf
   { id: "contact", label: "Contact", href: "/contact", canTurnOff: true, note: "Contact details and message form" },
   { id: "status", label: "Order status", href: "/order-status", canTurnOff: true, note: "Customers look up an order" },
   { id: "review", label: "Leave a review", href: "/review", canTurnOff: true, note: "The review form" },
+  { id: "military", label: "Military discount", href: "/military", canTurnOff: true, note: "Veteran, military & first responder discount" },
+  { id: "giftcards", label: "Gift cards", href: "/gift-cards", canTurnOff: true, note: "Buy a gift card" },
 ];
 
 export const DEFAULT_MENU: MenuItem[] = [
@@ -24,6 +26,8 @@ export const DEFAULT_MENU: MenuItem[] = [
   { id: "contact", label: "Contact", top: true, footer: true },
   { id: "status", label: "Order status", top: false, footer: true },
   { id: "review", label: "Leave a review", top: false, footer: false },
+  { id: "military", label: "Military discount", top: false, footer: true },
+  { id: "giftcards", label: "Gift cards", top: false, footer: true },
 ];
 
 export type ResolvedItem = MenuItem & { href: string; kind: "builtin" | "page" | "link"; note: string };
@@ -68,6 +72,7 @@ export const DEFAULT_CATEGORIES = ["Drinkware", "Home decor", "Leather goods", "
  * Dashboard > Customize dashboard.
  */
 export const DASHBOARD_WIDGETS: { id: string; label: string; note: string }[] = [
+  { id: "live", label: "Live now", note: "Shoppers on the site this minute, and who's signed in here" },
   { id: "setup", label: "Setup progress", note: "Until every setup step is done" },
   { id: "quick", label: "Quick links", note: "Your own buttons: the shop, Stripe, labels..." },
   { id: "tiles", label: "Sales numbers", note: "Sales, orders, profit, visitors" },

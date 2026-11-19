@@ -137,7 +137,6 @@ Either way works, and you can mix them:
 
 - **In this dashboard**: Products > **Add item**. Good for photos straight from your phone.
 - **In Stripe**: Product catalog > **+ Add product**. Give it a name, description, photos and a **one-off** price. It appears in the shop within seconds.
-- **In site-variables.ts on GitHub**: handy with ChatGPT. See Help > Editing with ChatGPT.
 
 Extra details for Stripe products go in the product's **Metadata** (bottom of the product page in Stripe): `category`, `stock`, `summary`, `featured` = true, `made_to_order` = true, `choice_label` = Color and `choice_options` = Black, Brown, and for engraving `engraving_label` = Name to engrave and `engraving_max` = 30.
 
@@ -205,7 +204,7 @@ Links: [Meta Commerce Manager](https://business.facebook.com/commerce), [Google 
 <a id="github-sync"></a>
 ### 15. Save dashboard edits to GitHub
 
-Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), ready for code changes or ChatGPT edits.
+Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), a backup with history.
 
 1. On GitHub, open the token page (link below): **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
 2. Name it "Shop dashboard", set an expiration (a year is fine), and under **Repository access** choose **Only select repositories** and pick the shop's repository.

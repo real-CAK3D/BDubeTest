@@ -25,19 +25,40 @@ async function hmac(data: string) {
     .join("");
 }
 
-export async function createSessionToken() {
+/** Signed login token: expiry, session id (one per phone or computer), signature. */
+export async function createSessionToken(sessionId: string) {
   const exp = Date.now() + SESSION_DAYS * 86400_000;
-  return `${exp}.${await hmac(String(exp))}`;
+  return `${exp}.${sessionId}.${await hmac(`${exp}.${sessionId}`)}`;
 }
 
-export async function verifySessionToken(token: string | undefined | null) {
+/** The session id if the token is genuine and not expired, else null. */
+export async function verifySessionToken(token: string | undefined | null): Promise<string | null> {
+  if (!token) return null;
+  const [exp, sid, sig] = token.split(".");
+  if (!exp || !sid || !sig || Number(exp) < Date.now()) return null;
+  return (await same(sig, await hmac(`${exp}.${sid}`))) ? sid : null;
+}
+
+// The PIN lock hands out a short pass that lets the login screen show.
+export const GATE_COOKIE = "owner_gate";
+export const GATE_MINUTES = 10;
+
+export async function createGateToken() {
+  const exp = Date.now() + GATE_MINUTES * 60_000;
+  return `${exp}.${await hmac(`gate.${exp}`)}`;
+}
+
+export async function verifyGateToken(token: string | undefined | null) {
   if (!token) return false;
   const [exp, sig] = token.split(".");
   if (!exp || !sig || Number(exp) < Date.now()) return false;
-  const expected = await hmac(exp);
-  if (expected.length !== sig.length) return false;
+  return same(sig, await hmac(`gate.${exp}`));
+}
+
+async function same(a: string, b: string) {
+  if (a.length !== b.length) return false;
   let diff = 0;
-  for (let i = 0; i < sig.length; i++) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
 }
 

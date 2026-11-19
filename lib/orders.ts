@@ -1,6 +1,9 @@
 import "server-only";
 import type Stripe from "stripe";
-import { addOrderOnce, getProducts, getSettings, saveProducts } from "./db";
+import { markRecovered } from "./abandoned";
+import { useBlanks } from "./blanks";
+import { addOrderOnce, getProducts, getSettings, saveProducts, updateOrder } from "./db";
+import { createCode, issueGiftCard, randomCode } from "./discounts";
 import { money } from "./format";
 import { notifyOwner } from "./push";
 import { stripe } from "./stripe";
@@ -74,6 +77,10 @@ export async function recordOrderFromSession(sessionId: string) {
           .join("\n")
       : undefined,
     items,
+    shipTo: addr?.line1
+      ? { name: ship?.name ?? session.customer_details?.name ?? "", line1: addr.line1, line2: addr.line2 ?? undefined, city: addr.city ?? "", state: addr.state ?? "", zip: addr.postal_code ?? "", country: addr.country ?? "US", phone: session.customer_details?.phone ?? undefined, email: session.customer_details?.email ?? undefined }
+      : undefined,
+    bulkPercent: Number(session.metadata?.bulk) || undefined,
     delivery: session.metadata?.delivery === "pickup" ? "pickup" : session.metadata?.delivery === "ship" ? "ship" : undefined,
     giftNote: session.custom_fields?.find((f) => f.key === "gift")?.text?.value || undefined,
     shipNote:
@@ -103,6 +110,41 @@ export async function recordOrderFromSession(sessionId: string) {
     }
   }
   await saveProducts(products);
+  await useBlanks(items).catch((e) => console.error("blanks:", e));
+  if (session.recovered_from) await markRecovered(session.recovered_from).catch(() => {});
+
+  // Gift cards bought in this order: make each code and email it
+  const giftCodes: string[] = [];
+  for (const li of session.line_items?.data ?? []) {
+    const meta = ((li.price?.product as Stripe.Product | undefined)?.metadata ?? {}) as Record<string, string>;
+    if (meta.kind !== "giftcard") continue;
+    for (let n = 0; n < (li.quantity ?? 1); n++) {
+      try {
+        const card = await issueGiftCard({
+          amount: li.price?.unit_amount ?? 0,
+          fromName: meta.fromName ?? "",
+          buyerEmail: order.email,
+          toName: meta.toName ?? "",
+          toEmail: meta.toEmail ?? "",
+          message: meta.message ?? "",
+          orderNumber: order.number,
+        });
+        giftCodes.push(card.code);
+      } catch (e) {
+        console.error("gift card:", e);
+      }
+    }
+  }
+
+  // A thank-you code for their next order
+  let nextCode: string | undefined;
+  const ty = settings.discounts.thankYou;
+  if (ty.on && items.some((i) => i.productId)) {
+    nextCode = await createCode({ code: randomCode("THANKS", 5), name: `Thank-you ${ty.percent}% off`, percent: ty.percent, maxUses: 1, expiresDays: ty.days, kind: "thanks" })
+      .then((c) => c.code)
+      .catch(() => undefined);
+  }
+  if (giftCodes.length || nextCode) await updateOrder(order.id, { ...(giftCodes.length ? { giftCodes } : {}), ...(nextCode ? { nextCode } : {}) });
 
   const count = items.reduce((n, i) => n + i.quantity, 0);
   /*
@@ -115,5 +157,5 @@ export async function recordOrderFromSession(sessionId: string) {
     `/admin/orders?open=${order.id}`
   );
   if (low.length) await notifyOwner("Running low on stock", low.join(", "), "/admin/products");
-  return order;
+  return { ...order, ...(giftCodes.length ? { giftCodes } : {}), ...(nextCode ? { nextCode } : {}) };
 }

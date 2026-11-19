@@ -5,6 +5,7 @@ import type { SiteSettings } from "@/lib/types";
 import { Logo } from "./Logo";
 import { Newsletter } from "./Newsletter";
 import { Social } from "./Social";
+import { VersionTap } from "./VersionTap";
 
 export function Footer({ s }: { s: SiteSettings }) {
   const policy = (group: "Help" | "Legal") =>
@@ -46,7 +47,7 @@ export function Footer({ s }: { s: SiteSettings }) {
       {/* legal pages sit in the small print to keep the footer short */}
       <nav className="fine fine-links" aria-label="Legal">
         {legal.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}
-        <Link href="/admin" className="owner-link">Owner login</Link>
+        <VersionTap />
       </nav>
     </footer>
   );

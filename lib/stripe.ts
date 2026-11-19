@@ -27,6 +27,7 @@ export function siteUrl(req?: Request) {
 export const WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
   "checkout.session.completed",
   "checkout.session.async_payment_succeeded",
+  "checkout.session.expired",
   "charge.refunded",
   "product.created",
   "product.updated",

@@ -6,7 +6,7 @@ Already running and want to know how something works? See [GUIDE.md](GUIDE.md). 
 
 Online shop plus a private dashboard for running it. Customers pay with card, Apple Pay or Google Pay through Stripe. The owner logs in at `/admin` (it can be added to an iPhone home screen like an app) to handle products, photos, text, themes, orders, customers, money, messages, discounts and API keys, and gets a notification on his phone for each order.
 
-Customers never see the dashboard. Nothing on the shop links to it, everything under `/admin` needs the owner's password, and search engines are told to skip it.
+Customers never see the dashboard. There's no login link: tap the version number at the bottom of the shop 7 times, or go to `/admin`. Optional PIN lock screen, lockouts after wrong tries, a list of signed-in devices that can be signed out remotely, and customer details stored encrypted. Everything under `/admin` needs the owner's password, and search engines are told to skip it.
 
 ## The standard setup
 
@@ -53,7 +53,7 @@ Notification keys are made automatically. The Supabase table can also be made by
 
 ## Changing things later
 - **Day to day:** the dashboard, on a phone or computer. Edits show instantly and are saved to `site-variables.ts` on GitHub too (once a GitHub token is added).
-- **With ChatGPT:** all words, prices, products and settings are in **[`site-variables.ts`](site-variables.ts)**. Copy it into ChatGPT, ask for a change, paste the result back on GitHub and commit.
+- **Backup:** all words, prices, products and settings are also saved in **[`site-variables.ts`](site-variables.ts)** on GitHub, with history.
 - **Code:** spots meant for editing are marked `EDIT-POINT` (`npm run edit-points`). See **[CUSTOMIZE.md](CUSTOMIZE.md)**.
 
 ## Run it on your computer

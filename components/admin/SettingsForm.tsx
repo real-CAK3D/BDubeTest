@@ -6,6 +6,7 @@ import type { SiteSettings } from "@/lib/types";
 import { api } from "./api";
 import { LogoutButton } from "./LogoutButton";
 import { PushToggle } from "./PushToggle";
+import { SecurityPanel } from "./SecurityPanel";
 import { Tabs } from "./Tabs";
 import { useSettings } from "./useSettings";
 
@@ -38,7 +39,7 @@ function PasswordForm() {
         {msg ? <span role="status">{msg}</span> : null}
         {err ? <span className="err" role="alert">{err}</span> : null}
       </div>
-      <p className="hint">At least 10 characters. Once changed here, the ADMIN_PASSWORD in Vercel is no longer used.</p>
+      <p className="hint">At least 8 characters. Once changed here, the ADMIN_PASSWORD in Vercel is no longer used. Everyone who signs in (you and your wife) uses this same password; each phone shows separately under Signed-in devices.</p>
     </form>
   );
 }
@@ -129,7 +130,33 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
             ) : null}
           </div>
         </section>
-  
+        <section className="panel stack">
+          <div className="panel-head"><h2>Shipping labels</h2></div>
+          <p className="hint">Your return address and box sizes, for buying labels from an order (needs a free Shippo token on the Keys page). Private: never shown on the shop or saved to GitHub.</p>
+          <h3 className="sub">Ship from</h3>
+          <div className="row2">
+            {([["name", "Your name"], ["company", "Business name (optional)"], ["street1", "Street address"], ["street2", "Apt, suite (optional)"], ["city", "City"], ["state", "State (2 letters)"], ["zip", "ZIP"], ["phone", "Phone (carriers ask for it)"], ["email", "Email"]] as const).map(([k, label]) => (
+              <label key={k} className="f"><span>{label}</span><input value={s.shipFrom[k]} onChange={(e) => set({ shipFrom: { ...s.shipFrom, [k]: e.target.value } })} /></label>
+            ))}
+          </div>
+          <h3 className="sub">Boxes you use</h3>
+          {s.parcels.map((p, i) => {
+            const upd = (patch: Partial<typeof p>) => set({ parcels: s.parcels.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+            const n = (v: string) => Number(v.replace(/[^0-9.]/g, "")) || 0;
+            return (
+              <div key={i} className="tier wrap-ok">
+                <input aria-label="Box name" value={p.name} style={{ flex: "1 1 10rem", width: "auto" }} onChange={(e) => upd({ name: e.target.value })} />
+                <input aria-label="Length in inches" value={p.length} onChange={(e) => upd({ length: n(e.target.value) })} />×
+                <input aria-label="Width in inches" value={p.width} onChange={(e) => upd({ width: n(e.target.value) })} />×
+                <input aria-label="Height in inches" value={p.height} onChange={(e) => upd({ height: n(e.target.value) })} /><span>in,</span>
+                <input aria-label="Weight in ounces" value={p.weightOz} onChange={(e) => upd({ weightOz: n(e.target.value) })} /><span>oz</span>
+                <button type="button" className="b b-ghost b-sm" aria-label="Remove box" onClick={() => set({ parcels: s.parcels.filter((_, j) => j !== i) })}>✕</button>
+              </div>
+            );
+          })}
+          <div><button type="button" className="b b-sm" onClick={() => set({ parcels: [...s.parcels, { name: "New box", length: 10, width: 8, height: 4, weightOz: 16 }] })}>Add a box</button></div>
+        </section>
+
           </>
           ) },
           { id: "checkout", label: "Checkout & emails", content: (
@@ -209,12 +236,13 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
   
           </>
           ) },
-          { id: "password", label: "Password", content: (
+          { id: "password", label: "Password & security", content: (
         <>
         <section className="panel">
           <div className="panel-head"><h2>Password</h2></div>
           <PasswordForm />
         </section>
+        <SecurityPanel />
   
           <section className="panel">
           <div className="panel-head"><h2>Account</h2></div>

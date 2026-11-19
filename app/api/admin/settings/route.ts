@@ -2,7 +2,7 @@ import { after, NextResponse } from "next/server";
 import { syncToGitHub } from "@/lib/github-sync";
 import { DEFAULT_SETTINGS, getSettings, saveSettings } from "@/lib/db";
 import { DEFAULT_ADMIN } from "@/lib/site-structure";
-import type { AdminPrefs, SiteSettings } from "@/lib/types";
+import type { AdminPrefs, DiscountPrograms, SiteSettings } from "@/lib/types";
 
 type Row = Record<string, unknown>;
 const str = (v: unknown, max: number) => String(v ?? "").slice(0, max);
@@ -59,7 +59,7 @@ function cleanMenu(rows: Row[]) {
         ...(m.off ? { off: true } : {}),
       };
     })
-    .filter((m) => /^(shop|gallery|custom|about|contact|status|review|page:[a-z0-9-]+|link:[a-z0-9-]+)$/.test(m.id) && !seen.has(m.id) && seen.add(m.id) && (!m.id.startsWith("link:") || m.href));
+    .filter((m) => /^(shop|gallery|custom|about|contact|status|review|military|giftcards|page:[a-z0-9-]+|link:[a-z0-9-]+)$/.test(m.id) && !seen.has(m.id) && seen.add(m.id) && (!m.id.startsWith("link:") || m.href));
 }
 
 function cleanDesignList(rows: Row[]) {
@@ -93,6 +93,28 @@ export async function PUT(req: Request) {
     else if (k === "shipCountries" || k === "expenseCategories" || k === "customOrderTypes")
       patch[k] = Array.isArray(v) ? v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 50) : def;
     else if (k === "admin") patch[k] = cleanAdmin((v ?? {}) as Row);
+    else if (k === "shipFrom") {
+      const a = (v ?? {}) as Row;
+      patch[k] = Object.fromEntries(["name", "company", "street1", "street2", "city", "state", "zip", "phone", "email"].map((f) => [f, str(a[f], 100).trim()]));
+    } else if (k === "parcels")
+      patch[k] = (Array.isArray(v) ? (v as unknown as Row[]) : []).slice(0, 12).map((p) => ({
+        name: str(p.name, 40),
+        length: Math.max(1, Number(p.length) || 1),
+        width: Math.max(1, Number(p.width) || 1),
+        height: Math.max(0.5, Number(p.height) || 1),
+        weightOz: Math.max(1, Number(p.weightOz) || 1),
+      }));
+    else if (k === "discounts") {
+      const d = (v ?? {}) as unknown as DiscountPrograms;
+      const pct = (x: unknown) => Math.min(90, Math.max(0, Math.round(Number(x) || 0)));
+      patch[k] = {
+        thankYou: { on: Boolean(d.thankYou?.on), percent: pct(d.thankYou?.percent) || 10, days: Math.min(365, Math.max(7, Math.round(Number(d.thankYou?.days) || 60))) },
+        veteran: { on: Boolean(d.veteran?.on), percent: pct(d.veteran?.percent) || 10, verify: d.veteran?.verify !== false, code: str(d.veteran?.code, 40).toUpperCase().replace(/[^A-Z0-9]/g, ""), heading: str(d.veteran?.heading, 80), text: str(d.veteran?.text, 600) },
+        bulk: (Array.isArray(d.bulk) ? d.bulk : []).slice(0, 8).map((t) => ({ minQty: Math.max(2, Math.round(Number(t.minQty) || 0)), percent: pct(t.percent) })).filter((t) => t.percent > 0).sort((a, b) => a.minQty - b.minQty),
+        reminders: { on: Boolean(d.reminders?.on), hours: Math.min(24, Math.max(1, Math.round(Number(d.reminders?.hours) || 2))) },
+        giftCards: { on: Boolean(d.giftCards?.on), amounts: (Array.isArray(d.giftCards?.amounts) ? d.giftCards.amounts : []).map((a) => Math.round(Number(a) || 0)).filter((a) => a >= 5 && a <= 2000).slice(0, 8), heading: str(d.giftCards?.heading, 80), text: str(d.giftCards?.text, 600) },
+      };
+    }
     else if (k === "watermark") {
       const w = (v ?? {}) as Row;
       const n = (x: unknown, lo: number, hi: number, d: number) => Math.min(hi, Math.max(lo, Math.round(Number(x) || d)));

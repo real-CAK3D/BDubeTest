@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { money, toCents } from "@/lib/format";
 import { fromPrice } from "@/lib/pricing";
-import type { Design, Product } from "@/lib/types";
+import type { Blank, Design, Product } from "@/lib/types";
 import { api } from "./api";
 import { CategoryManager } from "./CategoryManager";
 import { ImageList } from "./ImageField";
@@ -29,12 +29,12 @@ function toDraft(p: Product): Draft {
     stock: p.stock === null ? "" : String(p.stock),
     option: p.option ?? null,
     optionValues: p.option?.values.join(", ") ?? "",
-    sizesDraft: (p.sizes ?? []).map((s) => ({ name: s.name, price: (s.price / 100).toFixed(2) })),
+    sizesDraft: (p.sizes ?? []).map((s) => ({ name: s.name, price: (s.price / 100).toFixed(2), blank: s.blank })),
     designs: p.designs ?? null,
   };
 }
 
-export function ProductManager({ initial, currency, views, lowAt, stripeOn, stripeTest, library, categories: savedCats }: { initial: Product[]; currency: string; views: Record<string, number>; lowAt: number; stripeOn: boolean; stripeTest: boolean; library: Design[]; categories: string[] }) {
+export function ProductManager({ initial, currency, views, lowAt, stripeOn, stripeTest, library, categories: savedCats, blanks = [] }: { initial: Product[]; currency: string; views: Record<string, number>; lowAt: number; stripeOn: boolean; stripeTest: boolean; library: Design[]; categories: string[]; blanks?: Blank[] }) {
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
@@ -85,7 +85,8 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
     const body = {
       ...editing,
       price: sizes.length ? 0 : toCents(editing.price),
-      sizes: sizes.length ? sizes.map((s) => ({ name: s.name.trim(), price: toCents(s.price) })) : null,
+      sizes: sizes.length ? sizes.map((s) => ({ name: s.name.trim(), price: toCents(s.price), ...(s.blank ? { blank: s.blank } : {}) })) : null,
+      blank: sizes.length ? undefined : editing.blank || undefined,
       compareAtPrice: editing.compareAtPrice ? toCents(editing.compareAtPrice) : null,
       stock: editing.stock.trim() === "" ? null : Number(editing.stock),
       option: label ? { label, values: editing.optionValues.split(",").map((v) => v.trim()).filter(Boolean) } : null,
@@ -154,10 +155,20 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
             <h2>Stock</h2>
             <label className="f"><span>How many do you have? <em className="muted">(leave empty for unlimited)</em></span><input inputMode="numeric" value={editing.stock} onChange={(e) => set({ stock: e.target.value.replace(/[^0-9]/g, "") })} /></label>
             <label className="check"><input type="checkbox" checked={editing.madeToOrder} onChange={(e) => set({ madeToOrder: e.target.checked })} /> Made to order</label>
+            {blanks.length && !editing.sizesDraft.length ? (
+              <label className="f">
+                <span>Blank it uses <em className="muted">(one is taken off Blanks per sale)</em></span>
+                <select value={editing.blank ?? ""} onChange={(e) => set({ blank: e.target.value || undefined })}>
+                  <option value="">None</option>
+                  {blanks.map((b) => <option key={b.id} value={b.id}>{b.name} ({b.qty} on the shelf)</option>)}
+                </select>
+              </label>
+            ) : null}
             <ProductChoices
               sizes={editing.sizesDraft}
               designs={editing.designs ?? null}
               library={library}
+              blanks={blanks}
               onSizes={(sizesDraft, designs) => set({ sizesDraft, designs })}
               onDesigns={(designs) => set({ designs })}
             />

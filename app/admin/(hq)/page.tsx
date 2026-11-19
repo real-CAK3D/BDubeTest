@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DashboardCharts } from "@/components/admin/ChartsClient";
+import { LiveNow } from "@/components/admin/LiveNow";
 import { RangePicker } from "@/components/admin/RangePicker";
 import { SetupChecklist } from "@/components/admin/SetupChecklist";
 import { Tabs } from "@/components/admin/Tabs";
@@ -21,6 +22,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const tabbed = order.filter((id) => ["charts", "orders", "items"].includes(id));
   const blocks: Record<string, React.ReactNode> = {
     setup: <SetupChecklist key="setup" />,
+    live: <LiveNow key="live" />,
     quick: s.admin.quickLinks.length ? (
       <div key="quick" className="quick-links">
         {s.admin.quickLinks.map((l) => (

@@ -7,8 +7,6 @@ type Result = {
   status: string;
   delivery: string;
   items: { name: string; quantity: number }[];
-  total: number;
-  currency: string;
   tracking: { number: string; carrier: string; url: string } | null;
 };
 
@@ -40,7 +38,6 @@ export function OrderLookup() {
     setBusy(false);
   }
 
-  const money = (c: number, cur: string) => new Intl.NumberFormat("en-US", { style: "currency", currency: cur.toUpperCase() }).format(c / 100);
   return (
     <>
       <form className="review-form lookup" onSubmit={look}>
@@ -60,7 +57,6 @@ export function OrderLookup() {
             </p>
           ) : null}
           <ul>{r.items.map((i, n) => <li key={n}>{i.quantity} x {i.name}</li>)}</ul>
-          <p className="muted">Total {money(r.total, r.currency)}</p>
         </div>
       ) : null}
     </>

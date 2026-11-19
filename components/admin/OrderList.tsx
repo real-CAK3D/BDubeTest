@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { money, shortDate } from "@/lib/format";
-import type { Design, Order, OrderStatus } from "@/lib/types";
+import type { Design, Order, OrderStatus, Parcel } from "@/lib/types";
+import { ShippingLabel } from "./ShippingLabel";
 import { api } from "./api";
 
 const STATUSES: { id: OrderStatus; label: string }[] = [
@@ -18,7 +19,7 @@ function mailto(o: Order) {
   return `mailto:${o.email}?subject=${encodeURIComponent(`Your order #${o.number} has shipped`)}&body=${encodeURIComponent(body)}`;
 }
 
-export function OrderList({ initial, openId, status, canEmail, designs = [] }: { initial: Order[]; openId?: string; status?: string; canEmail: boolean; designs?: Design[] }) {
+export function OrderList({ initial, openId, status, canEmail, designs = [], parcels = [], labelsReady = false }: { initial: Order[]; openId?: string; status?: string; canEmail: boolean; designs?: Design[]; parcels?: Parcel[]; labelsReady?: boolean }) {
   const [orders, setOrders] = useState(initial);
   const [open, setOpen] = useState<string | null>(openId ?? null);
   const [filter, setFilter] = useState<string>(status ?? "all");
@@ -119,6 +120,9 @@ export function OrderList({ initial, openId, status, canEmail, designs = [] }: {
                       </ul>
                       {o.paymentMethod ? <p className="muted small">Paid with {o.paymentMethod}</p> : null}
                       {o.giftNote ? <div className="engrave">Gift message: <strong>&ldquo;{o.giftNote}&rdquo;</strong></div> : null}
+                      {o.bulkPercent ? <p className="muted small">Bulk order discount: {o.bulkPercent}% off</p> : null}
+                      {o.giftCodes?.length ? <p className="small">Gift card code{o.giftCodes.length > 1 ? "s" : ""} made: {o.giftCodes.map((c) => <code key={c}>{c} </code>)}</p> : null}
+                      {o.nextCode ? <p className="small">Thank-you code given for next time: <code>{o.nextCode}</code></p> : null}
                       {o.shipNote ? <p className="err small">{o.shipNote}</p> : null}
                     </div>
                     <div>
@@ -141,17 +145,18 @@ export function OrderList({ initial, openId, status, canEmail, designs = [] }: {
                   </div>
                   <div className="ship-box">
                     <h3>Shipping</h3>
+                    {o.delivery !== "pickup" ? <ShippingLabel key={o.label?.url ?? "none"} order={o} parcels={parcels} ready={labelsReady} onBought={(saved) => setOrders((l) => l.map((x) => (x.id === saved.id ? saved : x)))} /> : null}
                     <div className="row wrap">
                       <label className="f inline">
                         <span>Carrier</span>
-                        <select defaultValue={o.carrier ?? ""} onChange={(e) => update(o, { carrier: e.target.value })}>
+                        <select key={o.carrier ?? ""} defaultValue={o.carrier ?? ""} onChange={(e) => update(o, { carrier: e.target.value })}>
                           <option value="">Choose</option>
                           {["USPS", "UPS", "FedEx", "DHL", "Other"].map((c) => <option key={c}>{c}</option>)}
                         </select>
                       </label>
                       <label className="f inline grow">
                         <span>Tracking number</span>
-                        <input defaultValue={o.trackingNumber} onBlur={(e) => e.target.value !== (o.trackingNumber ?? "") && update(o, { trackingNumber: e.target.value })} placeholder="Paste from your label" />
+                        <input key={o.trackingNumber ?? ""} defaultValue={o.trackingNumber} onBlur={(e) => e.target.value !== (o.trackingNumber ?? "") && update(o, { trackingNumber: e.target.value })} placeholder="Paste from your label" />
                       </label>
                     </div>
                     <div className="row wrap">

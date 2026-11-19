@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/shop/AddToCart";
+import { getBlanks } from "@/lib/blanks";
 import { ProductViews } from "@/components/shop/ProductViews";
 import { ShareButtons } from "@/components/shop/ShareButtons";
 import { Price, StockNote } from "@/components/shop/Price";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Params) {
   const { slug } = await params;
-  const [p, s] = await Promise.all([shopProduct(slug), shopSettings()]);
+  const [p, s, blanks] = await Promise.all([shopProduct(slug), shopSettings(), getBlanks()]);
   if (!p || !p.active) notFound();
   return (
     <article className="product">
@@ -58,9 +59,9 @@ export default async function ProductPage({ params }: Params) {
             productId={p.id}
             option={p.option}
             personalize={p.personalize}
-            soldOut={p.stock === 0}
+            soldOut={p.stock === 0 || Boolean(p.blank && blanks.find((b) => b.id === p.blank)?.qty === 0) || Boolean(p.sizes?.length && p.sizes.every((z) => z.blank && blanks.find((b) => b.id === z.blank)?.qty === 0))}
             storeOpen={s.storeOpen}
-            sizes={p.sizes}
+            sizes={p.sizes?.map((z) => ({ name: z.name, price: z.price, out: Boolean(z.blank && blanks.find((b) => b.id === z.blank)?.qty === 0) }))}
             designs={p.designs ? { label: p.designs.label, required: p.designs.required, allowUpload: p.designs.allowUpload, uploadExtra: p.designs.uploadExtra } : null}
             fits={
               p.designs
@@ -72,6 +73,9 @@ export default async function ProductPage({ params }: Params) {
             basePrice={p.price}
             currency={s.currency}
           />
+          {s.discounts.bulk.length ? (
+            <p className="bulk-note">Buying several? {s.discounts.bulk.map((t) => `${t.minQty}+ items: ${t.percent}% off`).join(" · ")}</p>
+          ) : null}
           <ShareButtons title={p.name} path={`/product/${p.slug}`} />
           <div className="prose">
             {paragraphs(p.description).map((x, i) => (

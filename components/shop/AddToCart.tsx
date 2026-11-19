@@ -6,7 +6,7 @@ import Link from "next/link";
 import { money } from "@/lib/format";
 import { type CartDesign, useCart } from "./CartProvider";
 
-type Size = { name: string; price: number };
+type Size = { name: string; price: number; out?: boolean };
 
 /*
  * Add to cart, with the item's choices: size, then a design that fits that
@@ -38,7 +38,7 @@ export function AddToCart({
   currency?: string;
 }) {
   const cart = useCart();
-  const [size, setSize] = useState(sizes?.length === 1 ? sizes[0].name : "");
+  const [size, setSize] = useState(sizes?.length === 1 && !sizes[0].out ? sizes[0].name : "");
   const [design, setDesign] = useState("");
   const [group, setGroup] = useState("");
   const [choice, setChoice] = useState(option?.values[0] ?? "");
@@ -123,10 +123,10 @@ export function AddToCart({
             {sizes!.map((s) => {
               const n = designs && fits ? (fits[s.name] ?? []).length : null;
               return (
-                <label key={s.name} className={size === s.name ? "on" : ""}>
-                  <input type="radio" name={`size-${productId}`} value={s.name} checked={size === s.name} onChange={() => pickSize(s.name)} />
+                <label key={s.name} className={`${size === s.name ? "on" : ""} ${s.out ? "out" : ""}`}>
+                  <input type="radio" name={`size-${productId}`} value={s.name} checked={size === s.name} disabled={s.out} onChange={() => pickSize(s.name)} />
                   <strong>{s.name}</strong>
-                  <span>{money(s.price, currency)}</span>
+                  <span>{s.out ? "Sold out" : money(s.price, currency)}</span>
                   {n !== null && designs ? <em>{n} {designs.label.toLowerCase()}{n === 1 ? "" : "s"}</em> : null}
                 </label>
               );

@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import type { Design, ProductDesigns } from "@/lib/types";
+import type { Blank, Design, ProductDesigns } from "@/lib/types";
 
-export type SizeDraft = { name: string; price: string };
+export type SizeDraft = { name: string; price: string; blank?: string };
 
 const PRESETS: { label: string; sizes: string[] }[] = [
   { label: "Tumbler sizes", sizes: ["16 oz", "20 oz", "30 oz", "40 oz"] },
@@ -20,12 +20,14 @@ export function ProductChoices({
   sizes,
   designs,
   library,
+  blanks = [],
   onSizes,
   onDesigns,
 }: {
   sizes: SizeDraft[];
   designs: ProductDesigns | null;
   library: Design[];
+  blanks?: Blank[];
   onSizes: (s: SizeDraft[], designs: ProductDesigns | null) => void;
   onDesigns: (d: ProductDesigns | null) => void;
 }) {
@@ -62,6 +64,12 @@ export function ProductChoices({
           <input aria-label="Size name" value={s.name} placeholder="e.g. 30 oz" style={{ flex: "1 1 auto", width: "auto" }} onChange={(e) => changeSizes(sizes.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)), { from: s.name.trim(), to: e.target.value.trim() })} />
           <span>$</span>
           <input aria-label={`Price for ${s.name || "this size"}`} inputMode="decimal" value={s.price} placeholder="0.00" onChange={(e) => changeSizes(sizes.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))} />
+          {blanks.length ? (
+            <select aria-label={`Blank used for ${s.name || "this size"}`} className="blank-pick" value={s.blank ?? ""} onChange={(e) => changeSizes(sizes.map((x, j) => (j === i ? { ...x, blank: e.target.value } : x)))}>
+              <option value="">No blank</option>
+              {blanks.map((b) => <option key={b.id} value={b.id}>{b.name} ({b.qty})</option>)}
+            </select>
+          ) : null}
           <button type="button" className="b b-ghost b-sm" aria-label={`Remove ${s.name || "size"}`} onClick={() => changeSizes(sizes.filter((_, j) => j !== i))}>✕</button>
         </div>
       ))}

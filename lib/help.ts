@@ -43,7 +43,7 @@ export const HELP: HelpGroup[] = [
             ],
           },
           { p: "API keys for Stripe and any other service go on the **Keys** page. The **Setup** page walks through connecting everything, with a checkmark as each step is done." },
-          { tip: "You can change most things two ways: in the dashboard, or by editing `site-variables.ts` on GitHub (handy with ChatGPT). See **Editing with ChatGPT**." },
+          { tip: "Everything you change in the dashboard shows on the shop right away. A backup copy is also saved to GitHub (see **The backup file on GitHub**)." },
         ],
       },
       {
@@ -267,6 +267,90 @@ export const HELP: HelpGroup[] = [
         ],
       },
       {
+        id: "security",
+        title: "Password, lock screen and signed-in devices",
+        match: ["/admin/settings"],
+        summary: "Who can get in, and how your customers' details are kept private.",
+        blocks: [
+          { h: "Getting in" },
+          { p: "There's no login link on the shop. Tap the **version number** at the very bottom of any page 7 times in a row (it counts down from the 4th tap), or go to your address with `/admin` on the end. The Shop HQ app on your home screen opens straight in." },
+          { h: "Password" },
+          { p: "**Settings > Password & security** changes it (at least 8 characters). You and your wife use the same password; each of you types your own name when signing in, so you can tell your phones apart." },
+          { h: "Lock screen (optional)" },
+          { p: "Turn on a **4-digit PIN** or a **passcode** that has to be entered before the password box even shows. Five wrong tries lock it for 15 minutes; the same goes for the password. Forgot the PIN? Anyone still signed in can turn it off there." },
+          { h: "Signed-in devices" },
+          { p: "Every phone and computer that's signed in is listed with when it was last used. Lost a phone? Tap **Sign out** next to it and it needs the password again straight away." },
+          { h: "Your customers' privacy" },
+          {
+            list: [
+              "Orders, addresses, emails, phone numbers, messages, custom requests and sign-ups are stored **encrypted**. Even someone who got into the database would see scrambled text; only this website can read it, and only when you're signed in.",
+              "Card numbers never touch the site at all: Stripe handles payment on its own page.",
+              "The live visitor count uses a random number per browser tab, not names or IP addresses, and forgets it after 90 seconds.",
+              "The Order status page only answers to the exact order number plus the email used, shows no prices, and locks out anyone guessing.",
+            ],
+          },
+          { tip: "Never change AUTH_SECRET in Vercel once you have real orders: it's the key the customer details are locked with." },
+        ],
+      },
+      {
+        id: "live",
+        title: "Live now",
+        summary: "How many people are on the shop this minute, and who's signed in to the dashboard.",
+        blocks: [
+          { p: "The **Live now** box on the Dashboard updates every 20 seconds: how many shoppers are on the site and which pages they're looking at, plus who's signed in to the dashboard right now (for example you on your iPhone and your wife on hers). Move or hide it in **Customize dashboard**." },
+        ],
+      },
+      {
+        id: "discounts",
+        title: "Discounts, codes and gift cards",
+        match: ["/admin/discounts"],
+        summary: "Promo codes, sending them to customers, military and bulk discounts, gift cards, cart reminders.",
+        blocks: [
+          { h: "Codes" },
+          { p: "**Make a code**: type one (like SPRING15) or leave it empty for a random one, choose % or $ off, and optionally a limit on uses, an end date, a smallest order, or first orders only. Customers type it on the checkout page. The switch turns a code off at any time." },
+          { p: "**Send** emails a code to the customers you tick (everyone, past buyers, or picked people), one email each so nobody sees the others. Without email set up, it opens your own email app with them in BCC." },
+          { h: "Deals (always on once switched on)" },
+          {
+            list: [
+              "**Thank-you code**: after each order the customer gets a one-time code for their next order, shown on their thank-you page.",
+              "**Military & first responder**: adds a page where veterans, active duty, Guard/Reserve, police, firefighters and EMTs ask for the discount. You approve each one on the **Military** tab, which makes a personal code and emails it. Or choose **One shared code** to show a code to anyone who ticks the box.",
+              "**Bulk pricing**: e.g. 10+ items 5% off, 25+ items 10% off. It comes off automatically in the cart and at checkout, and the item page mentions it.",
+              "**Gift cards**: adds a Gift cards page. The buyer picks an amount and who it's for; once paid, a one-time code worth that amount is made and emailed to them. Make free ones for giveaways on the **Gift cards** tab.",
+            ],
+          },
+          { h: "Cart reminders" },
+          { p: "If someone types their email on the checkout page and leaves without paying, they get one email a few hours later with a link back to their cart. The **Cart reminders** tab lists them and marks the ones who came back and paid." },
+          { tip: "Codes, gift cards and reminders need Stripe connected; emails need email set up (Setup > Tracking emails)." },
+        ],
+      },
+      {
+        id: "labels",
+        title: "Shipping labels",
+        summary: "Buy and print postage from an order; the tracking number fills itself in.",
+        blocks: [
+          {
+            steps: [
+              "Make a free account at goshippo.com and copy your API token (Settings > API). The test token makes practice labels.",
+              "Paste it on the **Keys** page under **Shippo API token**.",
+              "In **Settings > Store > Shipping labels**, enter your return address and the boxes you use (size and typical weight).",
+              "Open an order, pick the box, tap **Get postage prices**, choose one and tap **Buy label**. **Print label** opens a 4x6 PDF.",
+              "The carrier and tracking number are filled in; tap **Mark shipped & email customer**.",
+            ],
+          },
+          { tip: "Shippo charges the postage only, at discounted rates, with no monthly fee." },
+        ],
+      },
+      {
+        id: "blanks",
+        title: "Blanks (stock to engrave)",
+        match: ["/admin/blanks"],
+        summary: "Count the plain pieces you engrave and get warned before you run out.",
+        blocks: [
+          { p: "On **Blanks**, add each kind you keep on the shelf (Stanley 40 oz black, slate coaster...) with how many you have, when to warn you, and what each costs. **+ Shipment** adds a delivery." },
+          { p: "Then in **Products**, choose the blank next to each size (or for the whole item). Every sale takes one off the shelf, you get a notification when it runs low, and a size with none left shows as **Sold out** in the shop until you add more." },
+        ],
+      },
+      {
         id: "previews",
         title: "Previews: design on a photo, 3D, scans and 360°",
         summary: "Extra ways for customers to see an item, set at the bottom of each item in Products.",
@@ -275,8 +359,8 @@ export const HELP: HelpGroup[] = [
             list: [
               "**Design on a photo**: pick a photo of the plain item and drag across it where the design goes. Customers see the design they pick drawn on the photo.",
               "**3D model**: choose the closest shape (tumbler, mug, sign, round or square coaster, card holder) and a color. The site draws it in 3D wearing the chosen design, shown the way a laser mark looks on that material. Customers drag to turn it.",
-              "**3D scan**: scan the real finished piece with a free phone app (Polycam, Scaniverse or KIRI Engine), export a .glb file and upload it. Customers can turn it and, on most phones, tap **View in your space** to see it on their own table.",
-              "**360° spin**: take 24 to 36 photos all the way around the item (a lazy Susan helps) and add them in order. Customers drag to turn the real piece.",
+              "**3D scan**: scan the real finished piece with a phone app (Polycam or KIRI Engine on iPhone and Android, Scaniverse on iPhone), export a .glb file and upload it. Customers can turn it and, on most phones, tap **View in your space** to see it on their own table.",
+              "**360° spin**: tap **Take 360° photos with the camera**, prop the phone up, press Start and slowly turn the piece on a lazy Susan; the phone takes the photos (iPhone and Android). Customers drag to turn the real piece.",
             ],
           },
           { p: "Each one you set up adds a tab above the item's photos. When a customer picks a design, the Preview or 3D tab opens on its own." },
@@ -439,7 +523,7 @@ export const HELP: HelpGroup[] = [
           },
           { p: "Orders over the free-shipping amount ship free. **Local pickup** adds a pickup choice in the cart with no shipping charge; the note tells customers where and when. If the address entered at Stripe has a different ZIP than the one quoted, the order shows a warning so you can check the postage." },
           { h: "Getting to the dashboard" },
-          { p: "Go to your site address with `/admin` on the end, or tap the small **Owner login** link at the very bottom of any shop page. On a phone, add the dashboard to your home screen (see **The phone app**)." },
+          { p: "Go to your site address with `/admin` on the end, or tap the **version and build number** at the very bottom of any shop page 7 times in a row (it counts down from the 4th tap). There's no visible login link, so customers never find it. On a phone, add the dashboard to your home screen (see **The phone app**)." },
         ],
       },
       {
@@ -501,32 +585,15 @@ export const HELP: HelpGroup[] = [
     ],
   },
   {
-    title: "Editing on GitHub",
+    title: "GitHub",
     topics: [
       {
         id: "site-variables",
-        title: "Editing with ChatGPT (site-variables.ts)",
-        summary: "One file on GitHub with every word, price and product.",
+        title: "The backup file on GitHub",
+        summary: "A copy of every word, price, product and setting, with history.",
         blocks: [
-          { p: "The file `site-variables.ts` holds the business name, headlines, story, contact info, policies, theme, layout, shipping and every product. Each value has a note saying what it does, and the top of the file has instructions for ChatGPT." },
-          {
-            steps: [
-              "On GitHub, open `site-variables.ts` and click the **Copy raw file** icon.",
-              "Paste it into ChatGPT and say what you want, e.g. \"Add a walnut pen for $35, 10 in stock\" or \"Rewrite my about story\".",
-              "Copy the whole file ChatGPT gives back.",
-              "On GitHub, click the **pencil** (Edit), select everything, paste, and click **Commit changes**.",
-              "Wait about a minute, then refresh your site.",
-            ],
-          },
-          { h: "How it works with the dashboard" },
-          {
-            list: [
-              "When the file changes, only the values that changed in it are applied. Everything else keeps what you set in the dashboard. Whichever was changed last wins.",
-              "Removing a product from the file removes it from the shop. Use `visible: false` to hide it instead.",
-              "Photos: upload them in the dashboard, or to the `public/images` folder on GitHub and write `\"/images/name.jpg\"` in the file.",
-            ],
-          },
-          { tip: "If the file has a mistake, Vercel won't publish it and the current site stays up. Vercel emails you the error; paste it into ChatGPT for a fix, or open the commit on GitHub and click **Revert**." },
+          { p: "Once a GitHub token is added (Setup), every change you save in the dashboard is also written to `site-variables.ts` on GitHub. That gives you a full history of your shop's content, and it's what a brand-new copy of the shop starts from." },
+          { p: "You never need to open it. If you do edit it by hand on GitHub, only the values you change are applied, and whichever was changed last (the file or the dashboard) wins. If the file has a mistake, Vercel won't publish it and the current site stays up." },
         ],
       },
       {
@@ -535,7 +602,6 @@ export const HELP: HelpGroup[] = [
         summary: "Labeled spots in the code for bigger changes.",
         blocks: [
           { p: "For things the variables file can't do (new themes, menu links, checkout options), the code has labeled blocks that start with `EDIT-POINT:` and explain what to change. Search the repository on GitHub for `EDIT-POINT` to find them. `CUSTOMIZE.md` lists them all." },
-          { p: "To get ChatGPT's help: copy the code under the label into ChatGPT, describe the change, and paste its answer back on GitHub the same way as the variables file." },
           { tip: "Passwords and keys never go in any file. They live in Vercel > Settings > Environment Variables." },
         ],
       },
@@ -629,7 +695,7 @@ export const HELP: HelpGroup[] = [
             ],
           },
           { p: "**Custom orders** has the request form. **Order status** in the footer lets customers look up an order with their order number and email. The shop has a search box once there are more than 6 items." },
-          { p: "The only link to the dashboard is the small **Owner login** at the very bottom, which still needs your password. Search engines are told not to list it." },
+          { p: "There's no link to the dashboard on the shop. The hidden way in is tapping the version number at the bottom 7 times, and it still needs your password (and your PIN, if the lock screen is on). Search engines are told not to list it." },
         ],
       },
     ],
@@ -643,7 +709,7 @@ export const HELP: HelpGroup[] = [
         summary: "Quick fixes for things that go sideways.",
         blocks: [
           { h: "I changed site-variables.ts but the site didn't change" },
-          { p: "Give it a minute, then refresh. In Vercel > Deployments, check that the newest one says **Ready**. If it says **Error**, the file has a mistake: open the error, paste it into ChatGPT with the file, and commit the fix. The old site stays up meanwhile." },
+          { p: "Give it a minute, then refresh. In Vercel > Deployments, check that the newest one says **Ready**. If it says **Error**, the file has a mistake: open the commit on GitHub and click **Revert**. The old site stays up meanwhile." },
           { h: "A customer paid but there's no order" },
           { p: "Orders usually appear when the customer reaches the thank-you page. If they closed the page early, the Stripe webhook delivers it. Check **Setup > Webhook connected** is green; if not, press **Connect Stripe webhook** on **Keys**." },
           { h: "Phone notifications don't arrive" },

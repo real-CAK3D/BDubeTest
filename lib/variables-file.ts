@@ -10,7 +10,7 @@ import type { Product, SiteSettings } from "./types";
 
 const dollars = (c: number | null | undefined) => (c == null ? null : Math.round(c) / 100);
 
-export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Product[]): SiteVariables {
+export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" | "parcels">, products: Product[]): SiteVariables {
   return {
     brand: { businessName: s.businessName, tagline: s.tagline, announcement: s.announcement },
     homePage: {
@@ -50,6 +50,13 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Pr
     extraPages: s.extraPages,
     menu: s.menu.map((m) => ({ page: m.id, label: m.label, ...(m.href ? { link: m.href } : {}), inMenu: m.top, inFooter: m.footer, on: !m.off })),
     categories: s.categories,
+    discounts: {
+      thankYouCode: { on: s.discounts.thankYou.on, percentOff: s.discounts.thankYou.percent, validDays: s.discounts.thankYou.days },
+      military: { on: s.discounts.veteran.on, percentOff: s.discounts.veteran.percent, checkFirst: s.discounts.veteran.verify, code: s.discounts.veteran.code, heading: s.discounts.veteran.heading, text: s.discounts.veteran.text },
+      bulk: s.discounts.bulk.map((t) => ({ fromItems: t.minQty, percentOff: t.percent })),
+      giftCards: s.discounts.giftCards,
+      checkoutReminders: { on: s.discounts.reminders.on, afterHours: s.discounts.reminders.hours },
+    },
     watermark: { on: s.watermark.on, text: s.watermark.text, withLogo: s.watermark.useLogo, position: s.watermark.position, opacity: s.watermark.opacity, size: s.watermark.size, onOurWork: s.watermark.onGallery, onDesigns: s.watermark.onDesigns },
     designs: s.designs.map((d) => ({ id: d.id, name: d.name, image: d.image, group: d.group, extraPrice: dollars(d.extra) ?? 0, show: d.active, ...(d.note ? { note: d.note } : {}) })),
     footer: { note: s.footerNote },
@@ -89,7 +96,8 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Pr
       visible: p.active,
       choice: p.option ? { label: p.option.label, options: p.option.values } : null,
       engraving: p.personalize ? { ...p.personalize } : null,
-      sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: dollars(x.price) ?? 0 })) : null,
+      sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: dollars(x.price) ?? 0, ...(x.blank ? { blank: x.blank } : {}) })) : null,
+      ...(p.blank ? { blank: p.blank } : {}),
       designs: p.designs
         ? {
             label: p.designs.label,
@@ -117,35 +125,22 @@ const HEADER = `/*
  *  The dashboard keeps this file up to date: when something is changed on the
  *  phone, it's saved here too, so GitHub always matches the live site.
  *
- *  HOW TO CHANGE THE SITE WITH CHATGPT
- *  1. On GitHub, open this file and click the "Copy raw file" button.
- *  2. Paste it into ChatGPT and say what you want, for example:
- *       "Add a walnut pen for $35, 10 in stock, in Woodwork. Write the descriptions."
- *       "Rewrite my about story. I was an MP from 2006 to 2014."
- *       "Put everything in Leather on sale for 15% off."
- *       "Switch to the Dress Blues theme."
- *  3. Copy the whole file ChatGPT gives back.
- *  4. On GitHub, click the pencil (Edit), select everything, paste, then click
- *     "Commit changes". The site updates by itself in about a minute.
- *     Wait for that before changing things in the dashboard, or the dashboard
- *     will save over your edit.
+ *  Day to day, change things in the dashboard; nothing here needs touching.
+ *  This file is the backup copy, with history on GitHub, and is used when the
+ *  shop is set up somewhere new.
  *
- *  If something goes wrong, nothing breaks: Vercel won't publish a file with a
- *  mistake in it, and the current site stays up. Open the commit on GitHub and
- *  click "Revert", or ask ChatGPT to fix the error message Vercel emails you.
- *
- *  RULES FOR CHATGPT (read these before editing this file)
- *  - Return the COMPLETE file every time, from the first line to the last.
- *  - Only change the values the owner asked about. Keep every key, every
- *    comment, the import line and the "satisfies SiteVariables" line at the end.
+ *  IF YOU EDIT IT BY HAND ON GITHUB
+ *  Click the pencil, change only the values you mean to, and "Commit changes".
+ *  The site updates by itself in about a minute. If there's a mistake, Vercel
+ *  won't publish it and the current site stays up; open the commit and click
+ *  "Revert". Rules:
+ *  - Keep every key, every comment, the import line and the "satisfies
+ *    SiteVariables" line at the end.
  *  - Text goes in "double quotes". Use \\n\\n inside text for a new paragraph.
- *    Write apostrophes as ' and avoid curly quotes.
  *  - Prices are plain numbers in dollars: 35 or 35.5 (no $ sign, no quotes).
- *  - Each product needs a unique "slug": lowercase words joined by dashes,
- *    e.g. "walnut-pen". The slug becomes the item's web address. Don't change
- *    the slug of an existing item unless asked.
- *  - Removing a product from the list removes it from the shop. To hide it but
- *    keep it, set visible: false.
+ *  - Each product needs a unique "slug": lowercase words joined by dashes.
+ *    The slug becomes the item's web address.
+ *  - Removing a product removes it from the shop; visible: false hides it.
  *  - theme must be one of:
  *      logo match: "dube-family"
  *      military: "olive-drab", "ocp-field", "dress-blues", "black-gold", "desert-camo", "woodland-camo"
@@ -160,8 +155,6 @@ const HEADER = `/*
  *    or links that are already in this file.
  *  - Policy text can use {business}, {email} and {state}; they're filled in
  *    automatically. These are plain starting points, not legal advice.
- *  - If a request can't be done in this file, say so and name the closest
- *    "EDIT-POINT" from CUSTOMIZE.md instead of guessing.
  *
  *  HOW THIS FILE AND THE DASHBOARD WORK TOGETHER
  *  When this file changes on GitHub, only the values that changed here are
@@ -272,15 +265,44 @@ export function variablesFile(v: SiteVariables): string {
   );
   sec("Shop categories", ["In the order they show in the shop. Each product's category should match one of these."]);
   L.push(`  ${field("categories", v.categories)}`);
+  if (v.discounts) {
+    const d = v.discounts;
+    sec("Discounts", ["Promo codes themselves are made in Dashboard > Discounts (they live in Stripe). These are the programs."]);
+    L.push(
+      "  discounts: {",
+      `    thankYouCode: { on: ${d.thankYouCode.on}, percentOff: ${d.thankYouCode.percentOff}, validDays: ${d.thankYouCode.validDays} }, // a code for their next order after each purchase`,
+      "    military: {",
+      `      ${field("on", d.military.on, "the Military & first responder page")}`,
+      `      ${field("percentOff", d.military.percentOff)}`,
+      `      ${field("checkFirst", d.military.checkFirst, "true: they ask and you approve each one; false: everyone sees the code below")}`,
+      `      ${field("code", d.military.code, "the shared code when checkFirst is false")}`,
+      `      ${field("heading", d.military.heading)}`,
+      `      ${field("text", d.military.text, "{percent} is filled in")}`,
+      "    },",
+      "    bulk: [ // the more items in one order, the bigger the discount",
+      ...d.bulk.map((t) => `      { fromItems: ${t.fromItems}, percentOff: ${t.percentOff} },`),
+      "    ],",
+      "    giftCards: {",
+      `      ${field("on", d.giftCards.on, "the Gift cards page")}`,
+      `      ${field("amounts", d.giftCards.amounts, "dollars")}`,
+      `      ${field("heading", d.giftCards.heading)}`,
+      `      ${field("text", d.giftCards.text)}`,
+      "    },",
+      ...(d.checkoutReminders
+        ? [`    checkoutReminders: { on: ${d.checkoutReminders.on}, afterHours: ${d.checkoutReminders.afterHours} }, // email people who left checkout without paying (1 to 24 hours later)`]
+        : []),
+      "  },"
+    );
+  }
   if (v.watermark) {
     sec("Watermark", ["A stamp on shop photos so they can't be reused without credit. The original photos are never changed."]);
     obj("watermark", [
       field("on", v.watermark.on, "true stamps shop photos; false shows them clean"),
       field("text", v.watermark.text, '"" uses the business name'),
       field("withLogo", v.watermark.withLogo, "add the logo next to the text"),
-      field("position", v.watermark.position, '"corner" | "center" | "tiled"'),
+      field("position", v.watermark.position, '"corner" | "center" (one big diagonal) | "tiled" (diagonal all over)'),
       field("opacity", v.watermark.opacity, "5 (faint) to 90 (strong)"),
-      field("size", v.watermark.size, "10 to 60, as a % of the photo's width"),
+      field("size", v.watermark.size, "10 to 60, how big the stamp is"),
       field("onOurWork", v.watermark.onOurWork, "Our work photos too"),
       field("onDesigns", v.watermark.onDesigns, "design library artwork too"),
     ]);
@@ -396,7 +418,8 @@ export function variablesFile(v: SiteVariables): string {
       `      ${field("visible", p.visible ?? true)}`,
       `      choice: ${p.choice ? `{ label: ${q(p.choice.label)}, options: ${q(p.choice.options)} }` : "null"},`,
       `      engraving: ${p.engraving ? `{ label: ${q(p.engraving.label)}, maxLength: ${p.engraving.maxLength}, required: ${p.engraving.required} }` : "null"},`,
-      `      sizes: ${p.sizes?.length ? `[${p.sizes.map((x) => `{ name: ${q(x.name)}, price: ${x.price} }`).join(", ")}]` : "null"},`,
+      `      sizes: ${p.sizes?.length ? `[${p.sizes.map((x) => `{ name: ${q(x.name)}, price: ${x.price}${x.blank ? `, blank: ${q(x.blank)}` : ""} }`).join(", ")}]` : "null"},`,
+      ...(p.blank ? [`      ${field("blank", p.blank, "the blank one of these uses up (Dashboard > Blanks)")}`] : []),
       ...(p.designs
         ? [
             `      designs: {`,

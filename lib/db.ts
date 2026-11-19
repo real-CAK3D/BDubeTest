@@ -1,16 +1,26 @@
 import "server-only";
+import { getPrivate, setPrivate } from "./private-data";
 import { kv } from "./store";
 import { DEFAULT_ADMIN } from "./site-structure";
 import { fileSettings, syncVariables } from "./sync";
 import type { AppNotification, CustomRequest, Expense, Message, Order, Product, Review, SiteSettings, Subscriber } from "./types";
 
 // Starting values come from site-variables.ts (the SITE-VARIABLES edit point).
-export const DEFAULT_SETTINGS: SiteSettings = { ...fileSettings(), admin: DEFAULT_ADMIN };
+export const DEFAULT_SETTINGS: SiteSettings = {
+  ...fileSettings(),
+  admin: DEFAULT_ADMIN,
+  shipFrom: { name: "", company: "", street1: "", street2: "", city: "", state: "", zip: "", phone: "", email: "" },
+  parcels: [
+    { name: "Tumbler box", length: 12, width: 6, height: 6, weightOz: 32 },
+    { name: "Small flat (coaster, card holder)", length: 8, width: 6, height: 2, weightOz: 12 },
+    { name: "Sign box", length: 26, width: 12, height: 3, weightOz: 64 },
+  ],
+};
 
 export async function getSettings(): Promise<SiteSettings> {
   await syncVariables();
   const s = await kv.get<Partial<SiteSettings>>("settings");
-  return { ...DEFAULT_SETTINGS, ...(s ?? {}), social: { ...(s?.social ?? {}) }, admin: { ...DEFAULT_ADMIN, ...(s?.admin ?? {}) } };
+  return { ...DEFAULT_SETTINGS, ...(s ?? {}), social: { ...(s?.social ?? {}) }, admin: { ...DEFAULT_ADMIN, ...(s?.admin ?? {}) }, shipFrom: { ...DEFAULT_SETTINGS.shipFrom, ...(s?.shipFrom ?? {}) } };
 }
 
 export async function saveSettings(patch: Partial<SiteSettings>) {
@@ -46,11 +56,20 @@ export async function saveProducts(list: Product[]) {
 export { newId, slugify } from "./ids";
 
 export async function getOrders(): Promise<Order[]> {
-  return (await kv.get<Order[]>("orders")) ?? [];
+  return await getPrivate<Order[]>("orders", []);
 }
 
 export async function saveOrders(list: Order[]) {
-  await kv.set("orders", list);
+  await setPrivate("orders", list);
+}
+
+export async function updateOrder(id: string, patch: Partial<Order>) {
+  const orders = await getOrders();
+  const o = orders.find((x) => x.id === id);
+  if (!o) return null;
+  Object.assign(o, patch);
+  await saveOrders(orders);
+  return o;
 }
 
 // Returns null if we already have it (webhook and thank-you page both call this).
@@ -72,10 +91,10 @@ export async function saveExpenses(list: Expense[]) {
 }
 
 export async function getNotifications(): Promise<AppNotification[]> {
-  return (await kv.get<AppNotification[]>("notifications")) ?? [];
+  return await getPrivate<AppNotification[]>("notifications", []);
 }
 export async function saveNotifications(list: AppNotification[]) {
-  await kv.set("notifications", list.slice(0, 200));
+  await setPrivate("notifications", list.slice(0, 200));
 }
 
 export function dayKey(d = new Date()) {
@@ -103,23 +122,23 @@ export async function getAnalytics() {
 
 export type PushSub = { endpoint: string; keys: { p256dh: string; auth: string }; label?: string };
 export async function getPushSubs(): Promise<PushSub[]> {
-  return (await kv.get<PushSub[]>("pushSubs")) ?? [];
+  return await getPrivate<PushSub[]>("pushSubs", []);
 }
 export async function savePushSubs(list: PushSub[]) {
-  await kv.set("pushSubs", list);
+  await setPrivate("pushSubs", list);
 }
 
 export async function getMessages(): Promise<Message[]> {
-  return (await kv.get<Message[]>("messages")) ?? [];
+  return await getPrivate<Message[]>("messages", []);
 }
 export async function saveMessages(list: Message[]) {
-  await kv.set("messages", list.slice(0, 1000));
+  await setPrivate("messages", list.slice(0, 1000));
 }
 export async function getSubscribers(): Promise<Subscriber[]> {
-  return (await kv.get<Subscriber[]>("subscribers")) ?? [];
+  return await getPrivate<Subscriber[]>("subscribers", []);
 }
 export async function saveSubscribers(list: Subscriber[]) {
-  await kv.set("subscribers", list);
+  await setPrivate("subscribers", list);
 }
 
 export async function getReviews(): Promise<Review[]> {
@@ -136,8 +155,8 @@ export async function homeReviews(max = 6) {
 }
 
 export async function getRequests(): Promise<CustomRequest[]> {
-  return (await kv.get<CustomRequest[]>("requests")) ?? [];
+  return await getPrivate<CustomRequest[]>("requests", []);
 }
 export async function saveRequests(list: CustomRequest[]) {
-  await kv.set("requests", list.slice(0, 2000));
+  await setPrivate("requests", list.slice(0, 2000));
 }

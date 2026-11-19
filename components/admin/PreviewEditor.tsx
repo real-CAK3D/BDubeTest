@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { Design, ProductPreview, Shape3D } from "@/lib/types";
 import { uploadFile, uploadImage } from "./api";
 import { ImageList } from "./ImageField";
+import { SpinCapture } from "./SpinCapture";
 
 const Viewer3D = dynamic(() => import("@/components/shop/Viewer3D").then((m) => m.Viewer3D), { ssr: false });
 
@@ -29,6 +30,7 @@ export function PreviewEditor({ value, onChange, photos, library }: { value: Pro
   };
   const sample = library.find((d) => d.active)?.image;
   const [busy, setBusy] = useState("");
+  const [capturing, setCapturing] = useState(false);
   const [err, setErr] = useState("");
   const pickRef = useRef<HTMLInputElement>(null);
   const scanRef = useRef<HTMLInputElement>(null);
@@ -122,7 +124,7 @@ export function PreviewEditor({ value, onChange, photos, library }: { value: Pro
 
       <h3 className="sub">3D scan of the real piece</h3>
       <p className="hint">
-        Scan the finished item with a free phone app like Polycam, Scaniverse or KIRI Engine (walk around it while it films), export a <strong>.glb</strong> file under 4 MB, and upload it here.
+        Scan the finished item with a phone app (Polycam or KIRI Engine work on both iPhone and Android; Scaniverse and Apple&apos;s Reality Composer on iPhone), export a <strong>.glb</strong> file under 4 MB, and upload it here.
         Customers can turn it, and on most phones see it on their own table. Bigger files: put them in the <code>public/models</code> folder on GitHub and paste <code>/models/name.glb</code>.
       </p>
       <div className="row wrap">
@@ -132,7 +134,12 @@ export function PreviewEditor({ value, onChange, photos, library }: { value: Pro
       </div>
 
       <h3 className="sub">360° spin</h3>
-      <p className="hint">Put the item on a lazy Susan and take a photo every few degrees all the way around (24 to 36 photos, same distance and light). Add them in order; customers drag to turn the real piece.</p>
+      <p className="hint">Put the item on a lazy Susan and let the phone take the photos while you turn it. Works on iPhone and Android. Or add photos you took yourself, in order.</p>
+      {capturing ? (
+        <SpinCapture onDone={(spin) => { up({ spin }); setCapturing(false); }} onClose={() => setCapturing(false)} />
+      ) : (
+        <div><button type="button" className="b b-sm" onClick={() => setCapturing(true)}>Take 360° photos with the camera</button></div>
+      )}
       <ImageList value={pv.spin ?? []} onChange={(spin) => up({ spin })} folder="spin" />
       {pv.spin?.length && pv.spin.length < 4 ? <p className="hint">Add at least 4 photos for the spin to show.</p> : null}
     </>

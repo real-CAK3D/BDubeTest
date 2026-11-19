@@ -8,7 +8,7 @@ import type { Design, GalleryItem, Product, SiteSettings, Watermark } from "./ty
  * The stamping itself happens in app/api/wm/route.ts.
  */
 
-export const DEFAULT_WATERMARK: Watermark = { on: false, text: "", useLogo: true, position: "corner", opacity: 45, size: 28, onGallery: true, onDesigns: false };
+export const DEFAULT_WATERMARK: Watermark = { on: false, text: "", useLogo: true, position: "tiled", opacity: 30, size: 30, onGallery: true, onDesigns: false };
 
 /** Short fingerprint of the watermark settings; part of each address so a change shows at once. */
 export function wmVersion(w: Watermark, logo: string) {

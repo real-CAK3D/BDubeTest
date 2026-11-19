@@ -70,7 +70,14 @@ export async function GET(req: Request) {
     const photo = await base.resize(width, height).toBuffer();
 
     // the stamp: logo and/or text, white with a soft dark shadow so it reads on light and dark photos
-    const markW = Math.max(80, Math.round((width * (w.position === "tiled" ? Math.min(w.size, 30) : w.size)) / 100));
+    // corner: a share of the width; all over: big repeated stamps; middle: one stamp across the diagonal
+    const diag = Math.hypot(width, height);
+    const markW =
+      w.position === "center"
+        ? Math.round(diag * Math.min(0.95, 0.45 + w.size / 100))
+        : w.position === "tiled"
+          ? Math.max(140, Math.round((Math.min(width, height) * (w.size + 25)) / 100))
+          : Math.max(80, Math.round((width * w.size) / 100));
     const text = (w.text || s.businessName).replace(/[<>&]/g, "");
     const parts: OverlayOptions[] = [];
     let markH = 0;
@@ -79,7 +86,7 @@ export async function GET(req: Request) {
       try {
         const logoUrl = new URL(s.logo, self.origin);
         if (allowed(logoUrl, self)) {
-          const logo = await sharp(await load(logoUrl)).resize({ width: Math.round(markW * 0.42) }).png().toBuffer({ resolveWithObject: true });
+          const logo = await sharp(await load(logoUrl)).resize({ width: Math.round(markW * (w.position === "corner" ? 0.42 : 0.2)) }).png().toBuffer({ resolveWithObject: true });
           logoH = logo.info.height;
           parts.push({ input: logo.data, left: Math.round((markW - logo.info.width) / 2), top: 0 });
           markH = logoH + 4;
@@ -104,19 +111,27 @@ export async function GET(req: Request) {
       .toBuffer();
 
     const pad = Math.round(width * 0.03);
-    const overlay: OverlayOptions =
-      w.position === "tiled"
-        ? {
-            // a stamp with space around it, repeated across the photo
-            input: await sharp({ create: { width: markW + Math.round(markW * 0.6), height: markH + Math.round(markW * 0.5), channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-              .composite([{ input: stamp, left: Math.round(markW * 0.3), top: Math.round(markW * 0.25) }])
-              .png()
-              .toBuffer(),
-            tile: true,
-          }
-        : w.position === "center"
-          ? { input: stamp, gravity: "center" }
-          : { input: stamp, left: Math.max(0, width - markW - pad), top: Math.max(0, height - markH - pad) };
+    const clear = { r: 0, g: 0, b: 0, alpha: 0 };
+    let overlay: OverlayOptions;
+    if (w.position === "tiled") {
+      // big stamps turned 30°, repeated with room between them
+      const turned = await sharp(stamp).rotate(-30, { background: clear }).png().toBuffer({ resolveWithObject: true });
+      const cellW = Math.min(width, turned.info.width + Math.round(markW * 0.35));
+      const cellH = Math.min(height, turned.info.height + Math.round(markW * 0.25));
+      const fitted = await sharp(turned.data).resize({ width: Math.min(turned.info.width, cellW), height: Math.min(turned.info.height, cellH), fit: "inside" }).png().toBuffer({ resolveWithObject: true });
+      const cell = await sharp({ create: { width: cellW, height: cellH, channels: 4, background: clear } })
+        .composite([{ input: fitted.data, left: Math.round((cellW - fitted.info.width) / 2), top: Math.round((cellH - fitted.info.height) / 2) }])
+        .png()
+        .toBuffer();
+      overlay = { input: cell, tile: true };
+    } else if (w.position === "center") {
+      // one stamp from the bottom-left corner toward the top-right
+      const angle = -Math.min(55, Math.max(20, (Math.atan2(height, width) * 180) / Math.PI));
+      const turned = await sharp(stamp).rotate(angle, { background: clear }).png().toBuffer();
+      overlay = { input: await sharp(turned).resize({ width, height, fit: "inside", withoutEnlargement: true }).png().toBuffer(), gravity: "center" };
+    } else {
+      overlay = { input: stamp, left: Math.max(0, width - markW - pad), top: Math.max(0, height - markH - pad) };
+    }
 
     const out = sharp(photo).composite([overlay]);
     const png = meta.hasAlpha || meta.format === "svg" || meta.format === "png";

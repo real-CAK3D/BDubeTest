@@ -40,6 +40,20 @@ export default async function Success({ searchParams }: { searchParams: Promise<
             {order.tax ? <li><span>Tax</span><span>{money(order.tax, order.currency)}</span></li> : null}
             <li className="total"><span>Total paid</span><span>{money(order.total, order.currency)}</span></li>
           </ul>
+          {order.giftCodes?.length ? (
+            <div className="code-box">
+              <strong>Gift card code{order.giftCodes.length > 1 ? "s" : ""}</strong>
+              {order.giftCodes.map((c) => <code key={c}>{c}</code>)}
+              <p className="muted small">We&apos;ve also emailed {order.giftCodes.length > 1 ? "them" : "it"} where you asked. Keep this page or take a screenshot.</p>
+            </div>
+          ) : null}
+          {order.nextCode ? (
+            <div className="code-box">
+              <strong>Thank you! {s.discounts.thankYou.percent}% off your next order</strong>
+              <code>{order.nextCode}</code>
+              <p className="muted small">Use it at checkout within {s.discounts.thankYou.days} days. One use.</p>
+            </div>
+          ) : null}
         </>
       ) : (
         <p className="lede">Your order is confirmed. A receipt is on its way to your inbox.</p>

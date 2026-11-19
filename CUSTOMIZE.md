@@ -4,29 +4,13 @@ Two ways to change things. The first covers almost everything.
 
 ## 1. Words, prices, products and settings: `site-variables.ts`
 
-Everything on the shop that isn't code lives in one file: **`site-variables.ts`**. It holds the business name, headlines, about story, contact info, social links, policies, logo/photo paths, theme, layout, shipping, store open/closed and the full product list. Every value has a note next to it saying what it does, and the top of the file has instructions written for ChatGPT.
+Everything on the shop that isn't code (words, products, prices, designs, discounts, pages, theme...) is changed in the **dashboard**, and shows on the shop right away. A copy of all of it is also saved in **`site-variables.ts`** on GitHub as a backup with history (once a GitHub token is added), and that's what a fresh copy of the shop starts from.
 
-### Changing it with ChatGPT
-
-1. On GitHub, open `site-variables.ts` and click **Copy raw file** (the copy icon above the code).
-2. Paste it into ChatGPT and say what you want:
-   - "Add a walnut pen for $35, 10 in stock, in Woodwork. Write the descriptions."
-   - "Rewrite my about story. I was an MP from 2006 to 2014."
-   - "Put everything in Leather on sale for 15% off."
-   - "Switch to the Dress Blues theme and the Showroom layout."
-3. Copy the **whole file** ChatGPT gives back.
-4. On GitHub, click the **pencil** (Edit this file), select everything, paste, and click **Commit changes**.
-5. Vercel rebuilds the site. It's live in about a minute.
-
-**If ChatGPT makes a mistake** (a missing comma, a theme name that doesn't exist), Vercel refuses to publish it and the current site stays up. Vercel emails the error. Paste that error into ChatGPT to get a fixed file, or open the commit on GitHub and click **Revert**.
+You can also edit `site-variables.ts` by hand on GitHub (pencil, change the value, **Commit changes**); every value has a note saying what it does. If there's a mistake, Vercel won't publish it and the live site stays up.
 
 ### Photos
 
-ChatGPT can't upload photos. Either:
-- upload them in the dashboard (**Products** > the item > Add photos, or **Words & logos**), or
-- on GitHub, open the `public/images` folder, click **Add file > Upload files**, then refer to them in `site-variables.ts` as `"/images/file-name.jpg"` (for example `logo: "/images/logo.png"` or `photos: ["/images/pen-1.jpg"]`).
-
-If a product has no `photos` line, the photos added in the dashboard are kept.
+Upload them in the dashboard (**Products**, **Designs**, **Words & logos**). Or, on GitHub, upload to the `public/images` folder and refer to them as `"/images/file-name.jpg"`.
 
 ### The file and the dashboard together
 
@@ -80,10 +64,9 @@ Find one by searching the repository for `EDIT-POINT: NAME` (on GitHub press `/`
 | `STRIPE-CATALOG` | `lib/stripe-catalog.ts` | How products made in Stripe map to shop items |
 | `EMAILS` | `lib/email.ts` | Wording of the "your order shipped" email |
 
-### Getting ChatGPT to help with a code change
+### Making a code change
 
-1. Open the file on GitHub and find the `EDIT-POINT` block.
-2. Copy the code under it into ChatGPT: *"Here is the PRICING section of my site. Add a 10% discount when someone orders 5 or more of the same item. Give me the full replacement."*
-3. On GitHub, click the pencil, swap in the new code, and click **Commit changes**. Vercel rebuilds automatically.
+1. Open the file on GitHub and find the `EDIT-POINT` block; it explains what the code does.
+2. Click the pencil, make the change, and click **Commit changes**. Vercel rebuilds automatically, and if the change breaks the build, the current site stays up.
 
 Passwords and keys never go in any file. They live in Vercel > Settings > Environment Variables.

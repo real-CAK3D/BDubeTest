@@ -73,8 +73,8 @@ Optional: rename it under the repository's **Settings > General > Repository nam
 
    | Name | Value |
    |---|---|
-   | `ADMIN_PASSWORD` | The password you'll log in with. At least 10 characters; don't reuse one. |
-   | `AUTH_SECRET` | 40 or more random characters. Mash the keyboard; you'll never type it again. |
+   | `ADMIN_PASSWORD` | The dashboard password. Use `bdube123` for now; change it any time in **Settings > Password & security**. |
+   | `AUTH_SECRET` | 40 or more random characters. Mash the keyboard; you'll never type it again. **Never change it once you have real orders**: customer details are stored encrypted with it. |
 
 6. Click **Deploy** and wait about two minutes.
 7. Choose your web address: open the project's **Settings > Domains**, click **Add Domain**, and type the name you want ending in `.vercel.app`, for example `bdubytest.vercel.app` once Part 1, step 3 has freed it up. Vercel tells you right away if a name is taken.
@@ -83,10 +83,12 @@ Optional: rename it under the repository's **Settings > General > Repository nam
 
 ### Step 3: Log in to your dashboard, 1 minute
 1. Open your web address with `/admin` on the end, for example `https://bdubytest.vercel.app/admin`.
-2. Log in with your `ADMIN_PASSWORD`.
-3. On your iPhone, open the same address in **Safari** and tap **Share > Add to Home Screen**. It becomes an app called Shop HQ.
+2. Type your name (so you can tell your phones apart later) and the password (`bdube123` for now).
+3. Change the password in **Settings > Password & security**. Your wife signs in with the same password on her phone; both of you can be signed in at once.
+4. On your iPhone, open the same address in **Safari** and tap **Share > Add to Home Screen**. It becomes an app called Shop HQ.
+5. Optional but recommended: in **Settings > Password & security**, turn on the **lock screen** (a 4-digit PIN asked for before the password).
 
-There's also a small **Owner login** link at the very bottom of every shop page.
+Hidden way in from the shop: tap the **version and build number** at the very bottom of any page **7 times** in a row. There's no visible login link, so customers never see one.
 
 ### Step 4: Supabase (database and photo storage), 5 minutes
 This is what makes your changes, orders and photos permanent. Until it's done, edits can disappear when Vercel restarts.
@@ -167,6 +169,9 @@ Things only you know:
 4. Share your link.
 
 ### Optional extras (any time)
+- **Shipping labels from an order:** a free Shippo account; see Help > Shipping labels.
+- **Discounts:** codes, the military discount, bulk pricing, gift cards and cart reminders are all on the **Discounts** page.
+- **Blanks:** count your plain stock on the **Blanks** page and link it to item sizes.
 - **Shipped emails with tracking links:** **Setup > Tracking emails** (a free Resend account).
 - **Sales tax:** turn on Stripe Tax in Stripe (**Settings > Tax**), then **Settings > Checkout & emails** in your dashboard. Check your state's seller's permit rules.
 - **Facebook / Instagram Shop and Google Shopping:** **Setup > List your items**. Your shop already publishes the product list they need at `/feed.xml`.
@@ -182,14 +187,17 @@ Things only you know:
 - **Repository and Vercel project** are detected from Vercel, so links and GitHub saves point at your copy.
 - **Stripe products and webhook** are set up when you save your Stripe key (test or live).
 - **Notification keys** are made the first time you open Settings.
+- **Customer details** (orders, addresses, emails, phones, messages, requests) are stored encrypted.
 - **Every dashboard edit** goes live instantly and is saved to GitHub (once the token is in). Those saves don't trigger a rebuild.
-- **Every change pushed to GitHub** (for example a ChatGPT edit of `site-variables.ts`) is rebuilt and published by Vercel in about a minute.
+- **Every change pushed to GitHub** is rebuilt and published by Vercel in about a minute.
 
 ### If something isn't green on the Setup page
 
 | Problem | Fix |
 |---|---|
-| Can't log in at `/admin` | Check `ADMIN_PASSWORD` in Vercel (**Settings > Environment Variables**), then **Deployments > ⋯ > Redeploy**. Changes to variables only apply after a redeploy. |
+| Can't log in at `/admin` | Check `ADMIN_PASSWORD` in Vercel (**Settings > Environment Variables**), then **Deployments > ⋯ > Redeploy**. Changes to variables only apply after a redeploy. Once the password has been changed in Settings, the Vercel one is no longer used. |
+| "Too many wrong tries" | Wait 15 minutes; it unlocks by itself. |
+| "Saved orders can't be unlocked" | `AUTH_SECRET` in Vercel was changed. Put the old value back and redeploy. |
 | Database or Photos not green | Make sure step 4 ended with a **Redeploy**. Still red? Run `supabase/schema.sql` as described in step 4. |
 | "Photo storage isn't connected yet" when uploading | Same as above: Supabase isn't connected or the site wasn't redeployed. |
 | Stripe saved but the webhook isn't green | Open **Keys** from your live web address (not a preview link) and press **Connect Stripe webhook**. |

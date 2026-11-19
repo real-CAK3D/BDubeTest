@@ -66,6 +66,15 @@ export const KEY_DEFS: KeyDef[] = [
     secret: true,
   },
   {
+    envName: "SHIPPO_API_KEY",
+    label: "Shippo API token (optional)",
+    group: "Shipping labels",
+    where: "Buy and print shipping labels from an order, with the tracking number filled in. Free account at goshippo.com > Settings > API. The test token (shippo_test_) makes practice labels.",
+    link: "https://apps.goshippo.com/settings/api",
+    prefix: /^shippo_(live|test)_/,
+    secret: true,
+  },
+  {
     envName: "RESEND_API_KEY",
     label: "Resend API key (optional)",
     group: "Email",

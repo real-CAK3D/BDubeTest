@@ -168,7 +168,6 @@ export const SETUP_STEPS: SetupStep[] = [
         list: [
           "**In this dashboard**: Products > **Add item**. Good for photos straight from your phone.",
           "**In Stripe**: Product catalog > **+ Add product**. Give it a name, description, photos and a **one-off** price. It appears in the shop within seconds.",
-          "**In site-variables.ts on GitHub**: handy with ChatGPT. See Help > Editing with ChatGPT.",
         ],
       },
       { p: "Extra details for Stripe products go in the product's **Metadata** (bottom of the product page in Stripe): `category`, `stock`, `summary`, `featured` = true, `made_to_order` = true, `choice_label` = Color and `choice_options` = Black, Brown, and for engraving `engraving_label` = Name to engrave and `engraving_max` = 30." },
@@ -280,7 +279,7 @@ export const SETUP_STEPS: SetupStep[] = [
     time: "5 min",
     check: "githubSync",
     blocks: [
-      { p: "Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), ready for code changes or ChatGPT edits." },
+      { p: "Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), a backup with history." },
       {
         steps: [
           "On GitHub, open the token page (link below): **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.",

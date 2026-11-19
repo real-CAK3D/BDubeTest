@@ -2,7 +2,9 @@ export type ProductOption = { label: string; values: string[] };
 // Lets the customer type text for the item, e.g. a name to engrave.
 export type Personalize = { label: string; maxLength: number; required: boolean };
 // A size (or style) of an item with its own price, e.g. "30 oz" at $80.
-export type ProductSize = { name: string; price: number }; // cents
+export type ProductSize = { name: string; price: number; blank?: string }; // price in cents; blank = id of the blank it uses up
+// A blank he keeps on the shelf to engrave (a 40 oz Stanley, a slate coaster...).
+export type Blank = { id: string; name: string; qty: number; low: number; cost: number; note: string };
 // Which designs from the design library fit this item. "fit" is keyed by size
 // name ("*" when the item has no sizes) and lists design ids, so each size can
 // offer a different set (a 40 oz tumbler might fit 2 designs, a 16 oz 10).
@@ -36,6 +38,17 @@ export type Watermark = {
   onGallery: boolean; // Our work photos too
   onDesigns: boolean; // design library artwork too
 };
+// Discount programs, all switched on and off in Dashboard > Discounts
+export type DiscountPrograms = {
+  thankYou: { on: boolean; percent: number; days: number }; // a code for the next order, given after each purchase
+  veteran: { on: boolean; percent: number; verify: boolean; code: string; heading: string; text: string };
+  bulk: { minQty: number; percent: number }[]; // the more items in the cart, the bigger the discount
+  giftCards: { on: boolean; amounts: number[]; heading: string; text: string }; // amounts in dollars
+  reminders: { on: boolean; hours: number }; // email people who left checkout without paying
+};
+export type Abandoned = { id: string; createdAt: string; email: string; name: string; amount: number; items: string; url: string; emailedAt?: string; recovered?: boolean };
+export type VetRequest = { id: string; createdAt: string; name: string; email: string; group: string; note: string; status: "new" | "approved" | "declined"; code?: string };
+export type GiftCard = { id: string; code: string; promoId: string; amount: number; createdAt: string; fromName: string; buyerEmail: string; toName: string; toEmail: string; message: string; orderNumber?: number; sentAt?: string };
 // One entry in the shop's page list (top menu and footer).
 export type MenuItem = { id: string; label: string; href?: string; top: boolean; footer: boolean; off?: boolean };
 // How the owner's dashboard looks and what it shows.
@@ -69,6 +82,7 @@ export type Product = {
   option?: ProductOption | null;
   personalize?: Personalize | null;
   sizes?: ProductSize[] | null; // price then comes from the chosen size
+  blank?: string; // blank used up by one of this item (when it has no sizes)
   designs?: ProductDesigns | null;
   preview?: ProductPreview | null;
   // Set when the item comes from Stripe (Stripe > Product catalog)
@@ -90,6 +104,12 @@ export type OrderItem = {
 };
 
 export type OrderStatus = "paid" | "shipped" | "delivered" | "refunded" | "cancelled";
+
+// Where packages ship from (on labels) and the box sizes he uses. Kept out of site-variables.ts (private).
+export type ShipFrom = { name: string; company: string; street1: string; street2: string; city: string; state: string; zip: string; phone: string; email: string };
+export type Parcel = { name: string; length: number; width: number; height: number; weightOz: number }; // inches, ounces
+
+export type ShipTo = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country: string; phone?: string; email?: string };
 
 export type Order = {
   id: string; // Stripe checkout session id
@@ -115,6 +135,11 @@ export type Order = {
   delivery?: "ship" | "pickup";
   giftNote?: string;
   shipNote?: string; // e.g. shipping ZIP differs from the one quoted
+  nextCode?: string; // thank-you code for their next order
+  giftCodes?: string[]; // gift card codes bought in this order
+  bulkPercent?: number; // bulk discount applied
+  shipTo?: ShipTo; // the address in parts, for shipping labels
+  label?: { url: string; carrier: string; service: string; cost: number; boughtAt: string }; // a label bought in the dashboard
   note?: string;
 };
 
@@ -211,6 +236,7 @@ export type SiteSettings = {
   categories: string[]; // shop categories, in display order
   designs: Design[]; // design library for decals / engravings
   watermark: Watermark;
+  discounts: DiscountPrograms;
   showContactForm: boolean;
   showNewsletter: boolean;
   newsletterText: string;
@@ -245,6 +271,8 @@ export type SiteSettings = {
   vercelProject: string;
   customLinks: CustomLink[];
   admin: AdminPrefs; // dashboard look and layout (not in site-variables.ts)
+  shipFrom: ShipFrom; // return address for labels (not in site-variables.ts)
+  parcels: Parcel[]; // box presets for labels (not in site-variables.ts)
   expenseCategories: string[];
 };
 

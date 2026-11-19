@@ -16,11 +16,18 @@ type Props = {
   promoCodes: boolean;
   tax: boolean;
   giftNotes: boolean;
+  bulk: { minQty: number; percent: number }[];
+  military: { percent: number; href: string } | null;
 };
 type Quote = { amount: number; label: string; free?: boolean };
 
 export function CartView(props: Props) {
   const cart = useCart();
+  const qty = cart.lines.reduce((n, l) => n + l.quantity, 0);
+  const bulkPct = props.bulk.filter((t) => qty >= t.minQty).reduce((m, t) => Math.max(m, t.percent), 0);
+  const nextTier = props.bulk.find((t) => t.minQty > qty && t.percent > bulkPct);
+  const bulkOff = Math.round((cart.subtotal * bulkPct) / 100);
+  const afterBulk = cart.subtotal - bulkOff;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [delivery, setDelivery] = useState<"ship" | "pickup">("ship");
@@ -133,13 +140,14 @@ export function CartView(props: Props) {
       <aside className="cart-sum">
         <dl>
           <div><dt>Subtotal</dt><dd>{money(cart.subtotal, props.currency)}</dd></div>
+          {bulkPct ? <div className="saving"><dt>Bulk order ({bulkPct}% off)</dt><dd>−{money(bulkOff, props.currency)}</dd></div> : null}
           {props.ships ? (
             <div>
               <dt>{delivery === "pickup" ? "Local pickup" : "Shipping"}</dt>
               <dd>{shipping === null ? (quoting ? "…" : "Enter ZIP") : shipping === 0 ? "Free" : money(shipping, props.currency)}</dd>
             </div>
           ) : null}
-          <div className="total"><dt>Total</dt><dd>{money(cart.subtotal + (shipping ?? 0), props.currency)}{shipping === null && props.ships ? " + shipping" : ""}</dd></div>
+          <div className="total"><dt>Total</dt><dd>{money(afterBulk + (shipping ?? 0), props.currency)}{shipping === null && props.ships ? " + shipping" : ""}</dd></div>
         </dl>
         {props.ships ? (
           <fieldset className="delivery">
@@ -162,8 +170,14 @@ export function CartView(props: Props) {
             ) : null}
           </fieldset>
         ) : null}
+        {nextTier ? <p className="muted small">Order {nextTier.minQty - qty} more item{nextTier.minQty - qty === 1 ? "" : "s"} for {nextTier.percent}% off everything.</p> : null}
+        {props.military ? (
+          <p className="muted small">
+            Veteran, active duty or first responder? <Link href={props.military.href}>Get {props.military.percent}% off</Link>.
+          </p>
+        ) : null}
         {props.ships && delivery === "ship" && props.freeOver > 0 && !free ? (
-          <p className="muted small">Add {money(props.freeOver - cart.subtotal, props.currency)} more for free shipping.</p>
+          <p className="muted small">Add {money(props.freeOver - afterBulk, props.currency)} more for free shipping.</p>
         ) : null}
         {props.storeOpen ? (
           <button className="btn btn-lg btn-block" onClick={checkout} disabled={busy}>

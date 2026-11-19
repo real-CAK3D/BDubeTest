@@ -16,6 +16,7 @@ export const ADMIN_PAGES: AdminPage[] = [
   { group: "Selling", href: "/admin/orders", label: "Orders", note: "Paid orders, shipping and tracking", icon: "M4 4h16v4H4zM5 8v12h14V8M9 12h6", tab: true },
   { group: "Selling", href: "/admin/products", label: "Products", note: "Items, sizes, prices and stock", icon: "M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5", tab: true },
   { group: "Selling", href: "/admin/money", label: "Money", note: "Income, expenses and profit", icon: "M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M6 9v.01M18 15v.01", tab: true },
+  { group: "Selling", href: "/admin/blanks", label: "Blanks", note: "Plain stock to engrave, counts and low alerts", icon: "M7 3h10l-1 18H8zM7 3c0 1.5 2.2 2 5 2s5-.5 5-2M9 9h6" },
   { group: "Selling", href: "/admin/designs", label: "Designs", note: "Decals and engravings, and which items they fit", icon: "M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.3 7.2 17.9l.9-5.4-3.9-3.8 5.4-.8zM4 21h16" },
   { group: "Selling", href: "/admin/discounts", label: "Discounts", note: "Coupons and promo codes from Stripe", icon: "M9 15l6-6M9.5 9.5v.01M14.5 14.5v.01M3 12l2-2V5h5l2-2 2 2h5v5l2 2-2 2v5h-5l-2 2-2-2H5v-5z" },
   { group: "Customers", href: "/admin/customers", label: "Customers", note: "Who's buying, email sign-ups, downloads", icon: "M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M22 19v-1a4 4 0 0 0-3-3.9M16 4.1a3 3 0 0 1 0 5.8" },

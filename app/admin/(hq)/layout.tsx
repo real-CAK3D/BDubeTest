@@ -33,7 +33,7 @@ export default async function HQLayout({ children }: { children: React.ReactNode
     "/admin/live": live.filter((c) => c.status !== "closed" && c.unread > 0).length,
   };
   return (
-    <div className="hq-shell" data-mode={a.mode} data-density={a.density} data-text={a.textSize} style={accent ? ({ "--owner-accent": accent } as React.CSSProperties) : undefined}>
+    <div className="hq-shell" data-mode={a.mode} data-density={a.density} data-text={a.textSize} style={accent ? ({ "--owner-accent": accent, "--owner-accent-ink": inkFor(accent) } as React.CSSProperties) : undefined}>
       <RegisterSW />
       <AdminPing />
       <header className="hq-top">
@@ -63,4 +63,11 @@ export default async function HQLayout({ children }: { children: React.ReactNode
       <main className="hq-main">{children}</main>
     </div>
   );
+}
+
+/** Black or white text, whichever reads better on the owner's main color. */
+function inkFor(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum > 0.22 ? "#111111" : "#FFFFFF";
 }

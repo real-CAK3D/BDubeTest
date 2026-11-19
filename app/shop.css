@@ -39,7 +39,7 @@ body:has(.shop) { background: var(--bg); }
 .small { font-size: 0.88rem; }
 .lede { font-size: 1.16rem; color: var(--muted); max-width: 60ch; margin: 0 0 1.4rem; }
 .prose p { max-width: 68ch; }
-.error { color: #b3261e; }
+.error { color: color-mix(in srgb, #d93025 70%, var(--ink)); }
 .empty { color: var(--muted); padding: 2rem 0; }
 
 /* ---------- header band (the MP brassard) ---------- */
@@ -645,7 +645,7 @@ body:has(.shop) { background: var(--bg); }
 .design-grid-shop label.on { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
 .design-grid-shop label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 .design-grid-shop img, .design-grid-shop .none { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: calc(var(--radius) * 0.7); }
-.design-grid-shop .none { display: grid; place-items: center; color: #777; font-size: 0.85rem; border: 1px dashed #bbb; }
+.design-grid-shop .none { display: grid; place-items: center; color: var(--muted); font-size: 0.85rem; border: 1px dashed var(--line); }
 .mini-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
 .mini-chips button { border: 1px solid var(--line); background: transparent; color: inherit; border-radius: 999px; padding: 0.2rem 0.7rem; font: inherit; font-size: 0.82rem; cursor: pointer; }
 .mini-chips button.on { background: var(--accent); color: var(--accent-ink, #fff); border-color: var(--accent); }
@@ -794,8 +794,9 @@ model-viewer.viewer3d-stage { --poster-color: transparent; }
 .coming-body h3 { margin: 0; }
 .coming-body p { margin: 0; color: var(--muted); }
 .coming-stage { align-self: flex-start; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--surface-2); }
-.coming-stage.s-soon { background: rgba(46, 160, 67, 0.15); color: #1f7a33; }
-.coming-stage.s-working { background: rgba(212, 160, 23, 0.18); color: #8a6508; }
+/* tinted toward the theme's own text color, so they read on light and dark themes alike */
+.coming-stage.s-soon { background: color-mix(in srgb, #2ea043 18%, transparent); color: color-mix(in srgb, #2ea043 45%, var(--ink)); }
+.coming-stage.s-working { background: color-mix(in srgb, #d4a017 20%, transparent); color: color-mix(in srgb, #d4a017 45%, var(--ink)); }
 .want { margin-top: auto; padding-top: 0.5rem; display: grid; gap: 0.5rem; }
 .want-row { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
 .want-btn { border: 1.5px solid var(--accent); background: none; color: var(--ink); border-radius: 999px; padding: 0.4rem 0.95rem; font: inherit; font-weight: 700; cursor: pointer; }

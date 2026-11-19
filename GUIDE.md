@@ -412,8 +412,8 @@ _Where API keys for Stripe and other services go._
 An API key is a long password that lets the shop talk to another service. Paste it in, press **Save**, and the site checks it before storing it encrypted. Nobody, including you, can read a saved key back; you can only replace or remove it.
 
 - **Stripe secret key**: connects payments. Saving it also pulls in your Stripe products.
-- **Connect Stripe webhook**: one tap. Tells Stripe to send orders, refunds and product changes to your site instantly, and saves the webhook secret for you.
-- **Create notification keys**: one tap. Needed for phone alerts.
+- **Connect Stripe webhook**: happens by itself when you save your Stripe key. The button is there to redo it if ever needed (for example after changing your web address).
+- **Notification keys**: made automatically the first time you open Settings; **Create notification keys** remakes them if ever needed.
 - **Resend API key** (optional): lets the site email tracking numbers.
 - **Add another key**: for any other service you start using later.
 

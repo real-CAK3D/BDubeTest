@@ -3,7 +3,7 @@
 // Run: npm run guide
 import { writeFileSync } from "fs";
 import { HELP } from "../lib/help.ts";
-import { DEPLOY_URL, PHASES, SETUP_STEPS } from "../lib/setup-steps.ts";
+import { PHASES, SETUP_STEPS } from "../lib/setup-steps.ts";
 
 function blockLines(b) {
   if ("p" in b) return [b.p, ""];
@@ -46,7 +46,7 @@ const setup = [
   "Getting the shop online, in order: GitHub, Vercel, Supabase, then Stripe (which also handles Apple Pay and Google Pay). " +
     "Once you can log in (step 3), the dashboard has a Setup page with the same list that checks steps off as you finish them.",
   "",
-  `[![Deploy with Vercel](https://vercel.com/button)](${DEPLOY_URL})`,
+  "Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).",
   "",
 ];
 const num = new Map(SETUP_STEPS.map((st, i) => [st.id, i + 1]));

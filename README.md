@@ -1,5 +1,6 @@
 # Dube Family Creations: shop + Shop HQ
 
+**New owner? Start with [HANDOFF.md](HANDOFF.md)**: taking over the repository and connecting GitHub, Vercel, Supabase and Stripe, one step at a time.
 Setting it up for the first time? Start with [SETUP.md](SETUP.md).
 Already running and want to know how something works? See [GUIDE.md](GUIDE.md). Both are also in the dashboard (Setup, and the ? button).
 
@@ -11,14 +12,14 @@ Customers never see the dashboard. Nothing on the shop links to it, everything u
 
 | Service | Does | How it connects |
 |---|---|---|
-| **GitHub** | Holds the site's files, including `site-variables.ts` | The Deploy button copies the shop into your account |
+| **GitHub** | Holds the site's files, including `site-variables.ts` | The repository is transferred to the owner's account (see HANDOFF.md) |
 | **Vercel** | Runs the website; rebuilds on every GitHub change | Linked to GitHub when you sign up with it |
 | **Supabase** | Database and photo storage | Vercel > Storage > Supabase. The site creates its own table and photo bucket on first run |
-| **Stripe** | Payments, Apple Pay, Google Pay, products, coupons, tax | Paste the secret key on the dashboard's **Keys** page, then one tap connects the webhook |
+| **Stripe** | Payments, Apple Pay, Google Pay, products, coupons, tax | Paste the secret key on the dashboard's **Keys** page; products and the webhook connect by themselves |
 
 You only type two environment variables yourself (`ADMIN_PASSWORD` and `AUTH_SECRET`). Supabase adds its own. Other keys can be pasted on the dashboard's Keys page (stored encrypted) or set in Vercel if you'd rather; Vercel's win if both are set.
 
-There's a Deploy to Vercel button in [SETUP.md, step 2](SETUP.md#copy).
+Notification keys are made automatically. The Supabase table can also be made by hand with [`supabase/schema.sql`](supabase/schema.sql) if ever needed.
 
 ## What's inside
 

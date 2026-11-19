@@ -355,7 +355,7 @@ export function variablesFile(v: SiteVariables): string {
   sec("Owner (not shown on the site)");
   obj("owner", [
     field("expenseCategories", v.owner.expenseCategories),
-    field("githubRepo", v.owner.githubRepo, 'e.g. "owner/repo"'),
+    field("githubRepo", v.owner.githubRepo, 'e.g. "owner/repo"; found by itself on Vercel'),
     field("vercelProject", v.owner.vercelProject),
     "links: [ // shortcuts on the Settings page",
     ...v.owner.links.map((l) => `  { label: ${q(l.label)}, url: ${q(l.url)} },`),

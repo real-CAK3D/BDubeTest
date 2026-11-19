@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import webpush from "web-push";
 import { checkFormat, KEY_DEFS, keyStatuses, removeKey, saveKey, validName } from "@/lib/keys";
+import { connectStripeWebhook } from "@/lib/stripe-webhook";
 import { syncStripeCatalog } from "@/lib/stripe-catalog";
 
 async function test(envName: string, value: string): Promise<string | null> {
@@ -50,12 +51,19 @@ export async function POST(req: Request) {
     await saveKey(name, value);
     let message = "Saved.";
     if (name === "STRIPE_SECRET_KEY") {
+      // one paste does it all: pull in products made in Stripe and connect the webhook
+      const parts = ["Saved. Stripe is connected."];
       try {
         const c = await syncStripeCatalog();
-        message = `Saved. Stripe connected and ${c.added + c.updated} product${c.added + c.updated === 1 ? "" : "s"} pulled in. Next: press "Connect Stripe webhook".`;
-      } catch {
-        message = 'Saved. Next: press "Connect Stripe webhook".';
+        if (c.added + c.updated) parts.push(`${c.added + c.updated} product${c.added + c.updated === 1 ? "" : "s"} pulled in from Stripe.`);
+      } catch {}
+      try {
+        await connectStripeWebhook(req);
+        parts.push("Orders and refunds will now reach your dashboard.");
+      } catch (e) {
+        parts.push(`One more step: press "Connect Stripe webhook". (${(e as Error).message})`);
       }
+      message = parts.join(" ");
     }
     return NextResponse.json({ ok: true, message });
   } catch (e) {

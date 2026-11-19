@@ -16,7 +16,7 @@ export type SetupStep = {
   links?: { label: string; url: string }[];
 };
 
-/** Change this to wherever the shop's code lives on GitHub (the folder that has package.json). */
+/** Where the shop's code lives on GitHub (used by the optional Deploy button only). */
 export const TEMPLATE_REPO = "https://github.com/real-CAK3D/BDubeTest";
 
 export const DEPLOY_URL =
@@ -39,9 +39,9 @@ export const SETUP_STEPS: SetupStep[] = [
       { p: "You need three free accounts. Use the same email for all of them to keep things simple." },
       {
         steps: [
-          "**GitHub** (stores the site's files): sign up at github.com.",
+          "**GitHub** (stores the site's files): sign up at github.com and pick a username. Send that username to whoever built the site, so they can hand the shop's repository over to you.",
           "**Vercel** (runs the website): go to vercel.com, choose **Sign Up**, then **Continue with GitHub**. This links the two.",
-          "**Stripe** (takes payments): sign up at stripe.com. You can explore in test mode right away; Stripe asks for business and bank details before real payments.",
+          "**Stripe** (takes payments, including Apple Pay and Google Pay): sign up at stripe.com. You can test right away; Stripe asks for business and bank details before real payments.",
         ],
       },
       { tip: "Supabase (the database) doesn't need its own sign-up. Vercel creates it for you in step 4." },
@@ -54,34 +54,22 @@ export const SETUP_STEPS: SetupStep[] = [
   },
   {
     id: "copy",
-    title: "Get your own copy of the site",
-    time: "5 min",
+    title: "Take over the repository and put it online",
+    time: "10 min",
     check: "vercel",
     blocks: [
-      { p: "**Easiest: the Deploy button.** It copies the shop into a new repository on your GitHub and puts it on Vercel at the same time." },
+      { p: "The shop's repository is transferred to your GitHub account, so it's fully yours (not a fork or a copy). Everything comes with it: every page, product, photo and setting." },
       {
         steps: [
-          "Open the **Deploy to Vercel** link below while signed in to Vercel.",
-          "Pick your GitHub account and keep the repository name (or choose your own). Leave it **Private** if you like.",
-          "When it asks for **ADMIN_PASSWORD**, type the password you'll use for the dashboard.",
-          "For **AUTH_SECRET**, type 40+ random characters (just mash the keyboard). You'll never need to remember it.",
-          "Press **Deploy** and wait about two minutes. You'll get a web address like `shop-yourname.vercel.app`.",
-        ],
-      },
-      { h: "Or: fork it by hand" },
-      {
-        steps: [
-          "On GitHub, open the shop's repository and click **Fork**, then **Create fork**.",
-          "In Vercel, click **Add New > Project**, find your fork and click **Import**.",
-          "Leave **Root Directory** as it is; the shop is at the top of the repository.",
-          "Open **Environment Variables** and add `ADMIN_PASSWORD` and `AUTH_SECRET` as described above, then click **Deploy**.",
+          "Watch for an email from GitHub saying a repository is being transferred to you, and click **Accept** (it expires after a day). The repository now shows under your account.",
+          "In Vercel, click **Add New > Project**. Your repository is in the list (if not, click **Adjust GitHub App Permissions** and allow it). Click **Import**.",
+          "Leave every setting as it is. Open **Environment Variables** and add **ADMIN_PASSWORD** with the password you'll use for the dashboard.",
+          "Add **AUTH_SECRET** too: 40+ random characters (mash the keyboard). You'll never need to remember it.",
+          "Click **Deploy** and wait about two minutes. You get a web address like `bdubetest.vercel.app`. To pick your own name, open the project's **Settings > Domains**, click **Add Domain** and type a name ending in `.vercel.app`.",
         ],
       },
     ],
-    links: [
-      { label: "Deploy to Vercel", url: DEPLOY_URL },
-      { label: "Vercel: import a project", url: "https://vercel.com/new" },
-    ],
+    links: [{ label: "Vercel: import a project", url: "https://vercel.com/new" }],
   },
   {
     id: "password",
@@ -123,8 +111,7 @@ export const SETUP_STEPS: SetupStep[] = [
         steps: [
           "In Stripe, make sure **Test mode** is on (top right) while you set up.",
           "Go to **Developers > API keys** and click **Reveal** next to **Secret key** (starts with `sk_test_`). Copy it.",
-          "In this dashboard, open **Keys**, paste it into **Stripe secret key** and press **Save**. The site checks it with Stripe and pulls in any products you've made there.",
-          "Still on **Keys**, press **Connect Stripe webhook**. This tells Stripe to send orders, refunds and product changes to your site instantly.",
+          "In this dashboard, open **Keys**, paste it into **Stripe secret key** and press **Save**. That's all: the site checks the key, pulls in any products you've made in Stripe, and connects the webhook so orders and refunds reach you instantly.",
         ],
       },
     ],
@@ -138,7 +125,7 @@ export const SETUP_STEPS: SetupStep[] = [
     title: "Webhook connected",
     time: "1 click",
     check: "webhook",
-    blocks: [{ p: "Done from **Keys > Connect Stripe webhook** (step above). If it's not green, press that button again from your live web address." }],
+    blocks: [{ p: "This connects by itself when you save your Stripe key. If it's not green, open **Keys** on your live web address and press **Connect Stripe webhook**." }],
     links: [{ label: "Open Keys", url: "/admin/keys" }],
   },
   {
@@ -219,13 +206,12 @@ export const SETUP_STEPS: SetupStep[] = [
     blocks: [
       {
         steps: [
-          "On **Keys**, press **Create notification keys**.",
           "On your iPhone, open your site's `/admin` in Safari, tap **Share > Add to Home Screen**.",
           "Open **Shop HQ** from the home screen, go to **Settings**, tap **Turn on notifications**, then **Send a test**.",
         ],
       },
     ],
-    links: [{ label: "Open Keys", url: "/admin/keys" }],
+    links: [{ label: "Open Settings", url: "/admin/settings" }],
   },
   {
     id: "shipping",
@@ -250,7 +236,7 @@ export const SETUP_STEPS: SetupStep[] = [
     time: "20 min",
     optional: true,
     blocks: [
-      { p: "Your shop publishes a product list at **your-site/feed.xml** (for example https://bdubytest.vercel.app/feed.xml). Facebook, Instagram and Google read it and keep your items, prices and stock up to date by themselves." },
+      { p: "Your shop publishes a product list at **your-site/feed.xml** (for example https://your-shop.vercel.app/feed.xml). Facebook, Instagram and Google read it and keep your items, prices and stock up to date by themselves." },
       { h: "Facebook and Instagram Shop" },
       {
         steps: [
@@ -368,7 +354,7 @@ export const SETUP_STEPS: SetupStep[] = [
           "In Stripe, finish **Activate payments** (business details and bank account).",
           "Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).",
           "On **Keys**, press **Replace** on **Stripe secret key**, paste it and **Save**.",
-          "Press **Connect Stripe webhook** again (live mode has its own webhooks).",
+          "The webhook for live mode connects by itself when you save the live key.",
           "Products made in test mode don't carry over to live mode in Stripe. Re-create them in live mode, or keep them in the dashboard instead.",
           "Mark any test orders as **Cancelled** so they stay out of your totals, and share your link.",
         ],

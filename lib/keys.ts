@@ -46,7 +46,7 @@ export const KEY_DEFS: KeyDef[] = [
     envName: "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
     label: "Notification public key",
     group: "Phone notifications",
-    where: "Press \"Create notification keys\" and both are made for you.",
+    where: "Made for you automatically the first time you open Settings (or press \"Create notification keys\").",
     secret: false,
   },
   {

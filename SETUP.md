@@ -4,12 +4,12 @@
 
 Getting the shop online, in order: GitHub, Vercel, Supabase, then Stripe (which also handles Apple Pay and Google Pay). Once you can log in (step 3), the dashboard has a Setup page with the same list that checks steps off as you finish them.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Freal-CAK3D%2FBDubeTest&project-name=shop&repository-name=shop&env=ADMIN_PASSWORD%2CAUTH_SECRET&envDescription=ADMIN_PASSWORD+is+your+dashboard+login.+AUTH_SECRET+is+any+long+random+text+%28mash+the+keyboard%2C+40%2B+characters%29.)
+Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 
 **Get online**
 
 1. [Make your accounts](#accounts), 10 min
-2. [Get your own copy of the site](#copy), 5 min
+2. [Take over the repository and put it online](#copy), 10 min
 3. [Check your login](#password), 1 min
 4. [Connect Supabase (your database and photo storage)](#supabase), 3 min
 
@@ -47,33 +47,26 @@ Getting the shop online, in order: GitHub, Vercel, Supabase, then Stripe (which 
 
 You need three free accounts. Use the same email for all of them to keep things simple.
 
-1. **GitHub** (stores the site's files): sign up at github.com.
+1. **GitHub** (stores the site's files): sign up at github.com and pick a username. Send that username to whoever built the site, so they can hand the shop's repository over to you.
 2. **Vercel** (runs the website): go to vercel.com, choose **Sign Up**, then **Continue with GitHub**. This links the two.
-3. **Stripe** (takes payments): sign up at stripe.com. You can explore in test mode right away; Stripe asks for business and bank details before real payments.
+3. **Stripe** (takes payments, including Apple Pay and Google Pay): sign up at stripe.com. You can test right away; Stripe asks for business and bank details before real payments.
 
 > **Tip:** Supabase (the database) doesn't need its own sign-up. Vercel creates it for you in step 4.
 
 Links: [GitHub sign up](https://github.com/signup), [Vercel sign up](https://vercel.com/signup), [Stripe sign up](https://dashboard.stripe.com/register)
 
 <a id="copy"></a>
-### 2. Get your own copy of the site
+### 2. Take over the repository and put it online
 
-**Easiest: the Deploy button.** It copies the shop into a new repository on your GitHub and puts it on Vercel at the same time.
+The shop's repository is transferred to your GitHub account, so it's fully yours (not a fork or a copy). Everything comes with it: every page, product, photo and setting.
 
-1. Open the **Deploy to Vercel** link below while signed in to Vercel.
-2. Pick your GitHub account and keep the repository name (or choose your own). Leave it **Private** if you like.
-3. When it asks for **ADMIN_PASSWORD**, type the password you'll use for the dashboard.
-4. For **AUTH_SECRET**, type 40+ random characters (just mash the keyboard). You'll never need to remember it.
-5. Press **Deploy** and wait about two minutes. You'll get a web address like `shop-yourname.vercel.app`.
+1. Watch for an email from GitHub saying a repository is being transferred to you, and click **Accept** (it expires after a day). The repository now shows under your account.
+2. In Vercel, click **Add New > Project**. Your repository is in the list (if not, click **Adjust GitHub App Permissions** and allow it). Click **Import**.
+3. Leave every setting as it is. Open **Environment Variables** and add **ADMIN_PASSWORD** with the password you'll use for the dashboard.
+4. Add **AUTH_SECRET** too: 40+ random characters (mash the keyboard). You'll never need to remember it.
+5. Click **Deploy** and wait about two minutes. You get a web address like `bdubetest.vercel.app`. To pick your own name, open the project's **Settings > Domains**, click **Add Domain** and type a name ending in `.vercel.app`.
 
-#### Or: fork it by hand
-
-1. On GitHub, open the shop's repository and click **Fork**, then **Create fork**.
-2. In Vercel, click **Add New > Project**, find your fork and click **Import**.
-3. Leave **Root Directory** as it is; the shop is at the top of the repository.
-4. Open **Environment Variables** and add `ADMIN_PASSWORD` and `AUTH_SECRET` as described above, then click **Deploy**.
-
-Links: [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Freal-CAK3D%2FBDubeTest&project-name=shop&repository-name=shop&env=ADMIN_PASSWORD%2CAUTH_SECRET&envDescription=ADMIN_PASSWORD+is+your+dashboard+login.+AUTH_SECRET+is+any+long+random+text+%28mash+the+keyboard%2C+40%2B+characters%29.), [Vercel: import a project](https://vercel.com/new)
+Links: [Vercel: import a project](https://vercel.com/new)
 
 <a id="password"></a>
 ### 3. Check your login
@@ -104,15 +97,14 @@ Links: [Vercel dashboard](https://vercel.com/dashboard)
 
 1. In Stripe, make sure **Test mode** is on (top right) while you set up.
 2. Go to **Developers > API keys** and click **Reveal** next to **Secret key** (starts with `sk_test_`). Copy it.
-3. In this dashboard, open **Keys**, paste it into **Stripe secret key** and press **Save**. The site checks it with Stripe and pulls in any products you've made there.
-4. Still on **Keys**, press **Connect Stripe webhook**. This tells Stripe to send orders, refunds and product changes to your site instantly.
+3. In this dashboard, open **Keys**, paste it into **Stripe secret key** and press **Save**. That's all: the site checks the key, pulls in any products you've made in Stripe, and connects the webhook so orders and refunds reach you instantly.
 
 Links: [Stripe API keys](https://dashboard.stripe.com/test/apikeys), Open Keys (dashboard, `/admin/keys`)
 
 <a id="webhook"></a>
 ### 6. Webhook connected
 
-Done from **Keys > Connect Stripe webhook** (step above). If it's not green, press that button again from your live web address.
+This connects by itself when you save your Stripe key. If it's not green, open **Keys** on your live web address and press **Connect Stripe webhook**.
 
 Links: Open Keys (dashboard, `/admin/keys`)
 
@@ -164,11 +156,10 @@ Links: [Stripe: new coupon](https://dashboard.stripe.com/coupons/create), Open D
 <a id="push"></a>
 ### 11. Phone notifications
 
-1. On **Keys**, press **Create notification keys**.
-2. On your iPhone, open your site's `/admin` in Safari, tap **Share > Add to Home Screen**.
-3. Open **Shop HQ** from the home screen, go to **Settings**, tap **Turn on notifications**, then **Send a test**.
+1. On your iPhone, open your site's `/admin` in Safari, tap **Share > Add to Home Screen**.
+2. Open **Shop HQ** from the home screen, go to **Settings**, tap **Turn on notifications**, then **Send a test**.
 
-Links: Open Keys (dashboard, `/admin/keys`)
+Links: Open Settings (dashboard, `/admin/settings`)
 
 <a id="shipping"></a>
 ### 12. Set your shipping prices
@@ -184,7 +175,7 @@ Links: Open Keys (dashboard, `/admin/keys`)
 <a id="listings"></a>
 ### 13. List your items on Facebook, Instagram and Google (optional)
 
-Your shop publishes a product list at **your-site/feed.xml** (for example https://bdubytest.vercel.app/feed.xml). Facebook, Instagram and Google read it and keep your items, prices and stock up to date by themselves.
+Your shop publishes a product list at **your-site/feed.xml** (for example https://your-shop.vercel.app/feed.xml). Facebook, Instagram and Google read it and keep your items, prices and stock up to date by themselves.
 
 #### Facebook and Instagram Shop
 
@@ -265,7 +256,7 @@ Links: [Stripe Tax](https://dashboard.stripe.com/settings/tax)
 1. In Stripe, finish **Activate payments** (business details and bank account).
 2. Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).
 3. On **Keys**, press **Replace** on **Stripe secret key**, paste it and **Save**.
-4. Press **Connect Stripe webhook** again (live mode has its own webhooks).
+4. The webhook for live mode connects by itself when you save the live key.
 5. Products made in test mode don't carry over to live mode in Stripe. Re-create them in live mode, or keep them in the dashboard instead.
 6. Mark any test orders as **Cancelled** so they stay out of your totals, and share your link.
 

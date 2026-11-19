@@ -1,11 +1,21 @@
 import "server-only";
 import webpush from "web-push";
 import { getNotifications, getPushSubs, newId, saveNotifications, savePushSubs } from "./db";
-import { getKey } from "./keys";
+import { getKey, saveKey } from "./keys";
 
 export async function vapidKeys() {
   const [pub, priv] = await Promise.all([getKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY"), getKey("VAPID_PRIVATE_KEY")]);
   return pub && priv ? { pub, priv } : null;
+}
+/** The notification keys, made on first use so the owner never has to create them. */
+export async function ensureVapidKeys() {
+  const have = await vapidKeys();
+  if (have) return have;
+  const k = webpush.generateVAPIDKeys();
+  // one after the other: both live in the same stored list
+  await saveKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY", k.publicKey);
+  await saveKey("VAPID_PRIVATE_KEY", k.privateKey);
+  return { pub: k.publicKey, priv: k.privateKey };
 }
 export const pushConfigured = async () => Boolean(await vapidKeys());
 

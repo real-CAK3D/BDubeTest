@@ -327,8 +327,8 @@ export const SITE_VARIABLES = {
   // Owner (not shown on the site)
   owner: {
     expenseCategories: ["Materials", "Tools", "Shipping supplies", "Postage", "Fees", "Marketing", "Software", "Other"],
-    githubRepo: "real-CAK3D/BDubeTest", // e.g. "owner/repo"
-    vercelProject: "cak3ds-projects/bdtest",
+    githubRepo: "", // e.g. "owner/repo"; found by itself on Vercel
+    vercelProject: "",
     links: [ // shortcuts on the Settings page
     ],
   },

@@ -12,6 +12,6 @@ export async function POST(req: Request) {
     await clearChatLog(typeof b.q === "string" ? b.q : undefined);
     return NextResponse.json(await getChatLog());
   }
-  if (b.action === "test" && typeof b.q === "string") return NextResponse.json(await answer([{ role: "user", content: b.q.slice(0, 800) }]));
+  if (b.action === "test" && typeof b.q === "string") return NextResponse.json(await answer([{ role: "user", content: b.q.slice(0, 800) }], { req }));
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }

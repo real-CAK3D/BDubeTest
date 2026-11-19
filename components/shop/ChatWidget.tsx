@@ -25,6 +25,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
   const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const state = useRef<unknown>(null); // what the chat is in the middle of (e.g. taking a request)
   const list = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
 
@@ -33,6 +34,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
     try {
       const raw = sessionStorage.getItem(KEY);
       if (raw) setTurns(JSON.parse(raw));
+      state.current = JSON.parse(sessionStorage.getItem(KEY + ":state") ?? "null");
     } catch {}
   }, []);
   useEffect(() => {
@@ -43,6 +45,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
   }, [turns, open]);
   useEffect(() => {
     if (open) input.current?.focus();
+    if (open) fetch("/api/chat").catch(() => {}); // wakes the chat up before the first question
   }, [open]);
 
   async function ask(q: string) {
@@ -53,8 +56,12 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
     setText("");
     setBusy(true);
     try {
-      const r = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next.slice(-10) }) });
+      const r = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next.slice(-10), state: state.current }) });
       const d = await r.json().catch(() => ({}));
+      state.current = d.state ?? null;
+      try {
+        sessionStorage.setItem(KEY + ":state", JSON.stringify(state.current));
+      } catch {}
       setTurns([...next, { role: "assistant", content: d.reply ?? d.error ?? "Sorry, something went wrong. Please try again." }]);
     } catch {
       setTurns([...next, { role: "assistant", content: "Sorry, I couldn't connect. Please try again." }]);

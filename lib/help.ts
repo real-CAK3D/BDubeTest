@@ -382,6 +382,20 @@ export const HELP: HelpGroup[] = [
           { h: "Adding an answer" },
           { steps: ["Open **Chat** in the dashboard.", "Tap **Add a question**, type the question how a customer would ask it, and your answer.", "Save. The chat uses it straight away, even if the customer words the question differently."] },
           { p: "**What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it. If it's really a question you already answered in other words, pick it under **Same as…** and the chat learns that wording." },
+          { h: "What the chat can do for customers" },
+          {
+            list: [
+              "**Look up an order**: they send the order number (or the code on their receipt) and the email they used, and the chat tells them its status and tracking. Both are needed, so nobody can look up someone else's order.",
+              "**Quote shipping**: \"how much to ship to 78701?\" gets the same price the cart would charge.",
+              "**Gift ideas**: \"something for my dad under $50\" suggests items in that price range.",
+              "**Designs**: \"do you have a flag design?\" searches your design library and says which items offer it.",
+              "**Your policies**: \"can I return a personalized item?\" quotes the right sentence from your policies.",
+              "**Custom requests**: when someone wants something made, the chat offers to send it; it asks what they want, their name and email, and it lands in **Requests** with a phone ping.",
+              "**Messages to you**: \"can I talk to a real person?\" or any question it can't answer: it offers to pass the message on, and it lands in your **Inbox**.",
+            ],
+          },
+          { h: "The built-in meaning model (free)" },
+          { p: "A small model (about 23 MB) lives inside the website. It doesn't write anything; it just understands that \"when will my stuff get here\" means the same as \"how long does shipping take\", or that \"it arrived broken\" is your damaged-item answer, even with no words in common. No key, no outside service, no cost. It also groups questions the chat couldn't answer under **Suggestions** in **What people asked**, with a one-tap **Same as…** when one of your answers fits." },
           { h: "Without any AI (free, the default)" },
           {
             list: [

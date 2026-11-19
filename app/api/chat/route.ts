@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { answer, logQuestion, type ChatTurn } from "@/lib/chat";
 import { getSettings } from "@/lib/db";
 import { tooMany } from "@/lib/guard";
+import { warmUp } from "@/lib/meaning";
+
+// Opening the chat box starts loading the meaning model, so the first answer is quick.
+export async function GET() {
+  warmUp();
+  return NextResponse.json({ ok: true });
+}
 
 // The shop's "Ask us" chat: { messages: [{ role, content }, ...] } -> { reply }
 export async function POST(req: Request) {
@@ -15,7 +22,8 @@ export async function POST(req: Request) {
     .filter((m: ChatTurn) => m.content.trim());
   if (!turns.length || turns.at(-1)!.role !== "user") return NextResponse.json({ error: "Ask a question first." }, { status: 400 });
   while (turns[0]?.role === "assistant") turns.shift(); // the conversation has to start with the customer
-  const out = await answer(turns);
-  await logQuestion({ at: new Date().toISOString(), q: turns.at(-1)!.content.slice(0, 300), answered: out.answered, faq: out.faq }).catch(() => {});
-  return NextResponse.json({ reply: out.reply });
+  const out = await answer(turns, { state: b.state, req });
+  // only plain questions go in the "What people asked" list, never order lookups or contact details
+  if (out.log !== false) await logQuestion({ at: new Date().toISOString(), q: turns.at(-1)!.content.slice(0, 300), answered: out.answered, faq: out.faq }).catch(() => {});
+  return NextResponse.json({ reply: out.reply, state: out.state ?? null });
 }

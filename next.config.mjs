@@ -6,6 +6,8 @@ const d = new Date();
 const pad = (n) => String(n).padStart(2, "0");
 const build = `${String(d.getUTCFullYear()).slice(2)}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;
 
+const MEANING_FILES = ["./models/minilm/**", "./node_modules/onnxruntime-web/dist/ort.node.min.mjs", "./node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs", "./node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm"];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: { NEXT_PUBLIC_APP_VERSION: version, NEXT_PUBLIC_BUILD: build },
@@ -28,6 +30,13 @@ const nextConfig = {
   images: { unoptimized: true },
   experimental: { serverActions: { bodySizeLimit: "5mb" } },
   // the watermark's font has to ship with the function that stamps photos
-  outputFileTracingIncludes: { "/api/wm": ["./assets/fonts/**"] },
+  // the chat's meaning model (lib/meaning.ts): its files and the WebAssembly runtime ship with the functions that use it
+  serverExternalPackages: ["onnxruntime-web"],
+  outputFileTracingIncludes: {
+    "/api/wm": ["./assets/fonts/**"],
+    "/api/chat": MEANING_FILES,
+    "/api/admin/chat": MEANING_FILES,
+    "/admin/chat": MEANING_FILES,
+  },
 };
 export default nextConfig;

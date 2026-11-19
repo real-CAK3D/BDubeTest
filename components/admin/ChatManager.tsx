@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { AI_PROVIDERS, providerOf } from "@/lib/ai-providers";
+import type { ChatSuggestion } from "@/lib/chat";
 import type { ChatLogEntry, Faq, SiteSettings } from "@/lib/types";
 import { api } from "./api";
 import { Tabs } from "./Tabs";
@@ -14,7 +15,7 @@ const when = (iso: string) => new Date(iso).toLocaleString("en-US", { month: "sh
  * hide, add), what customers actually asked (add an answer in one tap), and a
  * box to try it.
  */
-export function ChatManager({ initial, log: initialLog, hasKey }: { initial: SiteSettings; log: ChatLogEntry[]; hasKey: boolean }) {
+export function ChatManager({ initial, log: initialLog, hasKey, suggestions = [] }: { initial: SiteSettings; log: ChatLogEntry[]; hasKey: boolean; suggestions?: ChatSuggestion[] }) {
   const { s, set, bar } = useSettings(initial);
   const c = s.chat;
   const up = (patch: Partial<SiteSettings["chat"]>) => set({ chat: { ...c, ...patch } });
@@ -44,9 +45,19 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
   const aiOn = c.useAI && (hasKey || !prov.needsKey) && (prov.id === "anthropic" || Boolean(ai.baseUrl || prov.baseUrl));
 
   // a customer's wording becomes another way to ask an answer you already have
-  function sameAs(question: string, id: string) {
-    up({ faqs: c.faqs.map((f) => (f.id === id ? { ...f, alts: [...new Set([...(f.alts ?? []), question])] } : f)) });
-    void forget(question);
+  function sameAs(questions: string | string[], id: string) {
+    const qs = Array.isArray(questions) ? questions : [questions];
+    up({ faqs: c.faqs.map((f) => (f.id === id ? { ...f, alts: [...new Set([...(f.alts ?? []), ...qs])].slice(0, 30) } : f)) });
+    setDone((d) => [...d, ...qs]);
+    void Promise.all(qs.map((q) => forget(q)));
+  }
+  const [done, setDone] = useState<string[]>([]);
+  const tips = suggestions.filter((g) => !g.questions.every((q) => done.includes(q)));
+  function newFrom(g: ChatSuggestion) {
+    const f = { id: newId(), q: g.questions[0], a: "", hidden: false, alts: g.questions.slice(1) };
+    up({ faqs: [f, ...c.faqs] });
+    setFocus(f.id);
+    setDone((d) => [...d, ...g.questions]);
   }
 
   function addAnswer(question = "") {
@@ -123,6 +134,28 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
             label: "What people asked",
             badge: unanswered || undefined,
             content: (
+              <>
+              {tips.length ? (
+                <section className="panel stack">
+                  <h2>Suggestions</h2>
+                  <p className="hint">The chat&apos;s meaning model grouped questions it couldn&apos;t answer. One tap teaches it; remember to save.</p>
+                  <ul className="rows asked-list">
+                    {tips.map((g) => (
+                      <li key={g.questions[0]} className="stack">
+                        <span>
+                          <strong>{g.questions[0]}</strong>
+                          <span className="muted small"> · asked {g.asked} time{g.asked === 1 ? "" : "s"}{g.questions.length > 1 ? `, ${g.questions.length} ways` : ""}</span>
+                          {g.questions.length > 1 ? <span className="muted small"><br />Also: {g.questions.slice(1, 5).map((q) => `"${q}"`).join(", ")}</span> : null}
+                        </span>
+                        <span className="row wrap">
+                          {g.faqId ? <button className="b b-primary b-sm" onClick={() => sameAs(g.questions, g.faqId!)}>Same as &quot;{(g.faqQ ?? "").slice(0, 40)}&quot;</button> : null}
+                          <button className={`b b-sm ${g.faqId ? "b-ghost" : "b-primary"}`} onClick={() => newFrom(g)}>Write a new answer</button>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
               <section className="panel">
                 <p className="hint">Only the question is kept, never who asked. Ones the chat couldn&apos;t answer are at the top. <strong>Answer this</strong> adds a new answer; <strong>Same as…</strong> teaches the chat that this wording means a question you already answered. Remember to save.</p>
                 {asked.length ? (
@@ -151,6 +184,7 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
                 )}
                 {asked.length ? <button className="b b-ghost b-sm" onClick={() => confirm("Clear the whole list?") && forget()}>Clear the list</button> : null}
               </section>
+              </>
             ),
           },
           {

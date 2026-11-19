@@ -13,11 +13,17 @@ import type { Faq } from "./types";
  *     the question, its "other ways to ask", then the answer itself).
  *  4. Remembers the item being talked about, so "how much is it?" works.
  *  5. Splits two questions in one message and answers both.
+ *  6. Gift ideas ("something for my dad under $50") and design search
+ *     ("do you have an eagle design?").
+ *  7. When the meaning model (lib/meaning.ts) is running, it also knows which
+ *     answers, items and designs MEAN the same as the question, even with no
+ *     words in common, and blends that with the word matching.
  *
  * Everything here is plain code: same question, same answer, nothing made up.
  */
 
-export type BrainProduct = { name: string; slug: string; category: string; summary: string; price: number; sizes: { name: string; price: number }[]; stock: number | null; madeToOrder: boolean };
+export type BrainProduct = { name: string; slug: string; category: string; summary: string; price: number; sizes: { name: string; price: number }[]; stock: number | null; madeToOrder: boolean; designs: string[] };
+export type BrainDesign = { id: string; name: string; group: string };
 export type BrainShop = {
   business: string;
   products: BrainProduct[];
@@ -34,9 +40,14 @@ export type BrainShop = {
   phone: string;
   location: string;
   facebook: boolean;
+  designs: BrainDesign[];
 };
+/** How close in meaning (about 0.2 unrelated to 0.8 the same) the question is to each answer id, item slug and design id. */
+export type BrainMeaning = { faq: Map<string, number>; products: Map<string, number>; designs: Map<string, number> };
+export type BrainExtras = { meaning?: (text: string) => BrainMeaning | undefined };
 export type BrainTurn = { role: "user" | "assistant"; content: string };
-export type BrainReply = { reply: string; answered: boolean; faq?: string };
+export type BrainReply = { reply: string; answered: boolean; faq?: string; offer?: "custom" | "message"; confidence: number; small?: boolean };
+type One = { reply: string; answered: boolean; faq?: string; product: BrainProduct | null; offer?: "custom" | "message"; conf: number };
 
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
 const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
@@ -45,7 +56,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 // ---------- words ----------
 
 const STOP = new Set(
-  "a an the is are am was were be been do does did can could would will shall should may might must i im ive you your yours my me mine we our ours us it its of to for in on at by with and or but how what whats when where which who why if this that these those there here have has had get got any some about from into just also really very please thanks thank hi hello hey so too than then them they their one ones".split(" ")
+  "a an the is are am was were be been do does did can could would will shall should may might must i im ive you your yours my me mine we our ours us it its of to for in on at by with and or but how what whats when where which who why if this that these those there here have has had get got any some about from into just also really very please thanks thank hi hello hey so too than then them they their one ones sell sells carry offer make makes want like".split(" ")
 );
 // words that mean the same thing to this shop (after stemming)
 const SAME: Record<string, string> = {
@@ -160,7 +171,10 @@ function understand(text: string, idx: Index) {
 
 // ---------- the owner's written answers (BM25) ----------
 
-export function rankAnswers(words: string[], idx: Index) {
+/** 0 below 0.3 similarity, 1 at 0.65 and above. */
+const semScore = (s: number | undefined) => Math.min(1, Math.max(0, ((s ?? 0) - 0.3) / 0.35));
+
+export function rankAnswers(words: string[], idx: Index, meaning?: Map<string, number>) {
   const N = idx.docs.length;
   const idf = (w: string) => Math.log(1 + (N - (idx.df.get(w) ?? 0) + 0.5) / ((idx.df.get(w) ?? 0) + 0.5));
   const k1 = 1.2;
@@ -177,7 +191,11 @@ export function rankAnswers(words: string[], idx: Index) {
       for (const w of words) s += idf(w) * Math.max(bm(qs, qs.length, w), 0.35 * bm(d.a, d.a.length, w));
       // how much of the written question the customer covered (stops one shared word winning)
       const cover = d.q.length ? d.q.filter((w) => words.includes(w)).length / d.q.length : 0;
-      return { faq: d.faq, score: Math.min(1, (s / ideal) * 0.75 + cover * 0.35) };
+      const lex = Math.min(1, (s / ideal) * 0.75 + cover * 0.35);
+      if (!meaning) return { faq: d.faq, score: lex, lex };
+      // words and meaning agreeing count for more than either alone
+      const sem = semScore(meaning.get(d.faq.id));
+      return { faq: d.faq, score: Math.min(1, Math.max(lex, sem) + 0.2 * Math.min(lex, sem)), lex };
     })
     .filter((m) => m.score > 0.05)
     .sort((x, y) => y.score - x.score);
@@ -234,13 +252,13 @@ function about(p: BrainProduct, want: Set<string>) {
   return lines.join(" ");
 }
 
-type Topic = { test: (w: Set<string>, raw: string[]) => boolean; say: (s: BrainShop) => string | null };
+type Topic = { test: (w: Set<string>, raw: string[]) => boolean; say: (s: BrainShop) => string | null; offer?: (s: BrainShop) => "custom" | "message" | undefined };
 const has = (w: Set<string>, ...xs: string[]) => xs.some((x) => w.has(x));
 // answers built from the shop's settings, so they're always up to date
 const TOPICS: Topic[] = [
   {
     test: (w) => has(w, "ship") && has(w, "price"),
-    say: (s) => `Shipping is worked out from your ZIP code in the cart, so you'll see the exact price before you pay.${s.freeShippingOver ? ` Orders over ${money(s.freeShippingOver)} ship free.` : ""}${s.localPickup ? " Local pickup is free too." : ""}`,
+    say: (s) => `Shipping is worked out from your ZIP code.${s.freeShippingOver ? ` Orders over ${money(s.freeShippingOver)} ship free.` : ""}${s.localPickup ? " Local pickup is free too." : ""} Tell me your ZIP code and I'll work out the price for you.`,
   },
   {
     test: (w, raw) => has(w, "ship") && !has(w, "time", "track", "return") && !has(w, "outside"),
@@ -257,12 +275,13 @@ const TOPICS: Topic[] = [
       return bits.length ? `Here's what we offer: ${list(bits)}. If you have a code, type it on the checkout page.` : "If you have a code, type it on the checkout page.";
     },
   },
-  { test: (w, raw) => has(w, "track") && (raw.includes("order") || raw.includes("package") || raw.includes("my")), say: () => "You can check your order any time on the Order status page with your order number (or the code on your receipt) and your email: /order-status. You'll also get an email with tracking once it ships." },
+  { test: (w, raw) => has(w, "track") && (raw.includes("order") || raw.includes("package") || raw.includes("my")), say: () => "I can look that up for you. Send me your order number (or the code on your receipt) and the email you used. You can also check any time on /order-status, and you'll get an email with tracking once it ships." },
   {
     test: (w) => has(w, "custom", "logo", "picture") && !has(w, "care"),
-    say: (s) => (s.customOrders ? `Yes, we love custom work! Tell us what you have in mind on the Custom orders page and we'll get back to you with a price: /custom-order${s.customOrderNotice ? ` ${s.customOrderNotice}` : ""}` : null),
+    say: (s) => (s.customOrders ? `Yes, we love custom work!${s.customOrderNotice ? ` ${s.customOrderNotice}` : ""} Want me to send your idea to us for a price right now? Just say yes. (Or use /custom-order.)` : null),
+    offer: (s) => (s.customOrders ? "custom" : undefined),
   },
-  { test: (w, raw) => raw.some((x) => ["contact", "email", "phone", "call", "reach", "talk", "human", "person", "someone", "owner"].includes(x)), say: (s) => `You can reach us ${list([s.email ? `by email at ${s.email}` : "", s.phone ? `by phone at ${s.phone}` : "", "through the Contact page (/contact)", s.facebook ? "on our Facebook page" : ""].filter(Boolean))}.` },
+  { test: (w, raw) => raw.some((x) => ["contact", "email", "phone", "call", "reach", "talk", "human", "person", "someone", "owner"].includes(x)), say: (s) => `I can pass a message to us right now; just say yes. Or reach us ${list([s.email ? `by email at ${s.email}` : "", s.phone ? `by phone at ${s.phone}` : "", "through /contact", s.facebook ? "on our Facebook page" : ""].filter(Boolean))}.`, offer: () => "message" },
   { test: (w, raw) => raw.some((x) => ["located", "location", "based", "address", "city"].includes(x)), say: (s) => (s.location ? `We're based in ${s.location}.${s.localPickup ? " Local pickup is free." : ""}` : null) },
   { test: (w) => has(w, "pay"), say: () => "We take all major cards, Apple Pay and Google Pay, through a secure Stripe checkout." },
 ];
@@ -271,17 +290,116 @@ const SMALL: [RegExp, (s: BrainShop) => string][] = [
   [/^(hi|hello|hey|howdy|good (morning|afternoon|evening)|yo|sup)\b[\s!.]*$/i, (s) => `Hi there! Welcome to ${s.business}. What can I help you with?`],
   [/^(thanks|thank you|thx|ty|appreciate it|great|awesome|perfect|ok(ay)?|cool)\b.*$/i, () => "You're welcome! Anything else I can help with?"],
   [/^(bye|goodbye|see ya|later)\b/i, () => "Thanks for stopping by! Have a great day."],
+  [/^(yes|yeah|yep|yup|sure|ok(ay)?)[\s!.]*$/i, () => "Great! What would you like to know?"],
+  [/^(no thanks|no thank you|nope|nah|no|that'?s (all|it)|i'?m good|all good|never ?mind)\b[\s!.]*$/i, () => "No problem! If anything else comes up, just ask."],
   [/\b(who are you|are you (a )?(bot|robot|human|real|ai))\b/i, (s) => `I'm the ${s.business} chat helper. I answer from the shop's own info; for anything else a real person answers on the Contact page.`],
 ];
 
+// ---------- gift ideas and designs ----------
+
+const lowest = (p: BrainProduct) => {
+  const priced = p.sizes.map((z) => z.price).filter((x) => x > 0);
+  return priced.length ? Math.min(...priced) : p.price;
+};
+const priceText = (p: BrainProduct) => {
+  const lo = lowest(p);
+  return !lo ? "price shown on its page" : p.sizes.filter((z) => z.price > 0).length > 1 ? `from ${money(lo)}` : money(lo);
+};
+
+/** "under $50", "less than 40 dollars", "$20-$60" -> [min, max] in cents */
+function budget(text: string): [number, number] | null {
+  const t = text.toLowerCase().replace(/,/g, "");
+  const range = t.match(/\$?(\d{1,5})\s*(?:-|to|and)\s*\$?(\d{1,5})\s*(?:dollars|bucks)?/);
+  if (range && /\$|dollar|buck|budget|between|price|spend/.test(t)) return [Number(range[1]) * 100, Number(range[2]) * 100];
+  const cap = t.match(/(?:under|less than|below|max(?:imum)?|up to|no more than|cheaper than|within|budget(?: is| of)?|around|about)\s*\$?(\d{1,5})/);
+  if (cap) return [0, Number(cap[1]) * 100 * (/around|about/.test(cap[0]) ? 1.25 : 1)];
+  const over = t.match(/(?:over|more than|above|at least)\s*\$?(\d{1,5})/);
+  if (over && /\$|dollar|buck|budget|spend/.test(t)) return [Number(over[1]) * 100, Infinity];
+  return null;
+}
+
+const GIFT = /\b(gifts?|present|recommend|suggest(ion)?s?|ideas?|something (for|nice|special)|for (my|a|an|our) (dad|father|mom|mother|wife|husband|son|daughter|grandpa|grandma|grandfather|grandmother|brother|sister|friend|boss|coworker|teacher|vet|veteran|soldier|cop|officer|firefighter|nurse|boyfriend|girlfriend|fianc[eé]e?|uncle|aunt|kids?|family|team|groomsm[ae]n|bridesmaids?|retirement|birthday|anniversary|wedding|christmas|graduation)|stocking stuffer|what should i (get|buy))\b/i;
+
+function giftIdeas(text: string, raw: string[], shop: BrainShop, m: BrainMeaning | undefined): One | null {
+  const cap = budget(text);
+  if (!GIFT.test(text) && !cap) return null;
+  if (/\bgift ?cards?\b|\bcertificate/i.test(text)) return null;
+  const mine = new Set(tokens(text).filter((x) => !STOP.has(x)).map(norm));
+  const fits = shop.products.filter((p) => p.stock !== 0 && (!cap || !lowest(p) || (lowest(p) >= cap[0] && lowest(p) <= cap[1])));
+  if (!fits.length) return { reply: `I don't have anything listed${cap ? ` in that price range` : ""} right now, but we make custom pieces for every budget. Want me to send your idea to us? Just say yes.`, answered: true, product: null, offer: shop.customOrders ? "custom" : undefined, conf: 0.6 };
+  const ranked = fits
+    .map((p) => {
+      const words = new Set(tokens(`${p.name} ${p.category} ${p.summary}`).filter((x) => !STOP.has(x)).map(norm));
+      const lex = [...mine].filter((x) => words.has(x) && x.length > 2).length * 0.1;
+      return { p, score: (m?.products.get(p.slug) ?? 0) + lex };
+    })
+    .sort((a, b) => b.score - a.score || lowest(a.p) - lowest(b.p))
+    .slice(0, 3);
+  const who = text.match(/\bfor (?:my|a|an|our) (?:\w+ )?(dad|father|mom|mother|wife|husband|son|daughter|grandpa|grandma|brother|sister|friend|boss|coworker|teacher|veteran|soldier|officer|cop|firefighter|nurse|boyfriend|girlfriend|uncle|aunt|kids?|team)\b/i)?.[1];
+  const head = `Here are a few ideas${who ? ` for your ${who.toLowerCase()}` : ""}${cap ? (cap[1] === Infinity ? ` over ${money(cap[0])}` : cap[0] ? ` between ${money(cap[0])} and ${money(cap[1])}` : ` under ${money(cap[1])}`) : ""}:`;
+  const lines = ranked.map(({ p }) => `• ${p.name}, ${priceText(p)}. /product/${p.slug}`);
+  const tail = shop.customOrders ? "\n\nEverything can be personalized with a name or date, and we do one-of-a-kind custom pieces too." : "";
+  void raw;
+  return { reply: `${head}\n${lines.join("\n")}${tail}`, answered: true, product: ranked.length === 1 ? ranked[0].p : null, conf: 0.75 };
+}
+
+const DESIGNISH = /\b(designs?|decals?|graphics?|patterns?|artwork|emblems?|images?|pictures?|symbols?|options)\b/i;
+
+function designSearch(text: string, shop: BrainShop, m: BrainMeaning | undefined): One | null {
+  if (!shop.designs.length || !DESIGNISH.test(text)) return null;
+  const skip = new Set(["design", "decal", "graphic", "pattern", "artwork", "picture", "option", "have", "show", "list", "kind", "what", "which", "available"].map(norm));
+  const mine = tokens(text).filter((x) => !STOP.has(x)).map(norm).filter((x) => !skip.has(x) && x.length > 2);
+  const scored = shop.designs
+    .map((d) => {
+      const dw = new Set(tokens(`${d.name} ${d.group}`).map(norm));
+      const lex = mine.filter((x) => dw.has(x)).length;
+      return { d, score: lex + semScore(m?.designs.get(d.id)) * 1.2 };
+    })
+    .filter((x) => x.score >= 0.6)
+    .sort((a, b) => b.score - a.score);
+  const where = (ids: string[]) => {
+    const ps = shop.products.filter((p) => p.designs.some((id) => ids.includes(id))).slice(0, 3);
+    return ps.length ? ` You can pick ${ids.length > 1 ? "them" : "it"} on ${list(ps.map((p) => `the ${p.name} (/product/${p.slug})`))}.` : "";
+  };
+  if (scored.length) {
+    const top = scored.filter((x) => x.score >= scored[0].score * 0.7).slice(0, 5).map((x) => x.d);
+    return { reply: `Yes! We have ${list(top.map((d) => `"${d.name}"${d.group ? ` (${d.group})` : ""}`))}.${where(top.map((d) => d.id))}`, answered: true, product: null, conf: 0.8 };
+  }
+  if (mine.length && !/\b(what|which|show|list|kinds?|all)\b/i.test(text)) {
+    // asked for a design we don't have
+    if (!/\b(designs?|decals?)\b/i.test(text)) return null;
+    const groups = [...new Set(shop.designs.map((d) => d.group).filter(Boolean))];
+    return {
+      reply: `I don't see that one in our design library right now${groups.length ? ` (we have ${list(groups.slice(0, 5).map((g) => g.toLowerCase()))} designs)` : ""}.${shop.customOrders ? " We can make a custom design though. Want me to send your idea to us? Just say yes." : ""}`,
+      answered: true,
+      product: null,
+      offer: shop.customOrders ? "custom" : undefined,
+      conf: 0.6,
+    };
+  }
+  const groups = [...new Set(shop.designs.map((d) => d.group).filter(Boolean))];
+  return {
+    reply: `We have ${shop.designs.length} designs${groups.length ? `, including ${list(groups.slice(0, 6).map((g) => g.toLowerCase()))}` : ""}. You'll see the ones that fit each item on its page.${shop.customOrders ? " Don't see what you want? We can make a custom design too." : ""}`,
+    answered: true,
+    product: null,
+    conf: 0.7,
+  };
+}
+
 // ---------- putting it together ----------
 
-function one(text: string, idx: Index, shop: BrainShop, context: BrainProduct | null) {
-  for (const [re, say] of SMALL) if (re.test(text.trim())) return { reply: say(shop), answered: true, product: context };
+const HUMAN = /\b((talk|speak|chat|get in touch) (to|with) (a |an |the )?(real |actual |live )?(person|human|someone|somebody|owner|people)|real person|human being|live person|customer service|leave a message|send (you |a )?message|contact (you|the owner))\b/i;
+
+function one(text: string, idx: Index, shop: BrainShop, context: BrainProduct | null, m: BrainMeaning | undefined): One {
+  for (const [re, say] of SMALL) if (re.test(text.trim())) return { reply: say(shop), answered: true, product: context, conf: 1 };
+  if (HUMAN.test(text)) return { reply: `Of course! I can send your message to ${shop.business} right now and they'll reply by email. Just say yes.${shop.phone ? ` Or call ${shop.phone}.` : ""}`, answered: true, product: context, offer: "message", conf: 1 };
   const { raw, words } = understand(text, idx);
   const w = new Set(words);
-  const ranked = rankAnswers(words, idx);
+  const ranked = rankAnswers(words, idx, m?.faq);
   const best = ranked[0];
+  // a weak match is offered honestly as a maybe, and still shows up for the owner to answer properly
+  const asFaq = (r: (typeof ranked)[number]): One =>
+    r.score >= 0.5 ? { reply: r.faq.a, answered: true, faq: r.faq.id, product: context, conf: r.score } : { reply: `I'm not completely sure, but this may help: ${r.faq.a}`, answered: false, faq: r.faq.id, product: context, conf: r.score };
 
   // an item by name, or "it"/"that one" meaning the last item talked about
   let items = findProducts(raw, shop);
@@ -289,35 +407,68 @@ function one(text: string, idx: Index, shop: BrainShop, context: BrainProduct | 
   if (!items.length && pointing && context) items = [context];
   const asksSell = raw.some((x) => ["sell", "carry", "offer", "stock", "got"].includes(x)) || /\b(do|does) (you|y'?all|u) (have|make)\b/.test(raw.join(" "));
   const productish = has(w, "price", "stock", "size") || asksSell;
-  const aboutItems = (ps: BrainProduct[]) => {
-    if (ps.length > 3 && !has(w, "price")) return { reply: `We have ${ps.length} that match: ${list(ps.slice(0, 6).map((p) => p.name))}. Which one would you like to know about?`, answered: true, product: null };
-    return { reply: ps.slice(0, 2).map((p) => about(p, w)).join("\n\n"), answered: true, product: ps[0] };
+  const aboutItems = (ps: BrainProduct[]): One => {
+    if (ps.length > 3 && !has(w, "price")) return { reply: `We have ${ps.length} that match: ${list(ps.slice(0, 6).map((p) => p.name))}. Which one would you like to know about?`, answered: true, product: null, conf: 0.7 };
+    return { reply: ps.slice(0, 2).map((p) => about(p, w)).join("\n\n"), answered: true, product: ps[0], conf: 0.8 };
   };
   if (items.length && productish) return aboutItems(items);
+  // "do you sell tumblers?": the items of that kind
+  if (asksSell && !items.length && (!best || best.lex < 0.5)) {
+    const loose = looseProducts(raw, shop);
+    if (loose.length) return aboutItems(loose);
+  }
+  // "do you sell candles?": nothing by that name, and no answer shares its words -> say so rather than guess
+  if (asksSell && !items.length && !looseProducts(raw, shop).length && (!best || best.lex < 0.25) && words.length)
+    return shop.customOrders
+      ? { reply: "I don't see that in the shop right now, but we do a lot of custom work. Want me to send your idea to us for a price? Just say yes.", answered: false, product: context, offer: "custom", conf: 0.4 }
+      : { reply: "I don't see that in the shop right now. Have a look at /shop for everything we have.", answered: false, product: context, conf: 0.4 };
 
-  // a strong written answer wins; then the shop's own facts; then the item they named; then a weaker written answer
-  if (best && best.score >= 0.55) return { reply: best.faq.a, answered: true, faq: best.faq.id, product: context };
+  // asking for a design by name goes to the design library first
+  const design = designSearch(text, shop, m);
+  if (design && /\b(designs?|decals?)\b/i.test(text) && !/\b(why|how|can't|cannot|every)\b/i.test(text)) return design;
+  // a strong written answer wins
+  if (best && best.score >= 0.6) return asFaq(best);
+  const gift = giftIdeas(text, raw, shop, m);
+  if (gift) return gift;
+  if (design) return design;
+  if (best && best.score >= 0.55) return asFaq(best);
+  // then the shop's own facts; then the item they named; then a weaker written answer
   for (const t of TOPICS) {
     if (!t.test(w, raw)) continue;
     const said = t.say(shop);
-    if (said) return { reply: said, answered: true, product: context };
+    if (said) return { reply: said, answered: true, product: context, offer: t.offer?.(shop), conf: 0.7 };
+  }
+  // an item that means what they asked for, even without its name
+  if (!items.length && m) {
+    const near = shop.products.map((p) => ({ p, s: m.products.get(p.slug) ?? 0 })).sort((a, b) => b.s - a.s);
+    if (near[0] && near[0].s >= 0.5 && (!best || best.score < 0.45)) items = [near[0].p];
   }
   if (items.length && (!best || best.score < 0.45)) return aboutItems(items);
-  if (best && best.score >= 0.32) return { reply: best.faq.a, answered: true, faq: best.faq.id, product: context };
+  if (best && best.score >= 0.32) return asFaq(best);
 
   // "do you sell tumblers?" (a kind of item) or "do you sell candles?" (not listed)
   if ((asksSell || productish) && words.length) {
     const loose = looseProducts(raw, shop);
     if (loose.length) return aboutItems(loose);
-    if (shop.customOrders) return { reply: "I don't see that in the shop right now, but we do a lot of custom work. Tell us what you're after on the Custom orders page and we'll let you know: /custom-order", answered: false, product: context };
+    if (shop.customOrders) return { reply: "I don't see that in the shop right now, but we do a lot of custom work. Want me to send your idea to us for a price? Just say yes.", answered: false, product: context, offer: "custom", conf: 0.3 };
   }
-  const maybe = ranked.slice(0, 2).filter((m) => m.score > 0.2);
-  if (maybe.length) return { reply: `I'm not completely sure what you mean. Were you asking one of these?\n• ${maybe.map((m) => m.faq.q).join("\n• ")}\n\nOr send us a message on the Contact page (/contact) and we'll answer personally.`, answered: false, product: context };
-  return { reply: "I'm not sure about that one. Send us a message on the Contact page (/contact) and we'll get back to you.", answered: false, product: context };
+  const maybe = ranked.slice(0, 2).filter((r) => r.score > 0.2);
+  if (maybe.length) return { reply: `I'm not completely sure what you mean. Were you asking one of these?\n• ${maybe.map((r) => r.faq.q).join("\n• ")}\n\nIf not, I can pass your question to us; just say yes.`, answered: false, product: context, offer: "message", conf: 0.15 };
+  return { reply: "I'm not sure about that one. I can pass your question to us and we'll answer by email; just say yes. (Or use /contact.)", answered: false, product: context, offer: "message", conf: 0 };
+}
+
+/** The pieces of a message that each get their own answer ("how much is shipping and do you do pickup?"). */
+export function splitParts(question: string) {
+  const parts = question
+    .split(/\?+|\balso\b|\band (?=(?:do|does|can|how|what|is|are|will|when|where)\b)/i)
+    .map((x) => x.trim())
+    .filter((x) => x.split(/\s+/).length >= 2 || SMALL.some(([re]) => re.test(x)))
+    .slice(0, 3);
+  return parts.length < 2 ? [question] : parts;
 }
 
 /** Reply to the last message, using the conversation for "it" and "that one". */
-export function think(history: BrainTurn[], faqs: Faq[], shop: BrainShop): BrainReply {
+export function think(history: BrainTurn[], faqs: Faq[], shop: BrainShop, extras: BrainExtras = {}): BrainReply {
   const idx = indexOf(faqs, shop);
   const question = history.at(-1)?.content ?? "";
   // the last item mentioned earlier in the conversation
@@ -326,25 +477,25 @@ export function think(history: BrainTurn[], faqs: Faq[], shop: BrainShop): Brain
     const found = findProducts(understand(t.content, idx).raw, shop);
     if (found.length === 1) context = found[0];
   }
-  // two questions in one message get two answers
-  const parts = question
-    .split(/\?+|\balso\b|\band (?=(?:do|does|can|how|what|is|are|will|when|where)\b)/i)
-    .map((x) => x.trim())
-    .filter((x) => x.split(/\s+/).length >= 2 || SMALL.some(([re]) => re.test(x)))
-    .slice(0, 3);
-  if (parts.length < 2) {
-    const r = one(question, idx, shop, context);
-    return { reply: r.reply, answered: r.answered, faq: r.faq };
-  }
+  const parts = splitParts(question);
   const out: string[] = [];
   let answered = true;
   let faq: string | undefined;
+  let offer: BrainReply["offer"];
+  let conf = 1;
   for (const p of parts) {
-    const r = one(p, idx, shop, context);
+    const r = one(p, idx, shop, context, extras.meaning?.(p));
     if (r.product) context = r.product;
     if (!out.includes(r.reply)) out.push(r.reply);
     answered &&= r.answered;
     faq ??= r.faq;
+    offer ??= r.offer;
+    conf = Math.min(conf, r.conf);
   }
-  return { reply: out.map((r, i) => (i ? cap(r) : r)).join("\n\n"), answered, faq };
+  let reply = out.map((r, i) => (i ? cap(r) : r)).join("\n\n");
+  if (!offer && /contact page|\/contact\b/i.test(reply) && !/just say yes/i.test(reply)) {
+    offer = "message";
+    reply += "\n\nWant me to pass a message to us right now? Just say yes.";
+  }
+  return { reply, answered, faq, offer, confidence: conf, small: parts.every((x) => SMALL.some(([re]) => re.test(x.trim()))) };
 }

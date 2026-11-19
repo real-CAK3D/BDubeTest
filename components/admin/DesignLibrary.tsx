@@ -74,10 +74,18 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
     setChanged((c) => new Set(c).add(p.id));
   }
 
+  // the design on every size of one item, in one go
+  function setFitsAll(p: Product, id: string, on: boolean) {
+    if (!p.designs) return;
+    const fit = Object.fromEntries(Object.entries(p.designs.fit).map(([k, ids]) => [k, on ? [...new Set([...ids, id])] : ids.filter((x) => x !== id)]));
+    setProducts((l) => l.map((x) => (x.id === p.id ? { ...p, designs: { ...p.designs!, fit } } : x)));
+    setChanged((c) => new Set(c).add(p.id));
+  }
+
   function remove(d: Design) {
     if (!confirm(`Delete the "${d.name}" design? It will be taken off every item.`)) return;
     set({ designs: list.filter((x) => x.id !== d.id) });
-    for (const p of withDesigns) for (const k of Object.keys(p.designs!.fit)) if (p.designs!.fit[k].includes(d.id)) setFits(p, k, d.id, false);
+    for (const p of withDesigns) if (Object.values(p.designs!.fit).some((ids) => ids.includes(d.id))) setFitsAll(p, d.id, false);
     setOpenId("");
   }
 
@@ -109,7 +117,7 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
       </div>
       <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => add(e.target.files)} />
       <p className="muted lead">
-        Your decals and engraving artwork. Customers pick from the designs that fit the item and size they chose, so a 40 oz tumbler can offer 2 designs while a 16 oz offers 10.
+        Your decals and engraving artwork.
         Add several at once from your phone&apos;s photos; PNGs with a see-through background look best.
       </p>
       {msg ? <p className="alert" role="status">{msg}</p> : null}
@@ -137,6 +145,10 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
                 <datalist id="design-groups">{groups.map((g) => <option key={g} value={g} />)}</datalist>
               </label>
               <label className="f"><span>Extra charge <em className="muted">(added to the item price, 0 for none)</em></span><input inputMode="decimal" defaultValue={(open.extra / 100).toFixed(2)} key={open.id} onBlur={(e) => setDesign(open.id, { extra: toCents(e.target.value) })} /></label>
+              <label className="f">
+                <span>Laser notes <em className="muted">(only you see this; shows on orders)</em></span>
+                <textarea rows={2} maxLength={300} value={open.note ?? ""} onChange={(e) => setDesign(open.id, { note: e.target.value })} placeholder={"e.g. 2.5\" wide, 60% power / 300 speed, file: flag-v2.lbrn"} />
+              </label>
               <label className="check"><input type="checkbox" checked={open.active} onChange={(e) => setDesign(open.id, { active: e.target.checked })} /> Offer this design</label>
             </div>
           </div>
@@ -146,6 +158,18 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
               {withDesigns.map((p) => (
                 <li key={p.id}>
                   <strong style={{ flex: "1 1 10rem" }}>{p.name}{p.active ? "" : <span className="muted small"> (hidden)</span>}</strong>
+                  {Object.keys(p.designs!.fit).length > 1 ? (
+                    <button
+                      type="button"
+                      className="b b-ghost b-sm"
+                      onClick={() => {
+                        const all = Object.keys(p.designs!.fit).every((k) => p.designs!.fit[k].includes(open.id));
+                        setFitsAll(p, open.id, !all);
+                      }}
+                    >
+                      {Object.keys(p.designs!.fit).every((k) => p.designs!.fit[k].includes(open.id)) ? "No sizes" : "All sizes"}
+                    </button>
+                  ) : null}
                   {Object.keys(p.designs!.fit).map((k) => (
                     <label key={k} className="check small">
                       <input type="checkbox" checked={p.designs!.fit[k].includes(open.id)} onChange={(e) => setFits(p, k, open.id, e.target.checked)} />

@@ -8,7 +8,7 @@ export type ProductSize = { name: string; price: number }; // cents
 // offer a different set (a 40 oz tumbler might fit 2 designs, a 16 oz 10).
 export type ProductDesigns = { label: string; required: boolean; fit: Record<string, string[]> };
 // One decal / engraving artwork in the design library.
-export type Design = { id: string; name: string; image: string; group: string; extra: number; active: boolean };
+export type Design = { id: string; name: string; image: string; group: string; extra: number; active: boolean; note?: string }; // note: private laser settings, file name...
 // One entry in the shop's page list (top menu and footer).
 export type MenuItem = { id: string; label: string; href?: string; top: boolean; footer: boolean; off?: boolean };
 // How the owner's dashboard looks and what it shows.
@@ -55,6 +55,7 @@ export type OrderItem = {
   name: string;
   option?: string;
   custom?: string; // engraving / personalization text
+  design?: string; // id of the design picked from the design library
   quantity: number;
   unitAmount: number; // cents
 };

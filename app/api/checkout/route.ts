@@ -58,7 +58,7 @@ export async function POST(req: Request) {
                 // shows on the Stripe checkout page and the receipt
                 description: custom ? `${p.personalize!.label}: "${custom}"` : p.summary || undefined,
                 images: absImages.length ? absImages : undefined,
-                metadata: { productId: p.id, option, custom },
+                metadata: { productId: p.id, option, custom, design: design?.id ?? "" },
               },
             },
     });

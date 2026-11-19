@@ -190,10 +190,13 @@ Every decal or engraving you offer lives here once, and you choose which items a
 
 1. Tap **Add designs** and pick one or more images from your phone. PNGs with a see-through background look best.
 2. Tap a design to name it, put it in a **group** (Military, Patriotic, Police, Family...) and set an **extra charge** if it costs more.
-3. Under **Fits on**, tick each item and size it fits.
-4. Tap **Save changes**.
+3. Add **Laser notes** if you like: size, power and speed, file name. Only you see them.
+4. Under **Fits on**, tick each item and size it fits (**All sizes** does every size of that item at once).
+5. Tap **Save changes**.
 
 You can also set this from the other side: open an item in **Products** and tap the designs for each size. Untick **Offer this design** to hide one everywhere without deleting it.
+
+When someone orders with a design, the order shows that design's picture, your laser notes and a **Download artwork** link, so you know exactly what to engrave.
 
 > **Tip:** The 8 starter designs are simple placeholders. Replace them with your own artwork, or delete them.
 

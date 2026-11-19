@@ -181,6 +181,7 @@ export const SITE_VARIABLES = {
   // Decals and engraving artwork customers pick from. Which designs fit which item and size is set on each
   // product (designs.bySize). id: short unique name.  group: e.g. "Military", "Patriotic", "Family".
   // extraPrice: added to the item's price in dollars (0 for none).  show: false hides it everywhere.
+  // note (optional): private laser settings or file name, shown on orders; customers never see it.
   designs: [
     { id: "flag", name: "American flag", group: "Patriotic", extraPrice: 0, show: true, image: "/images/designs/flag.svg" },
     { id: "thin-line-flag", name: "Thin blue line flag", group: "Police", extraPrice: 0, show: true, image: "/images/designs/thin-line-flag.svg" },

@@ -11,7 +11,7 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
-    designs: (v.designs ?? []).map((d) => ({ id: idOf(d.id || d.name), name: d.name, image: d.image, group: d.group, extra: cents(d.extraPrice) ?? 0, active: d.show })),
+    designs: (v.designs ?? []).map((d) => ({ id: idOf(d.id || d.name), name: d.name, image: d.image, group: d.group, extra: cents(d.extraPrice) ?? 0, active: d.show, ...(d.note ? { note: d.note } : {}) })),
     businessName: v.brand.businessName,
     tagline: v.brand.tagline,
     announcement: v.brand.announcement,

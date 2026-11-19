@@ -77,7 +77,7 @@ export type SiteVariables = {
   extraPages: { slug: string; title: string; body: string; inFooter: boolean }[];
   menu: { page: string; label: string; link?: string; inMenu: boolean; inFooter: boolean; on: boolean }[];
   categories: string[];
-  designs: { id: string; name: string; image: string; group: string; extraPrice: number; show: boolean }[];
+  designs: { id: string; name: string; image: string; group: string; extraPrice: number; show: boolean; note?: string }[];
   footer: { note: string };
   gallery: {
     heading: string;

@@ -50,7 +50,7 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Pr
     extraPages: s.extraPages,
     menu: s.menu.map((m) => ({ page: m.id, label: m.label, ...(m.href ? { link: m.href } : {}), inMenu: m.top, inFooter: m.footer, on: !m.off })),
     categories: s.categories,
-    designs: s.designs.map((d) => ({ id: d.id, name: d.name, image: d.image, group: d.group, extraPrice: dollars(d.extra) ?? 0, show: d.active })),
+    designs: s.designs.map((d) => ({ id: d.id, name: d.name, image: d.image, group: d.group, extraPrice: dollars(d.extra) ?? 0, show: d.active, ...(d.note ? { note: d.note } : {}) })),
     footer: { note: s.footerNote },
     gallery: { heading: s.galleryHeading, text: s.galleryText, items: s.gallery },
     images: { logo: s.logo, patch: s.emblem, tabIcon: s.favicon, welcomePhoto: s.heroImage, aboutPhoto: s.aboutImage },
@@ -255,10 +255,11 @@ export function variablesFile(v: SiteVariables): string {
     "Decals and engraving artwork customers pick from. Which designs fit which item and size is set on each",
     "product (designs.bySize). id: short unique name.  group: e.g. \"Military\", \"Patriotic\", \"Family\".",
     "extraPrice: added to the item's price in dollars (0 for none).  show: false hides it everywhere.",
+    "note (optional): private laser settings or file name, shown on orders; customers never see it.",
   ]);
   L.push(
     "  designs: [",
-    ...v.designs.map((d) => `    { id: ${q(d.id)}, name: ${q(d.name)}, group: ${q(d.group)}, extraPrice: ${d.extraPrice}, show: ${d.show}, image: ${q(d.image)} },`),
+    ...v.designs.map((d) => `    { id: ${q(d.id)}, name: ${q(d.name)}, group: ${q(d.group)}, extraPrice: ${d.extraPrice}, show: ${d.show}, image: ${q(d.image)}${d.note ? `, note: ${q(d.note)}` : ""} },`),
     "  ],"
   );
   sec("Our work (gallery)", [

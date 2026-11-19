@@ -66,7 +66,7 @@ function cleanDesignList(rows: Row[]) {
   const seen = new Set<string>();
   return rows
     .slice(0, 300)
-    .map((d) => ({ id: slugOf(d.id || d.name), name: str(d.name, 60), image: str(d.image, 500), group: str(d.group, 40).trim(), extra: Math.max(0, Math.round(Number(d.extra) || 0)), active: d.active !== false }))
+    .map((d) => ({ id: slugOf(d.id || d.name), name: str(d.name, 60), image: str(d.image, 500), group: str(d.group, 40).trim(), extra: Math.max(0, Math.round(Number(d.extra) || 0)), active: d.active !== false, ...(d.note ? { note: str(d.note, 300) } : {}) }))
     .filter((d) => d.id && d.name && !seen.has(d.id) && seen.add(d.id));
 }
 

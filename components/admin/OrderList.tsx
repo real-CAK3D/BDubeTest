@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { money, shortDate } from "@/lib/format";
-import type { Order, OrderStatus } from "@/lib/types";
+import type { Design, Order, OrderStatus } from "@/lib/types";
 import { api } from "./api";
 
 const STATUSES: { id: OrderStatus; label: string }[] = [
@@ -18,7 +18,7 @@ function mailto(o: Order) {
   return `mailto:${o.email}?subject=${encodeURIComponent(`Your order #${o.number} has shipped`)}&body=${encodeURIComponent(body)}`;
 }
 
-export function OrderList({ initial, openId, status, canEmail }: { initial: Order[]; openId?: string; status?: string; canEmail: boolean }) {
+export function OrderList({ initial, openId, status, canEmail, designs = [] }: { initial: Order[]; openId?: string; status?: string; canEmail: boolean; designs?: Design[] }) {
   const [orders, setOrders] = useState(initial);
   const [open, setOpen] = useState<string | null>(openId ?? null);
   const [filter, setFilter] = useState<string>(status ?? "all");
@@ -83,6 +83,22 @@ export function OrderList({ initial, openId, status, canEmail }: { initial: Orde
                           <li key={n}>
                             {i.quantity} × {i.name}{i.option && !i.name.includes(i.option) ? ` (${i.option})` : ""} <span className="muted">{money(i.unitAmount * i.quantity, o.currency)}</span>
                             {i.custom ? <div className="engrave">Engrave: <strong>&ldquo;{i.custom}&rdquo;</strong></div> : null}
+                            {(() => {
+                              const d = i.design ? designs.find((x) => x.id === i.design) : undefined;
+                              return d ? (
+                                <div className="order-design">
+                                  <a href={d.image} target="_blank" rel="noreferrer" title="Open the full artwork">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={d.image} alt="" />
+                                  </a>
+                                  <span>
+                                    <strong>{d.name}</strong>
+                                    {d.note ? <span className="muted small"> {d.note}</span> : null}
+                                    <a className="small" href={d.image} download>Download artwork</a>
+                                  </span>
+                                </div>
+                              ) : null;
+                            })()}
                           </li>
                         ))}
                         {o.discount ? <li className="muted">Discount{o.promoCode ? ` (${o.promoCode})` : ""} −{money(o.discount, o.currency)}</li> : null}

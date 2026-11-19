@@ -38,6 +38,7 @@ export async function recordOrderFromSession(sessionId: string) {
       name: product?.name ?? li.description ?? "Item",
       option: meta.option || fromCart[1] || undefined,
       custom: meta.custom || undefined,
+      design: meta.design || undefined,
       quantity: li.quantity ?? 1,
       unitAmount: li.price?.unit_amount ?? 0,
     });

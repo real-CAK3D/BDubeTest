@@ -521,3 +521,6 @@ body:has(.hq-shell[data-mode="dark"]) { background: #0F1311; }
 .seg button.on { background: var(--accent); color: var(--accent-ink); }
 .grow-text { flex: 1 1 10rem; display: grid; min-width: 0; }
 .quick-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.order-design { display: flex; gap: 0.7rem; align-items: center; margin-top: 0.4rem; padding: 0.4rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+.order-design img { width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 6px; display: block; }
+.order-design > span { display: grid; gap: 0.15rem; }

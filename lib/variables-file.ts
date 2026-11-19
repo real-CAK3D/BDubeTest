@@ -52,6 +52,7 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" |
     categories: s.categories,
     hiddenText: s.hiddenFields,
     links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) })),
+    seasons: { on: s.seasons.on, items: s.seasons.items },
     upcoming: { on: s.upcoming.on, heading: s.upcoming.heading, intro: s.upcoming.intro, items: s.upcoming.items.map((x) => ({ id: x.id, title: x.title, text: x.text, image: x.image, when: x.when, stage: x.stage, ...(x.hidden ? { hidden: true } : {}) })) },
     chat: { on: s.chat.on, useAI: s.chat.useAI, live: s.chat.live !== false, ai: s.chat.ai ?? { provider: "anthropic", model: "", baseUrl: "" }, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, ...(x.topic ? { topic: x.topic } : {}), question: x.q, answer: x.a, ...(x.alts?.length ? { alsoAsked: x.alts } : {}), ...(x.hidden ? { hidden: true } : {}) })) },
     discounts: {
@@ -271,6 +272,10 @@ export function variablesFile(v: SiteVariables): string {
   L.push("  links: [", ...(v.links ?? []).map((l) => `    { icon: ${q(l.icon)}, label: ${q(l.label)}, url: ${q(l.url)}${l.hidden ? ", hidden: true" : ""} },`), "  ],");
   sec("Hidden text", ["Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos)."]);
   L.push(`  ${field("hiddenText", v.hiddenText ?? [])}`);
+  if (v.seasons) {
+    sec("Seasonal banners", ["Holiday banners at the top of the shop. Holidays not listed here use their usual settings (lib/seasons.ts).", "daysBefore / daysAfter: how long the banner shows around the day. style: patriotic, remembrance, winter, christmas, newyear, love, irish, spring, summer, fall, spooky, thanks, plain."]);
+    L.push("  seasons: {", `    ${field("on", v.seasons.on, "false = no holiday banners at all")}`, "    items: [", ...v.seasons.items.map((x) => `      ${JSON.stringify(x)},`), "    ],", "  },");
+  }
   if (v.upcoming) {
     sec("What's to come", ["New things on the way, shown on the home page and the What's to come page.", "stage: idea, working or soon. when: e.g. \"This spring\" (\"\" = no date). hidden: true keeps it but doesn't show it."]);
     L.push(

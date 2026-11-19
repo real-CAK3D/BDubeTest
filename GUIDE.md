@@ -31,6 +31,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Previews: design on a photo, 3D, scans and 360°](#previews): Extra ways for customers to see an item, set at the bottom of each item in Products.
 - [Chat (Ask us)](#chat): A chat button on the shop that answers customers' questions from your own answers.
 - [Live chat](#live-chat): Chat with customers on the shop yourself while you're available.
+- [Seasonal banners](#seasonal): Holiday banners at the top of the shop that come and go by themselves.
 - [What's to come](#coming-soon): Show customers what you're working on and find out what they want most.
 - [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
 - [Links (Facebook, Instagram, phone...)](#links): Your social pages and contact links, each with its own icon.
@@ -440,6 +441,19 @@ The **Live** switch in the dashboard's top bar decides whether customers can rea
 Switch to **Away**, lock your phone, or close the dashboard and live chat turns off within about a minute; the chat helper answers as usual. If nobody joins a chat within 90 seconds, the customer is asked for their email and the message lands in your **Inbox**.
 
 > **Tip:** Don't want live chat at all? Untick it in **Chat > Settings & try it**.
+
+<a id="seasonal"></a>
+### Seasonal banners
+
+_Holiday banners at the top of the shop that come and go by themselves._
+
+Every holiday is listed with its date this year, and when its banner will show. Flip the switch to turn one on or off. Each one shows for a few days before the holiday (you choose how many), then goes away by itself, every year. Holidays that move (Easter, Mother's Day, Thanksgiving...) are worked out automatically.
+
+Tap **Edit** to change the message, the button (the shop, the military discount, gift cards...), the colors, and whether little stars or snowflakes drift across it. The preview shows exactly what customers will see. **Add your own** for anything else: a sale, a craft fair, your shop's anniversary.
+
+While a holiday banner is showing it takes the place of your usual top message. If two overlap, the sooner holiday wins. Customers can close it with the ✕. Untick **Show holiday banners** to turn them all off at once.
+
+> **Tip:** Military dates are in the list too: Armed Forces Day, the Army birthday, and the Military Police Corps birthday (Sept 26). Switch on the ones you want.
 
 <a id="coming-soon"></a>
 ### What's to come

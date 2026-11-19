@@ -87,6 +87,7 @@ export type SiteVariables = {
   categories: string[];
   hiddenText?: string[];
   links?: { icon: string; label: string; url: string; hidden?: boolean }[];
+  seasons?: { on: boolean; items: import("./seasons").SeasonSetting[] };
   upcoming?: { on: boolean; heading: string; intro: string; items: { id: string; title: string; text: string; image?: string; when?: string; stage: "idea" | "working" | "soon"; hidden?: boolean }[] };
   chat?: { on: boolean; useAI: boolean; live?: boolean; ai?: { provider: string; model: string; baseUrl: string }; title: string; greeting: string; questions: { id: string; topic?: string; question: string; answer: string; alsoAsked?: string[]; hidden?: boolean }[] };
   discounts?: {

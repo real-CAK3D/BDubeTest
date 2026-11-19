@@ -172,6 +172,15 @@ export const SITE_VARIABLES = {
   // Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos).
   hiddenText: [],
 
+  // Seasonal banners
+  // Holiday banners at the top of the shop. Holidays not listed here use their usual settings (lib/seasons.ts).
+  // daysBefore / daysAfter: how long the banner shows around the day. style: patriotic, remembrance, winter, christmas, newyear, love, irish, spring, summer, fall, spooky, thanks, plain.
+  seasons: {
+    on: true, // false = no holiday banners at all
+    items: [
+    ],
+  },
+
   // What's to come
   // New things on the way, shown on the home page and the What's to come page.
   // stage: idea, working or soon. when: e.g. "This spring" ("" = no date). hidden: true keeps it but doesn't show it.

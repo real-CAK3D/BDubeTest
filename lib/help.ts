@@ -433,6 +433,18 @@ export const HELP: HelpGroup[] = [
         ],
       },
       {
+        id: "seasonal",
+        title: "Seasonal banners",
+        match: ["/admin/seasonal"],
+        summary: "Holiday banners at the top of the shop that come and go by themselves.",
+        blocks: [
+          { p: "Every holiday is listed with its date this year, and when its banner will show. Flip the switch to turn one on or off. Each one shows for a few days before the holiday (you choose how many), then goes away by itself, every year. Holidays that move (Easter, Mother's Day, Thanksgiving...) are worked out automatically." },
+          { p: "Tap **Edit** to change the message, the button (the shop, the military discount, gift cards...), the colors, and whether little stars or snowflakes drift across it. The preview shows exactly what customers will see. **Add your own** for anything else: a sale, a craft fair, your shop's anniversary." },
+          { p: "While a holiday banner is showing it takes the place of your usual top message. If two overlap, the sooner holiday wins. Customers can close it with the ✕. Untick **Show holiday banners** to turn them all off at once." },
+          { tip: "Military dates are in the list too: Armed Forces Day, the Army birthday, and the Military Police Corps birthday (Sept 26). Switch on the ones you want." },
+        ],
+      },
+      {
         id: "coming-soon",
         title: "What's to come",
         match: ["/admin/coming-soon"],

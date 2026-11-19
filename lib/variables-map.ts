@@ -15,6 +15,7 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
+    seasons: v.seasons ? { on: v.seasons.on, items: v.seasons.items.map((x) => ({ ...x })) } : { on: true, items: [] },
     upcoming: v.upcoming
       ? { on: v.upcoming.on, heading: v.upcoming.heading, intro: v.upcoming.intro, items: v.upcoming.items.map((x) => ({ id: x.id, title: x.title, text: x.text, image: x.image ?? "", when: x.when ?? "", stage: x.stage, ...(x.hidden ? { hidden: true } : {}) })) }
       : structuredClone(DEFAULT_UPCOMING),

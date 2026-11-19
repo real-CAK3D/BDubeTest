@@ -119,6 +119,31 @@ async function handlePUT(req: Request) {
         height: Math.max(0.5, Number(p.height) || 1),
         weightOz: Math.max(1, Number(p.weightOz) || 1),
       }));
+    else if (k === "seasons") {
+      const z = (v ?? {}) as unknown as Row;
+      const STY = ["patriotic", "remembrance", "winter", "christmas", "newyear", "love", "irish", "spring", "summer", "fall", "spooky", "thanks", "plain"];
+      const seen = new Set<string>();
+      patch[k] = {
+        on: Boolean(z.on),
+        items: (Array.isArray(z.items) ? (z.items as Row[]) : []).slice(0, 60).map((x) => {
+          const id = /^(custom-)?[a-z0-9-]{1,40}$/.test(String(x.id)) ? String(x.id) : "";
+          const link = str(x.link, 300).trim();
+          const days = (n: unknown) => Math.min(60, Math.max(0, Math.round(Number(n) || 0)));
+          return {
+            id,
+            on: Boolean(x.on),
+            message: str(x.message, 200).trim(),
+            link: /^(\/|https:\/\/)/.test(link) ? link : "",
+            linkText: str(x.linkText, 30).trim(),
+            daysBefore: days(x.daysBefore),
+            daysAfter: days(x.daysAfter),
+            style: (STY.includes(String(x.style)) ? x.style : "plain") as never,
+            decor: Boolean(x.decor),
+            ...(id.startsWith("custom-") ? { name: str(x.name, 50).trim(), start: /^\d{4}-\d{2}-\d{2}$/.test(String(x.start)) ? String(x.start) : "", emoji: str(x.emoji, 8) } : {}),
+          };
+        }).filter((x) => x.id && !seen.has(x.id) && seen.add(x.id)),
+      };
+    }
     else if (k === "upcoming") {
       const u = (v ?? {}) as unknown as Row;
       const seen = new Set<string>();

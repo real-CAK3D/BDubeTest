@@ -31,6 +31,7 @@ export const ADMIN_PAGES: AdminPage[] = [
   { group: "Customers", href: "/admin/inbox", label: "Inbox", note: "Messages from the contact form", icon: "M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6z" },
   { group: "Your site", href: "/admin/gallery", label: "Our work", note: "Photos and descriptions of finished pieces", icon: "M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5M15 9.5v.01" },
   { group: "Your site", href: "/admin/coming-soon", label: "What's to come", note: "New things on the way; see who wants them", icon: "M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" },
+  { group: "Your site", href: "/admin/seasonal", label: "Seasonal banners", note: "Holiday banners that show by themselves: switch each one on or off", icon: "M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8zM5 21h14" },
   { group: "Your site", href: "/admin/pages", label: "Pages & menu", note: "Add, remove and order the shop's pages", icon: "M4 4h16v4H4zM4 12h7v8H4zM14 12h6M14 16h6M14 20h6" },
   { group: "Your site", href: "/admin/content", label: "Words & logos", note: "Business name, words, logos, photos", icon: "M4 20h4L19 9l-4-4L4 16zM14 6l4 4" },
   { group: "Your site", href: "/admin/appearance", label: "Look & layout", note: "Themes and page styles", icon: "M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.5 0-1.2-1-1.5-1-2.5 0-.8.7-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4-4-7.5-9-7.5M7.5 12v.01M10 7.5v.01M15 7.5v.01" },

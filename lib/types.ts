@@ -224,7 +224,8 @@ export type SiteSettings = {
   customSteps: Step[];
   hiddenFields: string[];
   links: LinkItem[];
-  upcoming: UpcomingSettings; // "What's to come": new things on the way // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)
+  upcoming: UpcomingSettings; // "What's to come": new things on the way
+  seasons: import("./seasons").SeasonsSettings; // holiday banners (Dashboard > Seasonal banners) // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)
   showReviews: boolean;
   reviewsHeading: string;
   reviewsText: string;

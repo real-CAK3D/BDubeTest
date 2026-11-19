@@ -93,7 +93,7 @@ export function CartView(props: Props) {
         {cart.lines.map((l) => {
           const p = cart.products.find((x) => x.id === l.productId)!;
           return (
-            <li key={`${l.productId}|${l.size ?? ""}|${l.design ?? ""}|${l.option ?? ""}|${l.custom ?? ""}`} className="cart-line">
+            <li key={`${l.productId}|${l.size ?? ""}|${l.design ?? ""}|${l.art ?? ""}|${l.option ?? ""}|${l.custom ?? ""}`} className="cart-line">
               <Link href={`/product/${p.slug}`} className="cart-thumb">
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -105,7 +105,13 @@ export function CartView(props: Props) {
               <div className="cart-name">
                 <Link href={`/product/${p.slug}`}>{p.name}</Link>
                 {l.size || l.option ? <span className="muted">{[l.size, l.option].filter(Boolean).join(" · ")}</span> : null}
-                {l.design ? (
+                {l.art ? (
+                  <span className="cart-design">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={l.art} alt="" />
+                    Your artwork
+                  </span>
+                ) : l.design ? (
                   <span className="cart-design">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {cart.designOf(l)?.image ? <img src={cart.designOf(l)!.image} alt="" /> : null}

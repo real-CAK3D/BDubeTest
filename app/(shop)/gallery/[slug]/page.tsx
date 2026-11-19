@@ -4,20 +4,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PhotoViewer } from "@/components/shop/PhotoViewer";
 import { Tracker } from "@/components/shop/Tracker";
-import { getActiveProducts, getSettings } from "@/lib/db";
+import { shopProducts, shopSettings } from "@/lib/shop-data";
 import { paragraphs } from "@/lib/format";
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const g = (await getSettings()).gallery.find((x) => x.slug === slug);
+  const g = (await shopSettings()).gallery.find((x) => x.slug === slug);
   return g ? { title: g.title, description: g.description.slice(0, 160), openGraph: { images: g.photos.slice(0, 1) } } : {};
 }
 
 export default async function GalleryItemPage({ params }: Params) {
   const { slug } = await params;
-  const [s, products] = await Promise.all([getSettings(), getActiveProducts()]);
+  const [s, products] = await Promise.all([shopSettings(), shopProducts()]);
   if (!pageOn(s, "gallery")) notFound();
   const g = s.gallery.find((x) => x.slug === slug);
   if (!g) notFound();

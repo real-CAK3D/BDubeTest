@@ -22,3 +22,14 @@ export async function uploadImage(file: File, folder: string): Promise<string> {
   if (!res.ok) throw new Error(data.error || "Upload failed.");
   return data.url;
 }
+
+/** Uploads a file as it is (for 3D scans), no resizing. */
+export async function uploadFile(file: File, folder: string): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("folder", folder);
+  const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Upload failed.");
+  return data.url;
+}

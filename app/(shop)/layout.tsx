@@ -4,13 +4,13 @@ import { CartProvider } from "@/components/shop/CartProvider";
 import { Footer } from "@/components/shop/Footer";
 import { Header } from "@/components/shop/Header";
 import { ThemeStyle } from "@/components/shop/ThemeStyle";
-import { getActiveProducts, getSettings } from "@/lib/db";
+import { shopProducts, shopSettings } from "@/lib/shop-data";
 import { getTheme } from "@/lib/themes";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = await getSettings();
+  const s = await shopSettings();
   const url = process.env.NEXT_PUBLIC_SITE_URL;
   const ogImage = s.heroImage || s.logo;
   return {
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const [s, products] = await Promise.all([getSettings(), getActiveProducts()]);
+  const [s, products] = await Promise.all([shopSettings(), shopProducts()]);
   const cartProducts = products.map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.images[0], slug: p.slug, stock: p.stock, sizes: p.sizes ?? null, designs: p.designs ?? null }));
   const used = new Set(products.flatMap((p) => (p.designs ? Object.values(p.designs.fit).flat() : [])));
   const cartDesigns = s.designs.filter((d) => d.active && used.has(d.id)).map((d) => ({ id: d.id, name: d.name, image: d.image, extra: d.extra, active: d.active, group: d.group }));

@@ -13,7 +13,7 @@ const hits = [];
     if (statSync(p).isDirectory()) walk(p);
     else if (/\.(tsx?|css|mjs)$/.test(f)) {
       readFileSync(p, "utf8").split("\n").forEach((line, i, all) => {
-        const m = line.match(/EDIT-POINT: ([A-Z-]+)/);
+        const m = line.match(/EDIT-POINT: ([A-Z0-9-]+)/);
         if (m && !line.includes("EDIT-POINT: NAME")) hits.push({ name: m[1], at: `${relative(root, p)}:${i + 1}`, note: (all[i + 1] || "").replace(/^[\s*/{]+/, "").trim() });
       });
     }

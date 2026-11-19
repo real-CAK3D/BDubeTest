@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSettings } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 import { paragraphs } from "@/lib/format";
 import { fillPolicy, POLICY_PAGES } from "@/lib/policy-text";
 
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function Policy({ params }: Params) {
   const page = POLICY_PAGES[(await params).slug];
   if (!page) notFound();
-  const s = await getSettings();
+  const s = await shopSettings();
   const text = fillPolicy(String(s[page.field] ?? ""), s);
   return (
     <article className="section policy prose">

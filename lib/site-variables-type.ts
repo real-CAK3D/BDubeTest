@@ -41,7 +41,14 @@ export type VariableProduct = {
   choice?: { label: string; options: string[] } | null;
   engraving?: { label: string; maxLength: number; required: boolean } | null;
   sizes?: { name: string; price: number }[] | null;
-  designs?: { label: string; required: boolean; bySize: Record<string, string[]> } | null;
+  designs?: { label: string; required: boolean; bySize: Record<string, string[]>; customerUpload?: boolean; customerUploadPrice?: number } | null;
+  preview?: {
+    mockup?: { photo: string; x: number; y: number; width: number; height: number } | null;
+    shape3d?: "tumbler" | "mug" | "sign" | "round" | "square" | "card" | null;
+    color3d?: string;
+    scan3d?: string;
+    spin360?: string[];
+  } | null;
   photos?: string[];
 };
 
@@ -77,6 +84,7 @@ export type SiteVariables = {
   extraPages: { slug: string; title: string; body: string; inFooter: boolean }[];
   menu: { page: string; label: string; link?: string; inMenu: boolean; inFooter: boolean; on: boolean }[];
   categories: string[];
+  watermark?: { on: boolean; text: string; withLogo: boolean; position: "corner" | "center" | "tiled"; opacity: number; size: number; onOurWork: boolean; onDesigns: boolean };
   designs: { id: string; name: string; image: string; group: string; extraPrice: number; show: boolean; note?: string }[];
   footer: { note: string };
   gallery: {

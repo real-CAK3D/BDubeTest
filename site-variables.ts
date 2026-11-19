@@ -165,17 +165,30 @@ export const SITE_VARIABLES = {
   menu: [
     { page: "shop", label: "Shop", inMenu: true, inFooter: false, on: true },
     { page: "gallery", label: "Our work", inMenu: true, inFooter: false, on: true },
-    { page: "custom", label: "Custom orders", inMenu: true, inFooter: true, on: true },
+    { page: "custom", label: "Custom orders", inMenu: true, inFooter: false, on: true },
     { page: "about", label: "About", inMenu: true, inFooter: false, on: true },
     { page: "contact", label: "Contact", inMenu: true, inFooter: true, on: true },
     { page: "page:faq", label: "FAQ", inMenu: false, inFooter: true, on: true },
     { page: "status", label: "Order status", inMenu: false, inFooter: true, on: true },
-    { page: "review", label: "Leave a review", inMenu: false, inFooter: true, on: true },
+    { page: "review", label: "Leave a review", inMenu: false, inFooter: false, on: true },
   ],
 
   // Shop categories
   // In the order they show in the shop. Each product's category should match one of these.
   categories: ["Drinkware", "Home decor", "Leather goods", "Patriotic & military", "Gifts & keepsakes"],
+
+  // Watermark
+  // A stamp on shop photos so they can't be reused without credit. The original photos are never changed.
+  watermark: {
+    on: false, // true stamps shop photos; false shows them clean
+    text: "", // "" uses the business name
+    withLogo: true, // add the logo next to the text
+    position: "corner", // "corner" | "center" | "tiled"
+    opacity: 45, // 5 (faint) to 90 (strong)
+    size: 28, // 10 to 60, as a % of the photo's width
+    onOurWork: true, // Our work photos too
+    onDesigns: false, // design library artwork too
+  },
 
   // Design library
   // Decals and engraving artwork customers pick from. Which designs fit which item and size is set on each
@@ -333,6 +346,9 @@ export const SITE_VARIABLES = {
   //   designs      which designs from the design library fit each size, or null:
   //                { label: "Design", required: true, bySize: { "30 oz": ["flag", "eagle"] } }
   //                (with no sizes, use "*" as the size name)
+  //   preview      extra ways to see the item, or null: mockup (a photo with a box, in % of the photo,
+  //                where the chosen design is shown), shape3d (tumbler | mug | sign | round | square | card)
+  //                with color3d, scan3d (a .glb 3D scan file), spin360 (photos taken all the way around)
   //   photos       leave out to keep photos added in the dashboard
   products: [
     {
@@ -351,6 +367,7 @@ export const SITE_VARIABLES = {
       engraving: null,
       sizes: null,
       designs: null,
+      preview: null,
       photos: ["/images/work/aurora-1.webp", "/images/work/aurora-2.webp", "/images/work/aurora-3.webp"],
     },
     {
@@ -369,6 +386,7 @@ export const SITE_VARIABLES = {
       engraving: null,
       sizes: null,
       designs: null,
+      preview: null,
       photos: ["/images/work/aurora-3.webp", "/images/work/aurora-1.webp"],
     },
     {
@@ -387,6 +405,7 @@ export const SITE_VARIABLES = {
       engraving: null,
       sizes: null,
       designs: null,
+      preview: null,
       photos: ["/images/work/aurora-flawed-1.webp", "/images/work/aurora-flawed-2.webp", "/images/work/aurora-flawed-3.webp"],
     },
     {
@@ -405,6 +424,7 @@ export const SITE_VARIABLES = {
       engraving: { label: "Name and the scene you'd like", maxLength: 120, required: true },
       sizes: null,
       designs: null,
+      preview: null,
       photos: ["/images/work/sign-dube.webp", "/images/work/sign-jensen.webp"],
     },
     {
@@ -432,6 +452,7 @@ export const SITE_VARIABLES = {
           "40 oz": ["flag", "veteran-star"],
         },
       },
+      preview: { shape3d: "tumbler", color3d: "#24364f" },
       photos: ["/images/work/marine-3.webp", "/images/work/turtle-1.webp"],
     },
     {
@@ -450,6 +471,7 @@ export const SITE_VARIABLES = {
       engraving: { label: "Initials, name or logo idea", maxLength: 40, required: false },
       sizes: null,
       designs: null,
+      preview: null,
       photos: ["/images/work/card-holder.webp"],
     },
     {
@@ -468,6 +490,7 @@ export const SITE_VARIABLES = {
       engraving: { label: "Family name or design idea", maxLength: 40, required: false },
       sizes: null,
       designs: null,
+      preview: null,
       photos: ["/images/work/slate-coaster.webp"],
     },
   ],

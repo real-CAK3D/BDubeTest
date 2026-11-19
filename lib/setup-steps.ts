@@ -245,6 +245,36 @@ export const SETUP_STEPS: SetupStep[] = [
     ],
   },
   {
+    id: "listings",
+    title: "List your items on Facebook, Instagram and Google",
+    time: "20 min",
+    optional: true,
+    blocks: [
+      { p: "Your shop publishes a product list at **your-site/feed.xml** (for example https://bdubytest.vercel.app/feed.xml). Facebook, Instagram and Google read it and keep your items, prices and stock up to date by themselves." },
+      { h: "Facebook and Instagram Shop" },
+      {
+        steps: [
+          "Open Meta Commerce Manager and create a catalog (type: Ecommerce).",
+          "Choose **Data sources > Add items > Data feed > Use a URL**, paste your feed address and pick **Update daily**.",
+          "Connect the catalog to your Facebook Page and Instagram account to tag items in posts and run shop ads.",
+        ],
+      },
+      { h: "Google (free listings in Search and Shopping)" },
+      {
+        steps: [
+          "Open Google Merchant Center and add your business (it asks to confirm your website; choose the HTML tag or Google Analytics option, or ask for help).",
+          "Go to **Products > Add products > Add from a file > Enter a link to your file**, paste the feed address, and schedule a daily fetch.",
+          "Turn on **Free listings**. Your items can then show in Google Shopping for free.",
+        ],
+      },
+      { tip: "Items without a price or a photo are left out of the feed. The feed always uses your clean photos, because ad platforms reject watermarks." },
+    ],
+    links: [
+      { label: "Meta Commerce Manager", url: "https://business.facebook.com/commerce" },
+      { label: "Google Merchant Center", url: "https://merchants.google.com" },
+    ],
+  },
+  {
     id: "test-order",
     title: "Place a test order",
     time: "3 min",
@@ -355,7 +385,7 @@ export const SETUP_STEPS: SetupStep[] = [
 export const PHASES: { id: string; title: string; steps: string[] }[] = [
   { id: "online", title: "Get online", steps: ["accounts", "copy", "password", "supabase"] },
   { id: "payments", title: "Payments", steps: ["stripe", "webhook", "wallets", "receipts"] },
-  { id: "products", title: "Products", steps: ["products", "shipping", "coupons", "push", "test-order"] },
+  { id: "products", title: "Products", steps: ["products", "shipping", "coupons", "push", "listings", "test-order"] },
   { id: "extras", title: "Extras", steps: ["github-sync", "email", "domain", "tax"] },
   { id: "live", title: "Go live", steps: ["live"] },
 ];

@@ -26,18 +26,19 @@ Getting the shop online, in order: GitHub, Vercel, Supabase, then Stripe (which 
 12. [Set your shipping prices](#shipping), 5 min
 10. [Coupons and promo codes](#coupons) (optional), 2 min
 11. [Phone notifications](#push), 3 min
-13. [Place a test order](#test-order), 3 min
+13. [List your items on Facebook, Instagram and Google](#listings) (optional), 20 min
+14. [Place a test order](#test-order), 3 min
 
 **Extras**
 
-14. [Save dashboard edits to GitHub](#github-sync), 5 min
-15. [Tracking emails](#email) (optional), 10 min
-16. [Your own web address](#domain) (optional), 10 min
-17. [Sales tax](#tax) (optional), 10 min
+15. [Save dashboard edits to GitHub](#github-sync), 5 min
+16. [Tracking emails](#email) (optional), 10 min
+17. [Your own web address](#domain) (optional), 10 min
+18. [Sales tax](#tax) (optional), 10 min
 
 **Go live**
 
-18. [Go live](#live), 15 min
+19. [Go live](#live), 15 min
 
 ## Get online
 
@@ -180,8 +181,29 @@ Links: Open Keys (dashboard, `/admin/keys`)
 
 > **Tip:** Weigh a typical package and price a label at Pirate Ship or USPS for a near and a far ZIP. That gives you good numbers for the bands.
 
+<a id="listings"></a>
+### 13. List your items on Facebook, Instagram and Google (optional)
+
+Your shop publishes a product list at **your-site/feed.xml** (for example https://bdubytest.vercel.app/feed.xml). Facebook, Instagram and Google read it and keep your items, prices and stock up to date by themselves.
+
+#### Facebook and Instagram Shop
+
+1. Open Meta Commerce Manager and create a catalog (type: Ecommerce).
+2. Choose **Data sources > Add items > Data feed > Use a URL**, paste your feed address and pick **Update daily**.
+3. Connect the catalog to your Facebook Page and Instagram account to tag items in posts and run shop ads.
+
+#### Google (free listings in Search and Shopping)
+
+1. Open Google Merchant Center and add your business (it asks to confirm your website; choose the HTML tag or Google Analytics option, or ask for help).
+2. Go to **Products > Add products > Add from a file > Enter a link to your file**, paste the feed address, and schedule a daily fetch.
+3. Turn on **Free listings**. Your items can then show in Google Shopping for free.
+
+> **Tip:** Items without a price or a photo are left out of the feed. The feed always uses your clean photos, because ad platforms reject watermarks.
+
+Links: [Meta Commerce Manager](https://business.facebook.com/commerce), [Google Merchant Center](https://merchants.google.com)
+
 <a id="test-order"></a>
-### 13. Place a test order
+### 14. Place a test order
 
 1. Open your shop, add something to the cart and check out.
 2. Pay with card `4242 4242 4242 4242`, any future date, any 3-digit code and any ZIP.
@@ -190,7 +212,7 @@ Links: Open Keys (dashboard, `/admin/keys`)
 ## Extras
 
 <a id="github-sync"></a>
-### 14. Save dashboard edits to GitHub
+### 15. Save dashboard edits to GitHub
 
 Edits made in the dashboard show on the site right away. With a GitHub token, they're also written into `site-variables.ts` on GitHub, so GitHub always has the latest words, prices and products (with history), ready for code changes or ChatGPT edits.
 
@@ -205,7 +227,7 @@ Edits made in the dashboard show on the site right away. With a GitHub token, th
 Links: [Create a GitHub token](https://github.com/settings/personal-access-tokens/new), Open Keys (dashboard, `/admin/keys`)
 
 <a id="email"></a>
-### 15. Tracking emails (optional)
+### 16. Tracking emails (optional)
 
 Lets you email customers their tracking number with one tap from an order.
 
@@ -218,7 +240,7 @@ Lets you email customers their tracking number with one tap from an order.
 Links: [Resend](https://resend.com/signup)
 
 <a id="domain"></a>
-### 16. Your own web address (optional)
+### 17. Your own web address (optional)
 
 1. Buy a domain (for example in Vercel > Domains, or any registrar).
 2. In Vercel, open your project > **Settings > Domains**, add it, and follow the instructions to point it at Vercel.
@@ -227,7 +249,7 @@ Links: [Resend](https://resend.com/signup)
 Links: [Vercel domains](https://vercel.com/domains)
 
 <a id="tax"></a>
-### 17. Sales tax (optional)
+### 18. Sales tax (optional)
 
 Stripe Tax works out and adds the right sales tax at checkout. Set it up in Stripe under **Settings > Tax** (add your address and where you're registered), then turn on **Sales tax by Stripe** in **Settings > Checkout & emails**.
 
@@ -238,7 +260,7 @@ Links: [Stripe Tax](https://dashboard.stripe.com/settings/tax)
 ## Go live
 
 <a id="live"></a>
-### 18. Go live
+### 19. Go live
 
 1. In Stripe, finish **Activate payments** (business details and bank account).
 2. Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).

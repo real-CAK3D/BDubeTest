@@ -4,15 +4,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Showcase3D } from "@/components/shop/Showcase3D";
 import { Tracker } from "@/components/shop/Tracker";
-import { getSettings } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 import { slugify } from "@/lib/format-slug";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getSettings()).galleryHeading };
+  return { title: (await shopSettings()).galleryHeading };
 }
 
 export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
-  const [s, sp] = await Promise.all([getSettings(), searchParams]);
+  const [s, sp] = await Promise.all([shopSettings(), searchParams]);
   if (!pageOn(s, "gallery")) notFound();
   const items = s.gallery.filter((g) => g.photos[0]);
   const cats = [...new Set(items.map((g) => g.category).filter(Boolean))];

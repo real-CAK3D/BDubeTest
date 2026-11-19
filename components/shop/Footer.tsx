@@ -24,14 +24,10 @@ export function Footer({ s }: { s: SiteSettings }) {
             {s.showVeteranBadge && s.serviceLine ? <p className="muted">{s.serviceLine}</p> : null}
           </div>
         </div>
-        <nav className="footer-links" aria-label="Help">
-          <span className="footer-head">Help</span>
-          {help.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}
-        </nav>
-        {legal.length ? (
-          <nav className="footer-links" aria-label="Legal">
-            <span className="footer-head">Legal</span>
-            {legal.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}
+        {help.length ? (
+          <nav className="footer-links" aria-label="Help">
+            <span className="footer-head">Help</span>
+            <div className="footer-grid">{help.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
           </nav>
         ) : null}
         <div className="footer-side">
@@ -46,8 +42,12 @@ export function Footer({ s }: { s: SiteSettings }) {
           */}
       <p className="fine">
         © {new Date().getFullYear()} {s.businessName}. All rights reserved.{s.footerNote ? ` ${s.footerNote}` : ""}
-        {" "}<Link href="/admin" className="owner-link">Owner login</Link>
       </p>
+      {/* legal pages sit in the small print to keep the footer short */}
+      <nav className="fine fine-links" aria-label="Legal">
+        {legal.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}
+        <Link href="/admin" className="owner-link">Owner login</Link>
+      </nav>
     </footer>
   );
 }

@@ -19,11 +19,11 @@ export const BUILTIN_PAGES: { id: string; label: string; href: string; canTurnOf
 export const DEFAULT_MENU: MenuItem[] = [
   { id: "shop", label: "Shop", top: true, footer: false },
   { id: "gallery", label: "Our work", top: true, footer: false },
-  { id: "custom", label: "Custom orders", top: true, footer: true },
+  { id: "custom", label: "Custom orders", top: true, footer: false },
   { id: "about", label: "About", top: true, footer: false },
   { id: "contact", label: "Contact", top: true, footer: true },
   { id: "status", label: "Order status", top: false, footer: true },
-  { id: "review", label: "Leave a review", top: false, footer: true },
+  { id: "review", label: "Leave a review", top: false, footer: false },
 ];
 
 export type ResolvedItem = MenuItem & { href: string; kind: "builtin" | "page" | "link"; note: string };
@@ -75,6 +75,7 @@ export const DASHBOARD_WIDGETS: { id: string; label: string; note: string }[] = 
   { id: "charts", label: "Charts", note: "Sales and visitors over time" },
   { id: "orders", label: "Recent orders", note: "The last 5 orders" },
   { id: "items", label: "Popular items", note: "Best sellers, most viewed, where visitors came from" },
+  { id: "designs", label: "Top designs", note: "The designs customers order most" },
   { id: "summary", label: "Totals line", note: "Average order, page views, expenses" },
 ];
 

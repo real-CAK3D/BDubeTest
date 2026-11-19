@@ -7,6 +7,7 @@ import type { Design, Product } from "@/lib/types";
 import { api } from "./api";
 import { CategoryManager } from "./CategoryManager";
 import { ImageList } from "./ImageField";
+import { PreviewEditor } from "./PreviewEditor";
 import { ProductChoices, type SizeDraft } from "./ProductChoices";
 
 type Draft = Omit<Product, "price" | "compareAtPrice" | "stock" | "id" | "slug" | "createdAt" | "updatedAt"> & {
@@ -160,6 +161,7 @@ export function ProductManager({ initial, currency, views, lowAt, stripeOn, stri
               onSizes={(sizesDraft, designs) => set({ sizesDraft, designs })}
               onDesigns={(designs) => set({ designs })}
             />
+            <PreviewEditor value={editing.preview ?? null} onChange={(preview) => set({ preview })} photos={editing.images} library={library} />
             <h2>Other choice</h2>
             <p className="hint">One more pick-list if needed: color, wood, finish...</p>
             <label className="f"><span>Choice name</span><input value={editing.option?.label ?? ""} onChange={(e) => set({ option: { label: e.target.value, values: [] } })} placeholder="e.g. Color" /></label>

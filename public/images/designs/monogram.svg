@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" rx="18" fill="#f3efe6"/><circle cx="100" cy="100" r="62" fill="none" stroke="#222" stroke-width="3"/><text x="100" y="124" font-family="Georgia,serif" font-size="78" font-style="italic" text-anchor="middle" fill="#222">D</text><ellipse cx="100" cy="30" rx="5" ry="11" fill="#222" transform="rotate(-60 100 100) rotate(90 100 30)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="62" fill="none" stroke="#222" stroke-width="3"/><text x="100" y="124" font-family="Georgia,serif" font-size="78" font-style="italic" text-anchor="middle" fill="#222">D</text><ellipse cx="100" cy="30" rx="5" ry="11" fill="#222" transform="rotate(-60 100 100) rotate(90 100 30)"/>
 <ellipse cx="100" cy="30" rx="5" ry="11" fill="#222" transform="rotate(-40 100 100) rotate(90 100 30)"/>
 <ellipse cx="100" cy="30" rx="5" ry="11" fill="#222" transform="rotate(-20 100 100) rotate(90 100 30)"/>
 <ellipse cx="100" cy="30" rx="5" ry="11" fill="#222" transform="rotate(20 100 100) rotate(90 100 30)"/>

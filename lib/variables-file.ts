@@ -50,6 +50,7 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Pr
     extraPages: s.extraPages,
     menu: s.menu.map((m) => ({ page: m.id, label: m.label, ...(m.href ? { link: m.href } : {}), inMenu: m.top, inFooter: m.footer, on: !m.off })),
     categories: s.categories,
+    watermark: { on: s.watermark.on, text: s.watermark.text, withLogo: s.watermark.useLogo, position: s.watermark.position, opacity: s.watermark.opacity, size: s.watermark.size, onOurWork: s.watermark.onGallery, onDesigns: s.watermark.onDesigns },
     designs: s.designs.map((d) => ({ id: d.id, name: d.name, image: d.image, group: d.group, extraPrice: dollars(d.extra) ?? 0, show: d.active, ...(d.note ? { note: d.note } : {}) })),
     footer: { note: s.footerNote },
     gallery: { heading: s.galleryHeading, text: s.galleryText, items: s.gallery },
@@ -89,7 +90,22 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin">, products: Pr
       choice: p.option ? { label: p.option.label, options: p.option.values } : null,
       engraving: p.personalize ? { ...p.personalize } : null,
       sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: dollars(x.price) ?? 0 })) : null,
-      designs: p.designs ? { label: p.designs.label, required: p.designs.required, bySize: p.designs.fit } : null,
+      designs: p.designs
+        ? {
+            label: p.designs.label,
+            required: p.designs.required,
+            bySize: p.designs.fit,
+            ...(p.designs.allowUpload ? { customerUpload: true, customerUploadPrice: dollars(p.designs.uploadExtra ?? 0) ?? 0 } : {}),
+          }
+        : null,
+      preview: p.preview
+        ? {
+            ...(p.preview.mockup ? { mockup: { photo: p.preview.mockup.image, x: p.preview.mockup.x, y: p.preview.mockup.y, width: p.preview.mockup.w, height: p.preview.mockup.h } } : {}),
+            ...(p.preview.shape ? { shape3d: p.preview.shape, color3d: p.preview.color ?? "#2b2f36" } : {}),
+            ...(p.preview.model ? { scan3d: p.preview.model } : {}),
+            ...(p.preview.spin?.length ? { spin360: p.preview.spin } : {}),
+          }
+        : null,
       ...(p.images.length ? { photos: p.images } : {}),
     })),
   };
@@ -158,6 +174,11 @@ import type { SiteVariables } from "./lib/site-variables-type";
 
 const q = (v: unknown): string =>
   Array.isArray(v) && v.every((x) => typeof x !== "object") ? `[${v.map((x) => JSON.stringify(x)).join(", ")}]` : JSON.stringify(v);
+// an object written like the rest of the file: { key: "value", list: ["a", "b"] }
+const lit = (v: unknown): string =>
+  v && typeof v === "object" && !Array.isArray(v)
+    ? `{ ${Object.entries(v as Record<string, unknown>).map(([k, x]) => `${/^[a-z_$][\w$]*$/i.test(k) ? k : JSON.stringify(k)}: ${lit(x)}`).join(", ")} }`
+    : q(v);
 const field = (key: string, v: unknown, note?: string) => `${key}: ${q(v)},${note ? ` // ${note}` : ""}`;
 
 /** The complete text of site-variables.ts. */
@@ -251,6 +272,19 @@ export function variablesFile(v: SiteVariables): string {
   );
   sec("Shop categories", ["In the order they show in the shop. Each product's category should match one of these."]);
   L.push(`  ${field("categories", v.categories)}`);
+  if (v.watermark) {
+    sec("Watermark", ["A stamp on shop photos so they can't be reused without credit. The original photos are never changed."]);
+    obj("watermark", [
+      field("on", v.watermark.on, "true stamps shop photos; false shows them clean"),
+      field("text", v.watermark.text, '"" uses the business name'),
+      field("withLogo", v.watermark.withLogo, "add the logo next to the text"),
+      field("position", v.watermark.position, '"corner" | "center" | "tiled"'),
+      field("opacity", v.watermark.opacity, "5 (faint) to 90 (strong)"),
+      field("size", v.watermark.size, "10 to 60, as a % of the photo's width"),
+      field("onOurWork", v.watermark.onOurWork, "Our work photos too"),
+      field("onDesigns", v.watermark.onDesigns, "design library artwork too"),
+    ]);
+  }
   sec("Design library", [
     "Decals and engraving artwork customers pick from. Which designs fit which item and size is set on each",
     "product (designs.bySize). id: short unique name.  group: e.g. \"Military\", \"Patriotic\", \"Family\".",
@@ -340,6 +374,9 @@ export function variablesFile(v: SiteVariables): string {
     "  designs      which designs from the design library fit each size, or null:",
     "               { label: \"Design\", required: true, bySize: { \"30 oz\": [\"flag\", \"eagle\"] } }",
     "               (with no sizes, use \"*\" as the size name)",
+    "  preview      extra ways to see the item, or null: mockup (a photo with a box, in % of the photo,",
+    "               where the chosen design is shown), shape3d (tumbler | mug | sign | round | square | card)",
+    "               with color3d, scan3d (a .glb 3D scan file), spin360 (photos taken all the way around)",
     "  photos       leave out to keep photos added in the dashboard",
   ]);
   L.push("  products: [");
@@ -365,12 +402,14 @@ export function variablesFile(v: SiteVariables): string {
             `      designs: {`,
             `        label: ${q(p.designs.label)},`,
             `        required: ${p.designs.required},`,
+            ...(p.designs.customerUpload ? [`        customerUpload: true, // customers can upload their own logo or artwork`, `        customerUploadPrice: ${p.designs.customerUploadPrice ?? 0},`] : []),
             `        bySize: {`,
             ...Object.entries(p.designs.bySize).map(([k, ids]) => `          ${q(k)}: ${q(ids)},`),
             `        },`,
             `      },`,
           ]
         : ["      designs: null,"]),
+      `      preview: ${p.preview ? lit(p.preview) : "null"},`,
       ...(p.photos ? [`      ${field("photos", p.photos)}`] : []),
       "    },"
     );

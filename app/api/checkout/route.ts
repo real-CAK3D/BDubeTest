@@ -1,11 +1,22 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getActiveProducts, getSettings } from "@/lib/db";
-import { choiceLabel, unitPrice } from "@/lib/pricing";
+import { choiceLabel, unitPrice, UPLOAD_ID } from "@/lib/pricing";
 import { cleanZip, quoteShipping } from "@/lib/shipping";
 import { siteUrl, stripe } from "@/lib/stripe";
 
-type CartLine = { productId: string; quantity: number; option?: string; custom?: string; size?: string; design?: string };
+type CartLine = { productId: string; quantity: number; option?: string; custom?: string; size?: string; design?: string; art?: string };
+
+// Customer artwork must be a file uploaded to this shop's own photo storage
+function ownArt(url: unknown, base: string) {
+  const u = String(url ?? "");
+  if (!u || u.length > 400) return "";
+  if (u.startsWith("/uploads/customer-art/")) return base + u;
+  const sb = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (sb && u.startsWith(new URL(sb).origin + "/storage/v1/object/public/") && u.includes("/customer-art/")) return u;
+  if (/^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/customer-art\//.test(u)) return u;
+  return "";
+}
 
 export async function POST(req: Request) {
   const s = await stripe();
@@ -27,13 +38,15 @@ export async function POST(req: Request) {
     const each = unitPrice(p, size || undefined, designId || undefined, settings.designs);
     if (each === null) return NextResponse.json({ error: `The size or design picked for ${p.name} isn't available any more. Remove it from the cart and choose again.` }, { status: 400 });
     if (each < 50) return NextResponse.json({ error: `${p.name}${size ? ` (${size})` : ""} doesn't have a price yet. Please contact us to order it.` }, { status: 400 });
-    const design = designId ? settings.designs.find((d) => d.id === designId) : undefined;
+    const design = designId && designId !== UPLOAD_ID ? settings.designs.find((d) => d.id === designId) : undefined;
+    const art = designId === UPLOAD_ID ? ownArt(it.art, siteUrl(req)) : "";
+    if (designId === UPLOAD_ID && !art) return NextResponse.json({ error: `The artwork for ${p.name} didn't upload. Remove it from the cart and add it again.` }, { status: 400 });
     let qty = Math.max(1, Math.min(99, Math.floor(Number(it.quantity) || 1)));
     if (p.stock !== null) qty = Math.min(qty, p.stock);
     if (qty <= 0) return NextResponse.json({ error: `${p.name} is sold out.` }, { status: 400 });
     const picked = p.option && it.option && p.option.values.includes(it.option) ? it.option : "";
     // one line describing every choice: "30 oz · Black · Design: American flag"
-    const option = choiceLabel({ size, option: picked, design: design?.name });
+    const option = choiceLabel({ size, option: picked, design: art ? "your own artwork" : design?.name });
     const custom = p.personalize ? String(it.custom ?? "").replace(/\s+/g, " ").trim().slice(0, p.personalize.maxLength) : "";
     if (p.personalize?.required && !custom) return NextResponse.json({ error: `${p.name} needs "${p.personalize.label}" filled in. Remove it from the cart and add it again.` }, { status: 400 });
     subtotal += each * qty;
@@ -58,7 +71,7 @@ export async function POST(req: Request) {
                 // shows on the Stripe checkout page and the receipt
                 description: custom ? `${p.personalize!.label}: "${custom}"` : p.summary || undefined,
                 images: absImages.length ? absImages : undefined,
-                metadata: { productId: p.id, option, custom, design: design?.id ?? "" },
+                metadata: { productId: p.id, option, custom, design: art ? UPLOAD_ID : design?.id ?? "", art },
               },
             },
     });

@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { unitPrice } from "@/lib/pricing";
 import type { Design, ProductDesigns, ProductSize } from "@/lib/types";
 
-export type CartLine = { productId: string; quantity: number; option?: string; custom?: string; size?: string; design?: string };
+export type CartLine = { productId: string; quantity: number; option?: string; custom?: string; size?: string; design?: string; art?: string };
 export type CartProduct = { id: string; name: string; price: number; image?: string; slug: string; stock: number | null; sizes?: ProductSize[] | null; designs?: ProductDesigns | null };
 export type CartDesign = Pick<Design, "id" | "name" | "image" | "extra" | "active" | "group">;
 
@@ -52,7 +52,7 @@ export function CartProvider({ products, designs = [], children }: { products: C
   const value = useMemo<Ctx>(() => {
     // same item + same choice + same engraving text = one cart line
     const same = (a: CartLine, b: CartLine) =>
-      a.productId === b.productId && (a.option ?? "") === (b.option ?? "") && (a.custom ?? "") === (b.custom ?? "") && (a.size ?? "") === (b.size ?? "") && (a.design ?? "") === (b.design ?? "");
+      a.productId === b.productId && (a.option ?? "") === (b.option ?? "") && (a.custom ?? "") === (b.custom ?? "") && (a.size ?? "") === (b.size ?? "") && (a.design ?? "") === (b.design ?? "") && (a.art ?? "") === (b.art ?? "");
     const linePrice = (l: CartLine) => price(l) ?? 0;
     return {
       lines,

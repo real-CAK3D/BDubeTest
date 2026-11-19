@@ -653,3 +653,43 @@ body:has(.shop) { background: var(--bg); }
 .cart-design img { width: 28px; height: 28px; object-fit: contain; background: #fff; border-radius: 4px; }
 .price .from { font-style: normal; font-size: 0.8em; font-weight: 400; }
 .buy .size-pick, .buy .design-choose { grid-column: 1 / -1; }
+.design-grid-shop .none.upload { border-style: dashed; color: var(--accent); font-weight: 600; }
+
+/* ---------- product views: preview, 3D, scan, 360 ---------- */
+.view-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+.view-tabs button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 0.35rem 0.95rem; font: inherit; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
+.view-tabs button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.viewer3d { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: radial-gradient(circle at 50% 40%, var(--surface), var(--surface-2)); border: 1px solid var(--line); }
+.viewer3d-stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+.viewer3d-stage canvas { width: 100% !important; height: 100% !important; display: block; }
+.spin360 .viewer3d-stage img { width: 100%; height: 100%; object-fit: contain; user-select: none; pointer-events: none; }
+.viewer-note { position: absolute; inset: auto 0 3.2rem; text-align: center; color: var(--muted); font-size: 0.9rem; margin: 0; pointer-events: none; }
+.viewer-controls { position: absolute; left: 50%; bottom: 0.7rem; transform: translateX(-50%); display: flex; align-items: center; gap: 0.6rem; background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.4rem; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.viewer-controls button { width: 32px; height: 32px; border-radius: 999px; border: 0; background: var(--accent); color: var(--accent-ink); font-size: 1.1rem; cursor: pointer; }
+model-viewer.viewer3d-stage { --poster-color: transparent; }
+.ar-btn { position: absolute; top: 0.7rem; right: 0.7rem; }
+.mockup { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+.mockup > img { width: 100%; display: block; }
+.mockup-box { position: absolute; display: grid; place-items: center; }
+.mockup-box img { max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0.95; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25)); }
+.view-note { margin: 0.5rem 0 0; }
+
+/* compact footer */
+.footer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, auto)); gap: 0.35rem 1.6rem; }
+.footer-inner { padding-bottom: 0.8rem; }
+.fine:has(+ .fine-links) { padding-bottom: 0.4rem; }
+.fine-links { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; }
+.fine-links a { color: inherit; opacity: 0.8; }
+.fine-links .owner-link { opacity: 0.5; margin: 0; }
+@media (max-width: 560px) {
+  .footer-inner { gap: 1.2rem; padding-top: 1.6rem; }
+  .footer-links { width: 100%; }
+}
+/* about page link cards */
+.about-links { max-width: 1100px; margin: 0 auto; padding: 0 16px 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 45%), 1fr)); gap: 0.6rem; }
+@media (max-width: 560px) { .about-links a { padding: 0.8rem; } .about-links span { font-size: 0.84rem; } }
+.about-links a { display: grid; gap: 0.2rem; padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); text-decoration: none; }
+.about-links a:hover { border-color: var(--accent); }
+.about-links strong { font-family: var(--font-display); text-transform: var(--display-case); letter-spacing: var(--display-tracking); }
+.about-links span { color: var(--muted); font-size: 0.92rem; }
+.share { display: flex; gap: 0.9rem; align-items: center; flex-wrap: wrap; margin: 0.4rem 0 1.2rem; }

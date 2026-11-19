@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { CustomOrderForm } from "@/components/shop/CustomOrderForm";
-import { getSettings } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 
 export const metadata = { title: "Request a custom order" };
 
 export default async function CustomOrderPage({ searchParams }: { searchParams: Promise<{ about?: string }> }) {
-  const [s, sp] = await Promise.all([getSettings(), searchParams]);
+  const [s, sp] = await Promise.all([shopSettings(), searchParams]);
   if (!s.showCustomOrders) notFound();
   return (
     <section className="section review-page custom-page">

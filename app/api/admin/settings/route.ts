@@ -67,7 +67,7 @@ function cleanDesignList(rows: Row[]) {
   return rows
     .slice(0, 300)
     .map((d) => ({ id: slugOf(d.id || d.name), name: str(d.name, 60), image: str(d.image, 500), group: str(d.group, 40).trim(), extra: Math.max(0, Math.round(Number(d.extra) || 0)), active: d.active !== false, ...(d.note ? { note: str(d.note, 300) } : {}) }))
-    .filter((d) => d.id && d.name && !seen.has(d.id) && seen.add(d.id));
+    .filter((d) => d.id && d.id !== "upload" && d.name && !seen.has(d.id) && seen.add(d.id));
 }
 
 export async function GET() {
@@ -93,6 +93,20 @@ export async function PUT(req: Request) {
     else if (k === "shipCountries" || k === "expenseCategories" || k === "customOrderTypes")
       patch[k] = Array.isArray(v) ? v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 50) : def;
     else if (k === "admin") patch[k] = cleanAdmin((v ?? {}) as Row);
+    else if (k === "watermark") {
+      const w = (v ?? {}) as Row;
+      const n = (x: unknown, lo: number, hi: number, d: number) => Math.min(hi, Math.max(lo, Math.round(Number(x) || d)));
+      patch[k] = {
+        on: Boolean(w.on),
+        text: str(w.text, 60),
+        useLogo: Boolean(w.useLogo),
+        position: (["corner", "center", "tiled"] as const).find((x) => x === w.position) ?? "corner",
+        opacity: n(w.opacity, 5, 90, 45),
+        size: n(w.size, 10, 60, 28),
+        onGallery: Boolean(w.onGallery),
+        onDesigns: Boolean(w.onDesigns),
+      };
+    }
     else if (k === "menu") patch[k] = Array.isArray(v) ? cleanMenu(v as unknown as Row[]) : def;
     else if (k === "designs") patch[k] = Array.isArray(v) ? cleanDesignList(v as unknown as Row[]) : def;
     else if (k === "categories") patch[k] = Array.isArray(v) ? [...new Set(v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean))].slice(0, 40) : def;

@@ -83,6 +83,18 @@ export function OrderList({ initial, openId, status, canEmail, designs = [] }: {
                           <li key={n}>
                             {i.quantity} × {i.name}{i.option && !i.name.includes(i.option) ? ` (${i.option})` : ""} <span className="muted">{money(i.unitAmount * i.quantity, o.currency)}</span>
                             {i.custom ? <div className="engrave">Engrave: <strong>&ldquo;{i.custom}&rdquo;</strong></div> : null}
+                            {i.art ? (
+                              <div className="order-design">
+                                <a href={i.art} target="_blank" rel="noreferrer" title="Open the customer's artwork">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={i.art} alt="" />
+                                </a>
+                                <span>
+                                  <strong>Customer&apos;s own artwork</strong>
+                                  <a className="small" href={i.art} download>Download artwork</a>
+                                </span>
+                              </div>
+                            ) : null}
                             {(() => {
                               const d = i.design ? designs.find((x) => x.id === i.design) : undefined;
                               return d ? (

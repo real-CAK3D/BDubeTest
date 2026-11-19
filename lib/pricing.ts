@@ -20,6 +20,9 @@ export function fittingDesigns(p: Priced, size: string, library: Design[]) {
   return ids.map((id) => library.find((d) => d.id === id && d.active)).filter((d): d is Design => Boolean(d));
 }
 
+/** The design id used when a customer uploads their own artwork. */
+export const UPLOAD_ID = "upload";
+
 /** Price of one item with the chosen size and design, in cents. null = that choice isn't valid. */
 export function unitPrice(p: Priced, size: string | undefined, designId: string | undefined, library: Design[]): number | null {
   let price = p.price;
@@ -28,11 +31,14 @@ export function unitPrice(p: Priced, size: string | undefined, designId: string 
     if (!s) return null;
     price = s.price;
   }
-  if (designId) {
+  if (designId === UPLOAD_ID) {
+    if (!p.designs?.allowUpload) return null;
+    price += p.designs.uploadExtra ?? 0;
+  } else if (designId) {
     const d = fittingDesigns(p, size ?? "", library).find((x) => x.id === designId);
     if (!d) return null;
     price += d.extra;
-  } else if (p.designs?.required && fittingDesigns(p, size ?? "", library).length) return null;
+  } else if (p.designs?.required && (fittingDesigns(p, size ?? "", library).length || p.designs.allowUpload)) return null;
   return price;
 }
 

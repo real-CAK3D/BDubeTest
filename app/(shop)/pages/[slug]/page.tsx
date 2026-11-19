@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSettings } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 import { paragraphs } from "@/lib/format";
 import { fillPolicy } from "@/lib/policy-text";
 import { resolveMenu } from "@/lib/site-structure";
@@ -10,13 +10,13 @@ type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const page = (await getSettings()).extraPages.find((p) => p.slug === slug);
+  const page = (await shopSettings()).extraPages.find((p) => p.slug === slug);
   return page ? { title: page.title } : {};
 }
 
 export default async function ExtraPage({ params }: Params) {
   const { slug } = await params;
-  const s = await getSettings();
+  const s = await shopSettings();
   const page = s.extraPages.find((p) => p.slug === slug);
   if (!page || resolveMenu(s).find((m) => m.id === `page:${slug}`)?.off) notFound();
   // A paragraph whose first line is short and ends with "?" or ":" reads as a question/heading

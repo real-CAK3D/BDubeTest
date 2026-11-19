@@ -164,6 +164,7 @@ export const HELP: HelpGroup[] = [
               "**Photos**: tap **Add photos**. Big phone photos are shrunk automatically. The first photo (gold outline) is the cover; use the arrows to reorder.",
               "**Stock**: how many you have. Leave it empty for unlimited. It goes down by itself when someone buys. **Made to order** shows that label instead.",
               "**Sizes**: give each size its own price (16 oz $30, 40 oz $45). Tap **Tumbler sizes** to fill in the usual ones. The shop shows \"From\" the lowest price.",
+              "**Customers' own artwork**: under Designs, tick **Customers can upload their own logo or artwork** and set an extra charge if you like. Their file shows on the order with a download link.",
               "**Designs**: tick **Customers pick a decal or engraving**, then for each size tap the designs from your library that fit it. Customers pick a size first and only see the designs that fit that size. **Same as 20 oz** copies the list from the size above.",
               "**Other choice**: one more pick-list, like Color with Black, Brown, Natural.",
               "**Personalization**: turn on to give customers a box for engraving text (a name, date, unit or message). Set the label, the most characters, and whether it's required.",
@@ -263,6 +264,49 @@ export const HELP: HelpGroup[] = [
             ],
           },
           { tip: "Use the up and down arrows on the list to choose the order pieces appear in." },
+        ],
+      },
+      {
+        id: "previews",
+        title: "Previews: design on a photo, 3D, scans and 360°",
+        summary: "Extra ways for customers to see an item, set at the bottom of each item in Products.",
+        blocks: [
+          {
+            list: [
+              "**Design on a photo**: pick a photo of the plain item and drag across it where the design goes. Customers see the design they pick drawn on the photo.",
+              "**3D model**: choose the closest shape (tumbler, mug, sign, round or square coaster, card holder) and a color. The site draws it in 3D wearing the chosen design, shown the way a laser mark looks on that material. Customers drag to turn it.",
+              "**3D scan**: scan the real finished piece with a free phone app (Polycam, Scaniverse or KIRI Engine), export a .glb file and upload it. Customers can turn it and, on most phones, tap **View in your space** to see it on their own table.",
+              "**360° spin**: take 24 to 36 photos all the way around the item (a lazy Susan helps) and add them in order. Customers drag to turn the real piece.",
+            ],
+          },
+          { p: "Each one you set up adds a tab above the item's photos. When a customer picks a design, the Preview or 3D tab opens on its own." },
+          { tip: "Free 3D models of products are on Poly Pizza (free to use) and Sketchfab (check each model's license). A scan of your own finished piece shows the real thing, which sells best." },
+        ],
+      },
+      {
+        id: "watermark",
+        title: "Watermark",
+        match: ["/admin/appearance"],
+        summary: "Stamp your name or logo on shop photos, on or off at any time.",
+        blocks: [
+          { p: "In **Look & layout > Watermark**, tick **Stamp a watermark on shop photos**. Choose the text (or leave it empty for your business name), whether to add your logo, where it goes (bottom corner, middle or all over), how strong and how big. The preview updates as you change it; tap **Save changes** to put it on the shop." },
+          { p: "Your original photos are never changed, so switching it off brings the clean photos straight back. It covers item photos, and Our work and design artwork if you tick those. Your logo, banner and customers' review photos are never stamped, and the product list for Facebook and Google always uses clean photos." },
+        ],
+      },
+      {
+        id: "advertising",
+        title: "Advertising and getting found",
+        summary: "Facebook and Instagram Shop, Google free listings, sharing.",
+        blocks: [
+          {
+            list: [
+              "**Product feed**: your shop publishes your items at /feed.xml. Connect it once to Facebook/Instagram (Commerce Manager) and Google (Merchant Center) and they stay up to date. See **Setup > List your items**.",
+              "**Share buttons** on every item: customers send it to a friend, or post it to Facebook or Pinterest.",
+              "**Google**: each item page tells search engines its price and stock, and the sitemap lists every page.",
+              "**Reviews with photos** build trust. Text the review link (/review) to happy customers.",
+            ],
+          },
+          { tip: "Post finished pieces in your Facebook group with a link to the item. Items with a 3D view or a 360° spin are great to share." },
         ],
       },
       {

@@ -6,9 +6,36 @@ export type ProductSize = { name: string; price: number }; // cents
 // Which designs from the design library fit this item. "fit" is keyed by size
 // name ("*" when the item has no sizes) and lists design ids, so each size can
 // offer a different set (a 40 oz tumbler might fit 2 designs, a 16 oz 10).
-export type ProductDesigns = { label: string; required: boolean; fit: Record<string, string[]> };
+export type ProductDesigns = {
+  label: string;
+  required: boolean;
+  fit: Record<string, string[]>;
+  allowUpload?: boolean; // customers can upload their own logo or artwork
+  uploadExtra?: number; // cents added when they do
+};
+// How an item can be viewed beyond its photos.
+export type Shape3D = "tumbler" | "mug" | "sign" | "round" | "square" | "card";
+export type ProductPreview = {
+  // a photo of the item with a box marking where a design goes (percent of the photo)
+  mockup?: { image: string; x: number; y: number; w: number; h: number } | null;
+  shape?: Shape3D | null; // a 3D model drawn by the site, wearing the chosen design
+  color?: string; // the 3D model's color, e.g. "#1d2a3a"
+  model?: string; // a 3D scan (.glb file) of the real item
+  spin?: string[]; // photos taken all the way around the item, in order (360° view)
+};
 // One decal / engraving artwork in the design library.
 export type Design = { id: string; name: string; image: string; group: string; extra: number; active: boolean; note?: string }; // note: private laser settings, file name...
+// Stamp on shop photos, switched on and off in Look & layout
+export type Watermark = {
+  on: boolean;
+  text: string; // "" = business name
+  useLogo: boolean; // stamp the logo next to the text
+  position: "corner" | "center" | "tiled";
+  opacity: number; // 5-90 (%)
+  size: number; // 10-60 (% of the photo's width)
+  onGallery: boolean; // Our work photos too
+  onDesigns: boolean; // design library artwork too
+};
 // One entry in the shop's page list (top menu and footer).
 export type MenuItem = { id: string; label: string; href?: string; top: boolean; footer: boolean; off?: boolean };
 // How the owner's dashboard looks and what it shows.
@@ -43,6 +70,7 @@ export type Product = {
   personalize?: Personalize | null;
   sizes?: ProductSize[] | null; // price then comes from the chosen size
   designs?: ProductDesigns | null;
+  preview?: ProductPreview | null;
   // Set when the item comes from Stripe (Stripe > Product catalog)
   stripeProductId?: string;
   stripeStockSeen?: string | null;
@@ -55,7 +83,8 @@ export type OrderItem = {
   name: string;
   option?: string;
   custom?: string; // engraving / personalization text
-  design?: string; // id of the design picked from the design library
+  design?: string; // id of the design picked from the design library ("upload" = their own)
+  art?: string; // address of the artwork the customer uploaded
   quantity: number;
   unitAmount: number; // cents
 };
@@ -181,6 +210,7 @@ export type SiteSettings = {
   menu: MenuItem[]; // order and visibility of pages in the menu and footer
   categories: string[]; // shop categories, in display order
   designs: Design[]; // design library for decals / engravings
+  watermark: Watermark;
   showContactForm: boolean;
   showNewsletter: boolean;
   newsletterText: string;

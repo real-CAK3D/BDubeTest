@@ -3,14 +3,14 @@ import Link from "next/link";
 import { viewsFor } from "@/components/shop/layouts";
 import { byCategory } from "@/components/shop/layouts/types";
 import { Tracker } from "@/components/shop/Tracker";
-import { getActiveProducts, getSettings } from "@/lib/db";
+import { shopProducts, shopSettings } from "@/lib/shop-data";
 import { slugify } from "@/lib/format-slug";
 import { getLayout } from "@/lib/themes";
 
 type SP = { searchParams: Promise<{ category?: string; page?: string; q?: string }> };
 
 async function load(sp: Awaited<SP["searchParams"]>) {
-  const [s, all] = await Promise.all([getSettings(), getActiveProducts()]);
+  const [s, all] = await Promise.all([shopSettings(), shopProducts()]);
   const q = String(sp.q ?? "").trim().slice(0, 60);
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const products = words.length ? all.filter((p) => words.every((w) => `${p.name} ${p.summary} ${p.description} ${p.category}`.toLowerCase().includes(w))) : all;

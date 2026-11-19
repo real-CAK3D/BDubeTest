@@ -14,7 +14,7 @@ const nameFrom = (file: string) => file.replace(/\.[a-z0-9]+$/i, "").replace(/[-
  * offered on any item and size; that's picked here ("Fits on") or on the item
  * itself in Products.
  */
-export function DesignLibrary({ settings, products: initialProducts }: { settings: SiteSettings; products: Product[] }) {
+export function DesignLibrary({ settings, products: initialProducts, ordered = {} }: { settings: SiteSettings; products: Product[]; ordered?: Record<string, number> }) {
   const { s, set, save, bar, dirty } = useSettings(settings);
   const [products, setProducts] = useState(initialProducts);
   const [changed, setChanged] = useState<Set<string>>(new Set());
@@ -26,7 +26,10 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
   const fileRef = useRef<HTMLInputElement>(null);
   const list = s.designs;
   const groups = [...new Set(list.map((d) => d.group).filter(Boolean))];
-  const shown = list.filter((d) => (!group || d.group === group) && (!q || (d.name + d.group).toLowerCase().includes(q.toLowerCase())));
+  const [sort, setSort] = useState<"mine" | "popular">("mine");
+  const shownRaw = list.filter((d) => (!group || d.group === group) && (!q || (d.name + d.group).toLowerCase().includes(q.toLowerCase())));
+  const shown = sort === "popular" ? [...shownRaw].sort((a, b) => (ordered[b.id] ?? 0) - (ordered[a.id] ?? 0)) : shownRaw;
+  const uploads = ordered.upload ?? 0;
   const withDesigns = products.filter((p) => p.designs);
   const uses = (id: string) => withDesigns.reduce((n, p) => n + Object.values(p.designs!.fit).filter((ids) => ids.includes(id)).length, 0);
 
@@ -122,6 +125,13 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
       </p>
       {msg ? <p className="alert" role="status">{msg}</p> : null}
       {list.length > 8 ? <input className="search" placeholder="Search designs" value={q} onChange={(e) => setQ(e.target.value)} /> : null}
+      {Object.keys(ordered).length ? (
+        <div className="chips" role="group" aria-label="Order">
+          <button type="button" className={sort === "mine" ? "on" : ""} onClick={() => setSort("mine")}>My order</button>
+          <button type="button" className={sort === "popular" ? "on" : ""} onClick={() => setSort("popular")}>Most ordered</button>
+          {uploads ? <span className="muted small">Customers&apos; own artwork: {uploads} ordered</span> : null}
+        </div>
+      ) : null}
       {groups.length > 1 ? (
         <div className="chips" role="group" aria-label="Show group">
           <button type="button" className={!group ? "on" : ""} onClick={() => setGroup("")}>All ({list.length})</button>
@@ -199,7 +209,7 @@ export function DesignLibrary({ settings, products: initialProducts }: { setting
                 <img src={d.image} alt="" />
                 <strong>{d.name}</strong>
                 <span className="muted small">
-                  {[d.group, d.extra ? `+${money(d.extra, s.currency)}` : "", `fits ${uses(d.id)} size${uses(d.id) === 1 ? "" : "s"}`, d.active ? "" : "hidden"].filter(Boolean).join(" · ")}
+                  {[d.group, d.extra ? `+${money(d.extra, s.currency)}` : "", `fits ${uses(d.id)} size${uses(d.id) === 1 ? "" : "s"}`, ordered[d.id] ? `ordered ${ordered[d.id]}×` : "", d.active ? "" : "hidden"].filter(Boolean).join(" · ")}
                 </span>
               </button>
             </li>

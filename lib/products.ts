@@ -1,6 +1,6 @@
 import "server-only";
 import { newId, slugify } from "./ids";
-import type { Product, ProductDesigns } from "./types";
+import type { Product, ProductDesigns, ProductPreview, Shape3D } from "./types";
 
 const cleanSizes = (v: unknown) => {
   if (!Array.isArray(v)) return null;
@@ -20,8 +20,32 @@ const cleanDesigns = (v: Partial<ProductDesigns> | null | undefined, sizes: { na
     const ids = (v.fit as Record<string, unknown> | undefined)?.[k];
     fit[k] = Array.isArray(ids) ? [...new Set(ids.map((x) => String(x).slice(0, 50)).filter(Boolean))].slice(0, 200) : [];
   }
-  return { label: String(v.label || "Design").slice(0, 40), required: Boolean(v.required), fit };
+  return {
+    label: String(v.label || "Design").slice(0, 40),
+    required: Boolean(v.required),
+    fit,
+    ...(v.allowUpload ? { allowUpload: true, uploadExtra: Math.max(0, Math.round(Number(v.uploadExtra) || 0)) } : {}),
+  };
 };
+
+const SHAPES: Shape3D[] = ["tumbler", "mug", "sign", "round", "square", "card"];
+const url = (v: unknown) => {
+  const s = String(v ?? "").trim().slice(0, 500);
+  return /^(https:\/\/|\/)/.test(s) && !s.startsWith("//") ? s : "";
+};
+const pct = (v: unknown) => Math.min(100, Math.max(0, Math.round((Number(v) || 0) * 10) / 10));
+
+function cleanPreview(v: Partial<ProductPreview> | null | undefined): ProductPreview | null {
+  if (!v || typeof v !== "object") return null;
+  const m = v.mockup && url(v.mockup.image) ? { image: url(v.mockup.image), x: pct(v.mockup.x), y: pct(v.mockup.y), w: Math.max(2, pct(v.mockup.w)), h: Math.max(2, pct(v.mockup.h)) } : null;
+  const out: ProductPreview = {
+    ...(m ? { mockup: m } : {}),
+    ...(v.shape && SHAPES.includes(v.shape) ? { shape: v.shape, color: /^#[0-9a-f]{6}$/i.test(String(v.color)) ? String(v.color) : "#2b2f36" } : {}),
+    ...(url(v.model) ? { model: url(v.model) } : {}),
+    ...(Array.isArray(v.spin) && v.spin.map(url).filter(Boolean).length >= 4 ? { spin: v.spin.map(url).filter(Boolean).slice(0, 72) } : {}),
+  };
+  return Object.keys(out).length ? out : null;
+}
 
 export function cleanProduct(input: Partial<Product>, existing?: Product): Product {
   const now = new Date().toISOString();
@@ -52,6 +76,7 @@ export function cleanProduct(input: Partial<Product>, existing?: Product): Produ
       : null,
     sizes,
     designs: cleanDesigns(input.designs, sizes),
+    preview: cleanPreview(input.preview),
     stripeProductId: existing?.stripeProductId ?? input.stripeProductId,
     stripeStockSeen: input.stripeStockSeen ?? existing?.stripeStockSeen ?? null,
     createdAt: existing?.createdAt ?? now,

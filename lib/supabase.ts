@@ -81,9 +81,10 @@ async function setup() {
     }
   }
   const buckets = await sb.storage.listBuckets();
-  if (!buckets.error && !buckets.data.some((b) => b.name === BUCKET)) {
-    await sb.storage.createBucket(BUCKET, { public: true, fileSizeLimit: 5 * 1024 * 1024, allowedMimeTypes: ["image/*"] });
-  }
+  // photos and 3D scans (.glb)
+  const bucket = { public: true, fileSizeLimit: 5 * 1024 * 1024, allowedMimeTypes: ["image/*", "model/gltf-binary"] };
+  if (!buckets.error && !buckets.data.some((b) => b.name === BUCKET)) await sb.storage.createBucket(BUCKET, bucket);
+  else if (!buckets.error && !buckets.data.find((b) => b.name === BUCKET)?.allowed_mime_types?.includes("model/gltf-binary")) await sb.storage.updateBucket(BUCKET, bucket);
 }
 
 export async function supabaseStatus(): Promise<{ ok: boolean; message: string }> {

@@ -67,6 +67,9 @@ Find one by searching the repository for `EDIT-POINT: NAME` (on GitHub press `/`
 | `ADMIN-DEFAULTS` | `lib/site-structure.ts` | How the dashboard looks before it's customized; dashboard home sections |
 | `PAGES` | `lib/site-structure.ts` | The shop's built-in pages (ordered and switched on/off in Pages & menu) |
 | `PRICING` | `lib/pricing.ts` | How size and design choices set an item's price |
+| `WATERMARK` | `lib/watermark.ts` | Which photos get the watermark (the stamping is in `app/api/wm/route.ts`) |
+| `3D-SHAPES` | `components/shop/Viewer3D.tsx` | The 3D shapes (tumbler, mug, sign...) and how a laser mark looks on each |
+| `PRODUCT-FEED` | `app/feed.xml/route.ts` | The product list for Facebook/Instagram Shops and Google |
 | `APP-ICON` | `app/api/manifest/route.ts` | Home-screen app name and icon |
 | `LOGIN` | `lib/auth.ts` | How long the owner stays logged in |
 | `VARIABLES-FILE` | `lib/variables-file.ts` | How the dashboard writes site-variables.ts (and its comments) |

@@ -1,10 +1,10 @@
 import { CartView } from "@/components/shop/CartView";
-import { getSettings } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 
 export const metadata = { title: "Your cart" };
 
 export default async function CartPage() {
-  const s = await getSettings();
+  const s = await shopSettings();
   return (
     <section className="section cart">
       <h1>Your cart</h1>

@@ -88,6 +88,15 @@ export function ProductChoices({
             <label className="f"><span>What to call it</span><input value={designs.label} onChange={(e) => onDesigns({ ...designs, label: e.target.value })} placeholder="Design" /></label>
             <label className="check"><input type="checkbox" checked={designs.required} onChange={(e) => onDesigns({ ...designs, required: e.target.checked })} /> They must pick one</label>
           </div>
+          <div className="row2">
+            <label className="check"><input type="checkbox" checked={Boolean(designs.allowUpload)} onChange={(e) => onDesigns({ ...designs, allowUpload: e.target.checked, uploadExtra: designs.uploadExtra ?? 0 })} /> Customers can upload their own logo or artwork</label>
+            {designs.allowUpload ? (
+              <label className="f">
+                <span>Extra charge for their own artwork</span>
+                <input inputMode="decimal" defaultValue={((designs.uploadExtra ?? 0) / 100).toFixed(2)} onBlur={(e) => onDesigns({ ...designs, uploadExtra: Math.max(0, Math.round(parseFloat(e.target.value.replace(/[^0-9.]/g, "")) * 100) || 0) })} />
+              </label>
+            ) : null}
+          </div>
           <p className="hint">Tap the designs that fit {sizes.length ? "each size" : "this item"}. Customers only see the ones you pick, so a size with room for fewer designs offers fewer.</p>
           {groups.length > 1 ? (
             <div className="chips" role="group" aria-label="Show designs from">

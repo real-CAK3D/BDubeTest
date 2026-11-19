@@ -1,4 +1,5 @@
 import type { SiteVariables } from "./site-variables-type";
+import { DEFAULT_WATERMARK } from "./watermark";
 import type { Product, SiteSettings } from "./types";
 
 const cents = (d: number | null | undefined) => (d == null ? null : Math.max(0, Math.round(d * 100)));
@@ -11,6 +12,18 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
+    watermark: v.watermark
+      ? {
+          on: v.watermark.on,
+          text: v.watermark.text,
+          useLogo: v.watermark.withLogo,
+          position: v.watermark.position,
+          opacity: Math.min(90, Math.max(5, v.watermark.opacity)),
+          size: Math.min(60, Math.max(10, v.watermark.size)),
+          onGallery: v.watermark.onOurWork,
+          onDesigns: v.watermark.onDesigns,
+        }
+      : { ...DEFAULT_WATERMARK },
     designs: (v.designs ?? []).map((d) => ({ id: idOf(d.id || d.name), name: d.name, image: d.image, group: d.group, extra: cents(d.extraPrice) ?? 0, active: d.show, ...(d.note ? { note: d.note } : {}) })),
     businessName: v.brand.businessName,
     tagline: v.brand.tagline,
@@ -89,7 +102,7 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   };
 }
 
-export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize" | "sizes" | "designs"> & { images?: string[] };
+export type FileProduct = Pick<Product, "slug" | "name" | "price" | "compareAtPrice" | "summary" | "description" | "category" | "stock" | "madeToOrder" | "featured" | "active" | "option" | "personalize" | "sizes" | "designs" | "preview"> & { images?: string[] };
 
 // duplicate slugs: first one wins
 export function variablesToProducts(v: SiteVariables): FileProduct[] {
@@ -117,8 +130,23 @@ export function variablesToProducts(v: SiteVariables): FileProduct[] {
       option: p.choice && p.choice.label && p.choice.options.length ? { label: p.choice.label, values: p.choice.options } : null,
       personalize: p.engraving ? { label: p.engraving.label, maxLength: p.engraving.maxLength, required: p.engraving.required } : null,
       sizes: p.sizes?.length ? p.sizes.map((x) => ({ name: x.name, price: cents(x.price) ?? 0 })) : null,
-      designs: p.designs ? { label: p.designs.label, required: p.designs.required, fit: Object.fromEntries(Object.entries(p.designs.bySize).map(([k, ids]) => [k, ids.map(idOf)])) } : null,
+      designs: p.designs
+        ? {
+            label: p.designs.label,
+            required: p.designs.required,
+            fit: Object.fromEntries(Object.entries(p.designs.bySize).map(([k, ids]) => [k, ids.map(idOf)])),
+            ...(p.designs.customerUpload ? { allowUpload: true, uploadExtra: cents(p.designs.customerUploadPrice ?? 0) ?? 0 } : {}),
+          }
+        : null,
     };
+    fp.preview = p.preview
+      ? {
+          ...(p.preview.mockup ? { mockup: { image: p.preview.mockup.photo, x: p.preview.mockup.x, y: p.preview.mockup.y, w: p.preview.mockup.width, h: p.preview.mockup.height } } : {}),
+          ...(p.preview.shape3d ? { shape: p.preview.shape3d, color: p.preview.color3d ?? "#2b2f36" } : {}),
+          ...(p.preview.scan3d ? { model: p.preview.scan3d } : {}),
+          ...(p.preview.spin360?.length ? { spin: p.preview.spin360 } : {}),
+        }
+      : null;
     if (p.photos) fp.images = p.photos;
     out.push(fp);
   }

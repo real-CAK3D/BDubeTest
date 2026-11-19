@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { ClearCart } from "@/components/shop/ClearCart";
 import { recordOrderFromSession } from "@/lib/orders";
-import { getOrders, getSettings } from "@/lib/db";
+import { getOrders } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 import { money } from "@/lib/format";
 
 export const metadata = { title: "Thank you" };
 
 export default async function Success({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
   const { session_id } = await searchParams;
-  const s = await getSettings();
+  const s = await shopSettings();
   let order = null;
   if (session_id && /^cs_[A-Za-z0-9_]+$/.test(session_id)) {
     // Records the order now in case the webhook hasn't arrived yet (safe to repeat).

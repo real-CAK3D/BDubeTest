@@ -28,7 +28,10 @@ There's a Deploy to Vercel button in [SETUP.md, step 2](SETUP.md#copy).
 | **Dashboard** | Sales, orders, profit, visitors, conversion, charts, best sellers, most viewed, traffic sources, setup progress |
 | **Orders** | Items, address, payment method, discounts and tax, status, carrier and tracking number, one-tap "shipped" email, private notes, spreadsheet download |
 | **Products** | Add/edit/hide items with up to 12 photos, stock, sizes with their own prices, choices, sale prices; categories you name and order. Items made in Stripe sync in automatically |
-| **Designs** | A library of decals and engravings; each item and size offers only the designs that fit it |
+| **Designs** | A library of decals and engravings with laser notes; each item and size offers only the designs that fit it; customers can upload their own artwork; most-ordered designs |
+| **Previews** | Chosen design drawn on a photo, a 3D model that wears the design, 3D scans with "view in your space", 360° photo spins |
+| **Watermark** | Name/logo stamp on shop photos, switched on and off any time; originals untouched |
+| **Advertising** | Product feed (/feed.xml) for Facebook/Instagram Shops and Google free listings; share buttons |
 | **Pages & menu** | Add, remove, rename, reorder and switch off pages; menu and footer links; outside links |
 | **Customize dashboard** | Colors, dark mode, text size, home screen sections, quick links, menu order, phone bottom bar, start page |
 | **Money** | Income vs. expenses, profit, margin, spreadsheets for taxes |

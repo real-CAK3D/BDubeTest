@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { ReviewForm } from "@/components/shop/ReviewForm";
-import { getSettings } from "@/lib/db";
+import { shopSettings } from "@/lib/shop-data";
 
 export const metadata = { title: "Leave a review" };
 
 export default async function ReviewPage() {
-  const s = await getSettings();
+  const s = await shopSettings();
   if (!s.showReviews) notFound();
   return (
     <section className="section review-page">

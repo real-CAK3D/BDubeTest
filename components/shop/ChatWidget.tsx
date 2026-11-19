@@ -36,6 +36,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
   const [busy, setBusy] = useState(false);
   const [people, setPeople] = useState<string[]>([]); // who's available for live chat
   const [live, setLive] = useState<Live | null>(null);
+  const [typingName, setTypingName] = useState<string | null>(null); // "Brandon is typing…" during a live chat
   const liveRef = useRef<Live | null>(null);
   liveRef.current = live;
   const state = useRef<unknown>(null); // what the chat helper is in the middle of (e.g. taking a request)
@@ -88,6 +89,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
       if (r?.status === 404) return finishLive("This chat has ended.");
       const d = r?.ok ? await r.json() : null;
       if (!d) return;
+      setTypingName(d.typing ?? null);
       if (liveRef.current) liveRef.current = { ...liveRef.current, status: d.status, msgs: d.msgs };
       setLive((l) => (l ? { ...l, status: d.status, msgs: d.msgs } : l));
       if (d.status === "closed") finishLive();
@@ -199,6 +201,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
               )
             )}
             {busy ? <p className="chat-msg bot typing" aria-label="Typing"><span /><span /><span /></p> : null}
+            {live && typingName ? <p className="chat-sys">{typingName} is typing…</p> : null}
             {!turns.length && !live && suggestions.length ? (
               <div className="chat-suggest">
                 {suggestions.map((s) => <button key={s} type="button" onClick={() => ask(s)}>{s}</button>)}

@@ -126,7 +126,7 @@ export async function getAnalytics() {
   return { views, visitors, productViews, referrers };
 }
 
-export type PushSub = { endpoint: string; keys: { p256dh: string; auth: string }; label?: string };
+export type PushSub = { endpoint: string; keys: { p256dh: string; auth: string }; label?: string; who?: string }; // who: the person signed in on that device
 export async function getPushSubs(): Promise<PushSub[]> {
   return await getPrivate<PushSub[]>("pushSubs", []);
 }

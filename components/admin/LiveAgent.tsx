@@ -8,13 +8,15 @@ type Waiting = { id: string; name: string; unread: number; status: string };
 /*
  * The "Live" switch in the dashboard's top bar. While a dashboard page is on
  * screen and it's on (pulsing red), customers see that someone can chat.
- * Checks in every 30 seconds; when a customer is waiting, a box pops up.
+ * Checks in every 15 seconds; when a customer is waiting, a box pops up.
  */
 export function LiveAgent() {
   const path = usePathname();
   const [on, setOn] = useState<boolean | null>(null);
   const [waiting, setWaiting] = useState<Waiting[]>([]);
   const [hide, setHide] = useState("");
+  const [team, setTeam] = useState<{ unread: number; last: { id: string; by: string; text: string } | null }>({ unread: 0, last: null });
+  const [hideTeam, setHideTeam] = useState("");
   const onRef = useRef<boolean | undefined>(undefined);
 
   async function here(next?: boolean) {
@@ -25,11 +27,17 @@ export function LiveAgent() {
     setOn(d.on);
     onRef.current = d.on;
     setWaiting((d.chats as Waiting[]).filter((c) => c.unread > 0));
+    if (d.team) setTeam(d.team);
   }
 
   useEffect(() => {
+    // tag this device's phone notifications with who's signed in, so team messages skip the sender
+    navigator.serviceWorker?.ready
+      .then((r) => r.pushManager.getSubscription())
+      .then((sub) => sub && fetch("/api/admin/push", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ subscription: sub.toJSON() }) }))
+      .catch(() => {});
     here();
-    const t = setInterval(() => here(), 30_000);
+    const t = setInterval(() => here(), 15_000);
     const vis = () => {
       if (document.visibilityState === "visible") here();
       else navigator.sendBeacon?.("/api/admin/live-chat", new Blob([JSON.stringify({ action: "away" })], { type: "application/json" }));
@@ -43,6 +51,8 @@ export function LiveAgent() {
 
   const show = waiting.filter((w) => w.id !== hide);
   const onLive = path?.startsWith("/admin/live");
+  const onTeam = path?.startsWith("/admin/team");
+  const teamNote = team.last && team.last.id !== hideTeam && !onTeam ? team.last : null;
   return (
     <>
       <button
@@ -64,6 +74,15 @@ export function LiveAgent() {
           </span>
           <Link className="b b-primary b-sm" href={`/admin/live?c=${show[0].id}`}>Answer</Link>
           <button className="b b-ghost b-sm" aria-label="Hide" onClick={() => setHide(show[0].id)}>✕</button>
+        </div>
+      ) : teamNote ? (
+        <div className="live-toast team-toast" role="status">
+          <span>
+            <strong>{teamNote.by}:</strong> {teamNote.text}
+            {team.unread > 1 ? <span className="muted small"> (+{team.unread - 1} more)</span> : null}
+          </span>
+          <Link className="b b-primary b-sm" href="/admin/team">Open</Link>
+          <button className="b b-ghost b-sm" aria-label="Hide" onClick={() => setHideTeam(teamNote.id)}>✕</button>
         </div>
       ) : null}
     </>

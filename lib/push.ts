@@ -20,10 +20,13 @@ export async function ensureVapidKeys() {
 }
 export const pushConfigured = async () => Boolean(await vapidKeys());
 
-async function _notifyOwner(title: string, body: string, url = "/admin") {
-  const list = await getNotifications();
-  list.unshift({ id: newId(), createdAt: new Date().toISOString(), title, body, url, read: false });
-  await saveNotifications(list);
+/** opts.except: don't ping that person's devices (their own team message). opts.bell: false = phone ping only, not the bell list. */
+async function _notifyOwner(title: string, body: string, url = "/admin", opts: { except?: string; bell?: boolean } = {}) {
+  if (opts.bell !== false) {
+    const list = await getNotifications();
+    list.unshift({ id: newId(), createdAt: new Date().toISOString(), title, body, url, read: false });
+    await saveNotifications(list);
+  }
 
   const keys = await vapidKeys();
   if (!keys) return;
@@ -32,6 +35,7 @@ async function _notifyOwner(title: string, body: string, url = "/admin") {
   const dead: string[] = [];
   await Promise.all(
     subs.map(async (s) => {
+      if (opts.except && s.who && s.who.toLowerCase() === opts.except.toLowerCase()) return;
       try {
         await webpush.sendNotification(s, JSON.stringify({ title, body, url }));
       } catch (e: unknown) {

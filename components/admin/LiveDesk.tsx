@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { LiveMsg } from "@/lib/live-chat";
 
-type Chat = { id: string; createdAt: string; updatedAt: string; status: "waiting" | "open" | "closed"; name: string; email: string; page: string; msgs: LiveMsg[]; unread: number };
+type Chat = { id: string; createdAt: string; updatedAt: string; status: "waiting" | "open" | "closed"; name: string; email: string; page: string; msgs: LiveMsg[]; unread: number; mine: boolean; ownerName: string };
 const when = (iso: string) => new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 const post = (body: object) => fetch("/api/admin/live-chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -15,6 +15,7 @@ export function LiveDesk({ openId }: { openId?: string }) {
   const [text, setText] = useState("");
   const [tab, setTab] = useState<"now" | "done">("now");
   const list = useRef<HTMLDivElement>(null);
+  const lastClaim = useRef(0);
 
   async function refresh() {
     const r = await fetch("/api/admin/live-chat").catch(() => null);
@@ -34,6 +35,19 @@ export function LiveDesk({ openId }: { openId?: string }) {
     if (c?.unread) post({ action: "read", id: c.id });
     list.current?.scrollTo({ top: list.current.scrollHeight });
   }, [c?.id, c?.msgs.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // typing a reply claims the chat (and shows the customer "… is typing")
+  function typing(v: string) {
+    setText(v);
+    if (!c || !v.trim() || Date.now() - lastClaim.current < 3000) return;
+    lastClaim.current = Date.now();
+    post({ action: "claim", id: c.id }).then(refresh);
+  }
+  async function takeOver() {
+    if (!c) return;
+    await post({ action: "claim", id: c.id, force: true });
+    refresh();
+  }
 
   async function send() {
     if (!text.trim() || !c) return;
@@ -66,7 +80,7 @@ export function LiveDesk({ openId }: { openId?: string }) {
                   <button className={`live-item ${x.id === sel ? "on" : ""}`} onClick={() => setSel(x.id)}>
                     <strong>{x.name || "Guest"}</strong>
                     {x.unread ? <b className="count">{x.unread}</b> : null}
-                    <span className="muted small">{x.status === "waiting" ? "Waiting for you" : x.status === "open" ? "Chatting" : "Ended"} · {day(x.updatedAt)} {when(x.updatedAt)}</span>
+                    <span className="muted small">{x.status === "closed" ? "Ended" : x.mine ? "You're answering" : x.ownerName ? `${x.ownerName} has it` : "Waiting for an answer"} · {day(x.updatedAt)} {when(x.updatedAt)}</span>
                     <span className="muted small clip">{x.msgs.filter((m) => m.from !== "system").at(-1)?.text ?? ""}</span>
                   </button>
                 </li>
@@ -101,9 +115,14 @@ export function LiveDesk({ openId }: { openId?: string }) {
                   )
                 )}
               </div>
-              {c.status !== "closed" ? (
+              {c.status !== "closed" && c.ownerName && !c.mine ? (
+                <div className="live-taken">
+                  <span><strong>{c.ownerName}</strong> is answering this one, so you don&apos;t need to.</span>
+                  <button className="b b-sm" onClick={takeOver}>Take over</button>
+                </div>
+              ) : c.status !== "closed" ? (
                 <form className="row" onSubmit={(e) => { e.preventDefault(); send(); }}>
-                  <input value={text} onChange={(e) => setText(e.target.value)} placeholder={`Reply to ${c.name || "the customer"}`} style={{ flex: 1 }} autoFocus />
+                  <input value={text} onChange={(e) => typing(e.target.value)} placeholder={`Reply to ${c.name || "the customer"}`} style={{ flex: 1 }} autoFocus />
                   <button className="b b-primary" disabled={!text.trim()}>Send</button>
                 </form>
               ) : (

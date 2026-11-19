@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-security";
-import { adminClose, adminDelete, adminRead, adminSend, agentHere, agentLeave, availableAgents, chatToInbox, listChats } from "@/lib/live-chat";
+import { adminClaim, adminClose, adminDelete, adminRead, adminSend, agentHere, agentLeave, availableAgents, chatToInbox, listChats } from "@/lib/live-chat";
 import { currentSession } from "@/lib/session";
+import { teamSummary } from "@/lib/team-chat";
 
 async function me() {
   const sid = await currentSession();
@@ -11,8 +12,9 @@ async function me() {
 
 // Live chat, the dashboard's side.
 export async function GET() {
-  const chats = await listChats();
-  return NextResponse.json({ chats, agents: await availableAgents() });
+  const { sid, name } = await me();
+  const chats = await listChats(sid);
+  return NextResponse.json({ chats, agents: await availableAgents(), me: name.split(" ")[0] });
 }
 
 //  { action: "here", on? }    checks in (every 30s while a dashboard page is on screen); on = the Available switch
@@ -25,15 +27,23 @@ export async function POST(req: Request) {
   switch (b.action) {
     case "here": {
       const on = await agentHere(sid, name, typeof b.on === "boolean" ? b.on : undefined);
-      const chats = await listChats();
-      return NextResponse.json({ on, waiting: chats.filter((c) => c.status !== "closed" && c.unread > 0).length, chats: chats.filter((c) => c.status !== "closed").map((c) => ({ id: c.id, name: c.name, unread: c.unread, status: c.status })) });
+      const chats = (await listChats(sid)).filter((c) => c.status !== "closed");
+      // a chat someone else is answering doesn't pop up for you
+      const forMe = chats.filter((c) => !c.ownerName || c.mine);
+      const team = await teamSummary(name);
+      return NextResponse.json({ on, waiting: forMe.filter((c) => c.unread > 0).length, chats: forMe.map((c) => ({ id: c.id, name: c.name, unread: c.unread, status: c.status })), team });
     }
     case "away":
       await agentLeave(sid);
       return NextResponse.json({ ok: true });
     case "send": {
-      const c = await adminSend(id, String(b.text ?? ""), name.split(" ")[0]);
+      const c = await adminSend(id, String(b.text ?? ""), name.split(" ")[0], sid);
       return c ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "That chat is gone." }, { status: 404 });
+    }
+    // typing a reply claims the chat; { force: true } takes it over from someone else
+    case "claim": {
+      const c = await adminClaim(id, sid, name.split(" ")[0], Boolean(b.force));
+      return c ? NextResponse.json({ ok: true, ownerName: c.owner?.name ?? "", mine: c.owner?.sid === sid }) : NextResponse.json({ error: "That chat has ended." }, { status: 404 });
     }
     case "read":
       await adminRead(id);

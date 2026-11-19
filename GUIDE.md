@@ -33,6 +33,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Live chat](#live-chat): Chat with customers on the shop yourself while you're available.
 - [Seasonal banners](#seasonal): Holiday banners at the top of the shop that come and go by themselves.
 - [What's to come](#coming-soon): Show customers what you're working on and find out what they want most.
+- [Team chat](#team-chat): Message each other inside the dashboard.
 - [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
 - [Links (Facebook, Instagram, phone...)](#links): Your social pages and contact links, each with its own icon.
 - [Order codes, QR codes, packing slips and labels](#codes): One code per order that ties the receipt, packing slip and box together.
@@ -438,6 +439,10 @@ The **Live** switch in the dashboard's top bar decides whether customers can rea
 3. Type your reply. Their messages appear within a couple of seconds.
 4. **End chat** when you're done. **Save to Inbox** keeps a copy with your messages.
 
+#### Two of you signed in
+
+Both of you get the pop-up when a customer starts a chat. Whoever starts typing a reply first gets it: the other one's pop-up goes away and the chat shows **Brandon has it** (or whoever), so nobody answers twice. The customer sees "Brandon is typing…". To step in anyway, open the chat and tap **Take over**.
+
 Switch to **Away**, lock your phone, or close the dashboard and live chat turns off within about a minute; the chat helper answers as usual. If nobody joins a chat within 90 seconds, the customer is asked for their email and the message lands in your **Inbox**.
 
 > **Tip:** Don't want live chat at all? Untick it in **Chat > Settings & try it**.
@@ -465,6 +470,15 @@ Add new products or options you're working on: a name, a sentence about it, how 
 Customers tap **I want this** (counted once per phone) and can leave their email to hear when it's ready. You see the count and the emails on each item; **Email them all** opens an email to everyone waiting.
 
 > **Tip:** When something's ready: add it in Products, email the people waiting, then hide or delete it here.
+
+<a id="team-chat"></a>
+### Team chat
+
+_Message each other inside the dashboard._
+
+A private chat for the people who run the shop; customers never see it. When one of you sends a message, the other's phone gets a notification (if notifications are on), and it pops up in their dashboard with a badge next to **Team chat** in the menu.
+
+The quick buttons send common ones in one tap: "I've got it", "Can you take this one?", "On my way to the shop", "Order's packed and ready". The top of the page shows who's signed in right now.
 
 <a id="hiding"></a>
 ### Hide instead of delete

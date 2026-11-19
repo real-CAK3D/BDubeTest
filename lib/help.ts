@@ -428,6 +428,8 @@ export const HELP: HelpGroup[] = [
               "**End chat** when you're done. **Save to Inbox** keeps a copy with your messages.",
             ],
           },
+          { h: "Two of you signed in" },
+          { p: "Both of you get the pop-up when a customer starts a chat. Whoever starts typing a reply first gets it: the other one's pop-up goes away and the chat shows **Brandon has it** (or whoever), so nobody answers twice. The customer sees \"Brandon is typing…\". To step in anyway, open the chat and tap **Take over**." },
           { p: "Switch to **Away**, lock your phone, or close the dashboard and live chat turns off within about a minute; the chat helper answers as usual. If nobody joins a chat within 90 seconds, the customer is asked for their email and the message lands in your **Inbox**." },
           { tip: "Don't want live chat at all? Untick it in **Chat > Settings & try it**." },
         ],
@@ -453,6 +455,16 @@ export const HELP: HelpGroup[] = [
           { p: "Add new products or options you're working on: a name, a sentence about it, how far along it is (just an idea, in the works, coming soon), an optional date and an optional photo or sketch. The first three show on the home page; all of them are on the **What's to come** page (linked in the footer)." },
           { p: "Customers tap **I want this** (counted once per phone) and can leave their email to hear when it's ready. You see the count and the emails on each item; **Email them all** opens an email to everyone waiting." },
           { tip: "When something's ready: add it in Products, email the people waiting, then hide or delete it here." },
+        ],
+      },
+      {
+        id: "team-chat",
+        title: "Team chat",
+        match: ["/admin/team"],
+        summary: "Message each other inside the dashboard.",
+        blocks: [
+          { p: "A private chat for the people who run the shop; customers never see it. When one of you sends a message, the other's phone gets a notification (if notifications are on), and it pops up in their dashboard with a badge next to **Team chat** in the menu." },
+          { p: "The quick buttons send common ones in one tap: \"I've got it\", \"Can you take this one?\", \"On my way to the shop\", \"Order's packed and ready\". The top of the page shows who's signed in right now." },
         ],
       },
       {

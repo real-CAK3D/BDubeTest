@@ -29,6 +29,8 @@ export type LiveChat = {
   page: string; // the shop page they started on
   msgs: LiveMsg[];
   adminRead: number; // how many messages an admin has seen
+  owner?: { sid: string; name: string; at: string }; // the admin answering it; the others see who has it
+  typing?: { name: string; at: number }; // an admin typing a reply right now
 };
 type Agents = Record<string, { name: string; at: number; on: boolean }>;
 
@@ -132,15 +134,33 @@ async function _customerEnd(id: string, token: string) {
 }
 
 /** What the customer's browser gets: never the token or other chats. */
-export const forCustomer = (c: LiveChat) => ({ status: c.status, msgs: c.msgs.filter((m) => m.from !== "system" || !m.text.startsWith("Asked the chat helper")).map((m) => ({ at: m.at, from: m.from, text: m.text, by: m.by })) });
+export const forCustomer = (c: LiveChat) => ({ status: c.status, typing: c.typing && Date.now() - c.typing.at < 6000 ? c.typing.name : null, msgs: c.msgs.filter((m) => m.from !== "system" || !m.text.startsWith("Asked the chat helper")).map((m) => ({ at: m.at, from: m.from, text: m.text, by: m.by })) });
 
 // ---------- the dashboard side ----------
 
-export async function listChats() {
-  return (await load()).map(({ token: _t, ...c }) => ({ ...c, unread: c.msgs.length - c.adminRead }));
+/** sid: the asking admin's session, so each chat says whether it's theirs, someone else's, or nobody's yet. */
+export async function listChats(sid = "") {
+  return (await load()).map(({ token: _t, ...c }) => ({ ...c, unread: c.msgs.length - c.adminRead, mine: Boolean(c.owner && c.owner.sid === sid), ownerName: c.owner?.name ?? "" }));
 }
 
-async function _adminSend(id: string, text: string, by: string) {
+/**
+ * An admin started typing (or tapped Take over): the chat is theirs. The first
+ * one to start answering gets it; someone else only takes it over on purpose.
+ */
+async function _adminClaim(id: string, sid: string, name: string, force = false) {
+  const list = await load();
+  const c = list.find((x) => x.id === id);
+  if (!c || c.status === "closed") return null;
+  if (c.owner && c.owner.sid !== sid && !force) return c; // someone else has it
+  const changed = !c.owner || c.owner.sid !== sid;
+  if (changed && c.owner && force) c.msgs.push({ at: new Date().toISOString(), from: "system", text: `${name} took over from ${c.owner.name}.` });
+  c.owner = { sid, name, at: new Date().toISOString() };
+  c.typing = { name, at: Date.now() };
+  await save(list);
+  return c;
+}
+
+async function _adminSend(id: string, text: string, by: string, sid = "") {
   const list = await load();
   const c = list.find((x) => x.id === id);
   if (!c) return null;
@@ -148,6 +168,8 @@ async function _adminSend(id: string, text: string, by: string) {
   if (!t) return c;
   if (c.status === "waiting") c.msgs.push({ at: new Date().toISOString(), from: "system", text: `${by} joined the chat.` });
   c.status = c.status === "closed" ? "closed" : "open";
+  c.owner ??= { sid, name: by, at: new Date().toISOString() };
+  c.typing = undefined;
   c.msgs.push({ at: new Date().toISOString(), from: "admin", text: t, by });
   c.adminRead = c.msgs.length;
   c.updatedAt = new Date().toISOString();
@@ -224,4 +246,7 @@ export function adminDelete(...a: Parameters<typeof _adminDelete>) {
 // one change at a time (see withLock in lib/store.ts)
 export function chatToInbox(...a: Parameters<typeof _chatToInbox>) {
   return withLock("write", () => _chatToInbox(...a));
+}
+export function adminClaim(...a: Parameters<typeof _adminClaim>) {
+  return withLock("liveChats", () => _adminClaim(...a));
 }

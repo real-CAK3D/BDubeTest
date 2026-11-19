@@ -1,5 +1,6 @@
 import { LiveAgent } from "@/components/admin/LiveAgent";
 import { listChats } from "@/lib/live-chat";
+import { teamSummary } from "@/lib/team-chat";
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AuthCard } from "@/components/admin/AuthCard";
@@ -21,7 +22,7 @@ export default async function HQLayout({ children }: { children: React.ReactNode
         <ChoosePassword name={me.name} />
       </AuthCard>
     );
-  const [s, notes, orders, requests, reviews, messages, live] = await Promise.all([getSettings(), getNotifications(), getOrders(), getRequests(), getReviews(), getMessages(), listChats().catch(() => [])]);
+  const [s, notes, orders, requests, reviews, messages, live, team] = await Promise.all([getSettings(), getNotifications(), getOrders(), getRequests(), getReviews(), getMessages(), listChats(sid ?? "").catch(() => []), teamSummary(me?.name ?? "").catch(() => ({ unread: 0, last: null }))]);
   const unread = notes.filter((n) => !n.read).length;
   const a = s.admin;
   const accent = /^#[0-9a-f]{6}$/i.test(a.accent) ? a.accent : "";
@@ -30,7 +31,8 @@ export default async function HQLayout({ children }: { children: React.ReactNode
     "/admin/requests": requests.filter((r) => r.status === "new").length,
     "/admin/reviews": reviews.filter((r) => r.status === "pending").length,
     "/admin/inbox": messages.filter((m) => !m.read).length,
-    "/admin/live": live.filter((c) => c.status !== "closed" && c.unread > 0).length,
+    "/admin/live": live.filter((c) => c.status !== "closed" && c.unread > 0 && (!c.ownerName || c.mine)).length,
+    "/admin/team": team.unread,
   };
   return (
     <div className="hq-shell" data-mode={a.mode} data-density={a.density} data-text={a.textSize} style={accent ? ({ "--owner-accent": accent, "--owner-accent-ink": inkFor(accent) } as React.CSSProperties) : undefined}>

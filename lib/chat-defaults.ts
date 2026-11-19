@@ -5,11 +5,14 @@ import type { ChatSettings } from "./types";
  * The questions and answers the shop's chat starts with. They're edited,
  * hidden and added to in Dashboard > Chat; these are only the first set.
  */
-const qa = (id: string, q: string, a: string, alts: string[] = []) => ({ id, q, a, hidden: false, ...(alts.length ? { alts } : {}) });
+// which group each starting answer is filed under in Dashboard > Chat
+const TOPIC: Record<string, string> = { "ship-time": "Shipping & pickup", "ship-cost": "Shipping & pickup", "pickup": "Shipping & pickup", "intl": "Shipping & pickup", "track": "Orders & changes", "change": "Orders & changes", "rush": "Orders & changes", "proof": "Orders & changes", "custom": "Custom work & designs", "decline": "Custom work & designs", "logo": "Custom work & designs", "designs": "Custom work & designs", "text": "Custom work & designs", "returns": "Returns & problems", "damaged": "Returns & problems", "care": "Care & materials", "dishwasher": "Care & materials", "material": "Care & materials", "military": "Discounts & payment", "bulk": "Discounts & payment", "gift": "Discounts & payment", "codes": "Discounts & payment", "pay": "Discounts & payment", "who": "About us", "contact": "About us" };
+const qa = (id: string, q: string, a: string, alts: string[] = []) => ({ id, q, a, hidden: false, ...(alts.length ? { alts } : {}), ...(TOPIC[id] ? { topic: TOPIC[id] } : {}) });
 
 export const DEFAULT_CHAT: ChatSettings = {
   on: true,
   useAI: true,
+  live: true,
   ai: { provider: "anthropic", model: "", baseUrl: "" },
   title: "Questions? Ask us",
   greeting: "Hi! Ask me anything about our tumblers, signs, custom orders, shipping or discounts.",

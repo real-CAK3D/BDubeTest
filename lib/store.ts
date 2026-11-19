@@ -74,15 +74,27 @@ function fileKV(): KV {
   let queue: Promise<unknown> = Promise.resolve();
 
   async function load(): Promise<Record<string, unknown>> {
-    try {
-      return JSON.parse(await fs.readFile(file, "utf8"));
-    } catch {
-      return {};
+    for (let tries = 0; tries < 3; tries++) {
+      let raw: string;
+      try {
+        raw = await fs.readFile(file, "utf8");
+      } catch {
+        return {}; // no file yet
+      }
+      try {
+        return JSON.parse(raw);
+      } catch {
+        await new Promise((r) => setTimeout(r, 20)); // caught mid-write somewhere else: read again
+      }
     }
+    throw new Error("The data file couldn't be read.");
   }
   async function save(db: Record<string, unknown>) {
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(file, JSON.stringify(db, null, 2));
+    // write a new file, then swap it in: anyone reading always sees a whole file, never half of one
+    const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(db, null, 2));
+    await fs.rename(tmp, file);
   }
   // serialize writes so concurrent requests don't clobber each other
   function locked<T>(fn: () => Promise<T>): Promise<T> {

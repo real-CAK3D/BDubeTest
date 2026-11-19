@@ -22,7 +22,7 @@ import type { SiteSettings } from "./types";
  * already send from the site.
  */
 
-export type ChatState = { flow: "custom" | "message"; name?: string; email?: string; notes: string[]; turns: number } | { offer: "custom" | "message" } | null;
+export type ChatState = { flow: "custom" | "message"; name?: string; email?: string; notes: string[]; turns: number } | { offer: "custom" | "message"; q?: string } | null;
 export type ActionTurn = { role: "user" | "assistant"; content: string };
 export type ActionReply = { reply: string; answered: boolean; state?: ChatState; kind?: "zip" };
 
@@ -31,6 +31,7 @@ const CODE = /\b([A-Z]{1,3})(\d{3,7})-([A-Z0-9]{4})\b/i;
 const NUMBER = /(?:order|#|number|no\.?|num)\s*(?:number|no\.?|#)?\s*:?\s*#?\s*(\d{3,7})\b/i;
 const YES = /^\s*(yes|yeah|yep|yup|sure|ok(ay)?|please|please do|y|go ahead|do it|sounds good|that would be great|absolutely|definitely)\b/i;
 const NO = /^\s*(no|nope|nah|never ?mind|cancel|stop|forget it|not now|no thanks)\b/i;
+const HUMANISH = /\b(real person|human|someone|somebody|owner|talk to|speak to|contact)\b/i;
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
 
 /** A Request that counts toward its own limit (chat lookups and chat submissions are limited separately from chatting). */
@@ -39,7 +40,7 @@ const limitOf = (req: Request, name: string) => new Request(new URL(`/api/chat/$
 export function cleanState(x: unknown): ChatState {
   if (!x || typeof x !== "object") return null;
   const o = x as Record<string, unknown>;
-  if (o.offer === "custom" || o.offer === "message") return { offer: o.offer };
+  if (o.offer === "custom" || o.offer === "message") return { offer: o.offer, ...(typeof o.q === "string" && o.q.trim() ? { q: o.q.slice(0, 500) } : {}) };
   if (o.flow !== "custom" && o.flow !== "message") return null;
   const str = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : undefined);
   return {
@@ -165,13 +166,19 @@ async function intake(history: ActionTurn[], state: ChatState, req: Request, s: 
   if (state && "offer" in state) {
     if (NO.test(last)) return { reply: "No problem! Anything else I can help with?", answered: true, state: null };
     if (!YES.test(last)) return null;
+    // the question that led here goes along, so they don't have to type it again
+    const asked = state.q && !/^(talk|speak|chat|can i talk|can i speak)\b/i.test(state.q) && !HUMANISH.test(state.q) ? [state.q] : [];
     if (state.offer === "custom")
       return {
-        reply: `Great! Tell me what you'd like made (the item, size, wording or design, how many, and when you need it), plus your name and email so ${s.businessName} can send you a price.`,
+        reply: asked.length
+          ? `Great! I'll send ${s.businessName} this: "${asked[0]}". Add any details (item, size, wording, how many, when you need it), plus your name and email so we can send you a price.`
+          : `Great! Tell me what you'd like made (the item, size, wording or design, how many, and when you need it), plus your name and email so ${s.businessName} can send you a price.`,
         answered: true,
-        state: { flow: "custom", notes: [], turns: 0 },
+        state: { flow: "custom", notes: asked, turns: 0 },
       };
-    return { reply: "Sure! What would you like to ask or tell us? Include your name and email so we can reply.", answered: true, state: { flow: "message", notes: [], turns: 0 } };
+    return asked.length
+      ? { reply: `Sure! I'll ask ${s.businessName} "${asked[0]}" and they'll reply by email. What's your email (and name)? Add anything else you'd like them to know.`, answered: true, state: { flow: "message", notes: asked, turns: 0 } }
+      : { reply: "Sure! What would you like to ask or tell us? Include your name and email so we can reply.", answered: true, state: { flow: "message", notes: [], turns: 0 } };
   }
   if (!state || !("flow" in state)) return null;
   if (NO.test(last) && last.split(/\s+/).length <= 4) return { reply: "Okay, I won't send anything. Anything else I can help with?", answered: true, state: null };

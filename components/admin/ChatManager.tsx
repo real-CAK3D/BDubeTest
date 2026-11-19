@@ -27,7 +27,11 @@ export function ChatManager({ initial, log: initialLog, hasKey, suggestions = []
   const [busy, setBusy] = useState(false);
   const [focus, setFocus] = useState("");
 
-  const shown = c.faqs.filter((f) => !q || (f.q + " " + f.a).toLowerCase().includes(q.toLowerCase()));
+  // answers are filed under topics (folding lists), in the order the topics first appear
+  const OTHER = "Other";
+  const topics = [...new Set([...c.faqs.map((f) => f.topic || OTHER).filter((x) => x !== OTHER), OTHER])];
+  const [openTopics, setOpenTopics] = useState<string[]>([]);
+  const shown = c.faqs.filter((f) => !q || (f.q + " " + f.a + " " + (f.alts ?? []).join(" ") + " " + (f.topic ?? "")).toLowerCase().includes(q.toLowerCase()));
   // the same question asked many times only shows once, with a count
   const asked = Object.values(
     log.reduce<Record<string, { q: string; n: number; answered: boolean; at: string }>>((m, e) => {
@@ -60,8 +64,9 @@ export function ChatManager({ initial, log: initialLog, hasKey, suggestions = []
     setDone((d) => [...d, ...g.questions]);
   }
 
-  function addAnswer(question = "") {
-    const f = { id: newId(), q: question, a: "", hidden: false };
+  function addAnswer(question = "", topic = "") {
+    const f = { id: newId(), q: question, a: "", hidden: false, ...(topic ? { topic } : {}) };
+    if (topic) setOpenTopics((o) => [...new Set([...o, topic])]);
     up({ faqs: [f, ...c.faqs] });
     setFocus(f.id);
     setQ("");
@@ -104,28 +109,51 @@ export function ChatManager({ initial, log: initialLog, hasKey, suggestions = []
             badge: c.faqs.filter((f) => !f.hidden).length,
             content: (
               <>
-                <input className="search" placeholder="Search questions and answers" value={q} onChange={(e) => setQ(e.target.value)} />
-                <ul className="faq-list">
-                  {shown.map((f) => (
-                    <li key={f.id} className={`panel ${f.hidden ? "hidden-item" : ""}`}>
-                      <label className="f"><span>Question</span><input autoFocus={focus === f.id} value={f.q} onChange={(e) => setFaq(f.id, { q: e.target.value })} placeholder="What a customer might ask" /></label>
-                      <label className="f"><span>Answer</span><textarea rows={3} value={f.a} onChange={(e) => setFaq(f.id, { a: e.target.value })} placeholder="How you'd answer it" /></label>
-                      <label className="f">
-                        <span>Other ways people ask it <span className="muted small">(optional, one per line)</span></span>
-                        <textarea rows={Math.min(5, Math.max(1, (f.alts?.length ?? 0) + 1))} value={(f.alts ?? []).join("\n")} onChange={(e) => setFaq(f.id, { alts: e.target.value.split("\n").map((x) => x.trimStart()).slice(0, 30) })} placeholder="e.g. how long till I get it" />
-                      </label>
-                      <div className="row wrap">
-                        <label className="switch" title={f.hidden ? "Hidden" : "In use"}>
-                          <input type="checkbox" checked={!f.hidden} onChange={(e) => setFaq(f.id, { hidden: !e.target.checked })} aria-label="Use this answer" />
-                          <span />
-                        </label>
-                        <span className="muted small">{f.hidden ? "Hidden: kept, but the chat won't use it" : "In use"}</span>
-                        <span className="grow" />
-                        <button type="button" className="b b-danger b-sm" onClick={() => confirm("Delete this question and answer for good? (Hiding it keeps it.)") && up({ faqs: c.faqs.filter((x) => x.id !== f.id) })}>Delete</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <div className="row wrap">
+                  <input className="search" style={{ flex: 1 }} placeholder="Search questions and answers" value={q} onChange={(e) => setQ(e.target.value)} />
+                  <button type="button" className="b b-ghost b-sm" onClick={() => setOpenTopics(openTopics.length ? [] : topics)}>{openTopics.length ? "Close all" : "Open all"}</button>
+                </div>
+                <datalist id="faq-topics">{topics.map((x) => <option key={x} value={x} />)}</datalist>
+                {topics.map((topic) => {
+                  const inTopic = shown.filter((f) => (f.topic || OTHER) === topic);
+                  if (!inTopic.length) return null;
+                  const isOpen = Boolean(q) || openTopics.includes(topic) || inTopic.some((f) => f.id === focus);
+                  return (
+                    <details key={topic} className="panel faq-group" open={isOpen} onToggle={(e) => {
+                      const now = (e.currentTarget as HTMLDetailsElement).open;
+                      if (now !== isOpen && !q) setOpenTopics(now ? [...openTopics, topic] : openTopics.filter((x) => x !== topic));
+                    }}>
+                      <summary>
+                        <strong>{topic}</strong>
+                        <span className="muted small"> {inTopic.length} question{inTopic.length === 1 ? "" : "s"}{inTopic.some((f) => f.hidden) ? `, ${inTopic.filter((f) => f.hidden).length} hidden` : ""}</span>
+                      </summary>
+                      <ul className="faq-list">
+                        {inTopic.map((f) => (
+                          <li key={f.id} className={`faq-item ${f.hidden ? "hidden-item" : ""}`}>
+                            <label className="f"><span>Question</span><input autoFocus={focus === f.id} value={f.q} onChange={(e) => setFaq(f.id, { q: e.target.value })} placeholder="What a customer might ask" /></label>
+                            <label className="f"><span>Answer</span><textarea rows={3} value={f.a} onChange={(e) => setFaq(f.id, { a: e.target.value })} placeholder="How you'd answer it" /></label>
+                            <label className="f">
+                              <span>Other ways people ask it <span className="muted small">(optional, one per line)</span></span>
+                              <textarea rows={Math.min(5, Math.max(1, (f.alts?.length ?? 0) + 1))} value={(f.alts ?? []).join("\n")} onChange={(e) => setFaq(f.id, { alts: e.target.value.split("\n").map((x) => x.trimStart()).slice(0, 30) })} placeholder="e.g. how long till I get it" />
+                            </label>
+                            <div className="row wrap">
+                              <label className="switch" title={f.hidden ? "Hidden" : "In use"}>
+                                <input type="checkbox" checked={!f.hidden} onChange={(e) => setFaq(f.id, { hidden: !e.target.checked })} aria-label="Use this answer" />
+                                <span />
+                              </label>
+                              <span className="muted small">{f.hidden ? "Hidden: kept, but the chat won't use it" : "In use"}</span>
+                              <label className="f-inline small">Topic <input list="faq-topics" value={f.topic ?? ""} placeholder={OTHER} onChange={(e) => setFaq(f.id, { topic: e.target.value.slice(0, 40) })} /></label>
+                              <span className="grow" />
+                              <button type="button" className="b b-danger b-sm" onClick={() => confirm("Delete this question and answer for good? (Hiding it keeps it.)") && up({ faqs: c.faqs.filter((x) => x.id !== f.id) })}>Delete</button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                      <button type="button" className="b b-ghost b-sm" onClick={() => addAnswer("", topic === OTHER ? "" : topic)}>+ Add a question to {topic}</button>
+                    </details>
+                  );
+                })}
+                {!shown.length ? <p className="muted">No questions match.</p> : null}
               </>
             ),
           },
@@ -194,6 +222,7 @@ export function ChatManager({ initial, log: initialLog, hasKey, suggestions = []
               <>
                 <section className="panel stack">
                   <label className="check"><input type="checkbox" checked={c.on} onChange={(e) => up({ on: e.target.checked })} /> Show the chat button on the shop</label>
+                  <label className="check"><input type="checkbox" checked={c.live !== false} onChange={(e) => up({ live: e.target.checked })} /> Offer live chat with a person while one of you is available (the <strong>Live</strong> switch in the top bar)</label>
                   <p className="hint">The chat works with no AI at all. An AI just makes the wording more natural and handles odd questions better.</p>
                   <label className="check"><input type="checkbox" checked={c.useAI} onChange={(e) => up({ useAI: e.target.checked })} /> Let an AI write the replies</label>
                   {c.useAI ? (

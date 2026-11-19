@@ -381,6 +381,7 @@ export const HELP: HelpGroup[] = [
           { p: "Customers tap **Ask us** in the corner of the shop and type a question. The chat answers from **your questions & answers** plus what the shop already knows (items, prices, shipping, discounts). It starts with 25 common questions filled in; change them to fit." },
           { h: "Adding an answer" },
           { steps: ["Open **Chat** in the dashboard.", "Tap **Add a question**, type the question how a customer would ask it, and your answer.", "Save. The chat uses it straight away, even if the customer words the question differently."] },
+          { p: "Answers are filed under topics (Shipping & pickup, Orders & changes...) that fold open and closed. Change an answer's **Topic** box to move it, or type a new topic name to start a new group." },
           { p: "**What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it. If it's really a question you already answered in other words, pick it under **Same as…** and the chat learns that wording." },
           { h: "What the chat can do for customers" },
           {
@@ -391,7 +392,7 @@ export const HELP: HelpGroup[] = [
               "**Designs**: \"do you have a flag design?\" searches your design library and says which items offer it.",
               "**Your policies**: \"can I return a personalized item?\" quotes the right sentence from your policies.",
               "**Custom requests**: when someone wants something made, the chat offers to send it; it asks what they want, their name and email, and it lands in **Requests** with a phone ping.",
-              "**Messages to you**: \"can I talk to a real person?\" or any question it can't answer: it offers to pass the message on, and it lands in your **Inbox**.",
+              "**Messages to you**: \"can I talk to a real person?\", something you don't carry, or any question it can't answer: it offers to pass the question on (they just add their email), and it lands in your **Inbox** to answer by email. If you're available, \"talk to a person\" starts a **live chat** instead.",
             ],
           },
           { h: "The built-in meaning model (free)" },
@@ -410,6 +411,25 @@ export const HELP: HelpGroup[] = [
           { h: "With an AI (optional)" },
           { p: "In **Chat > Settings & try it**, tick **Let an AI write the replies** and pick a service: Anthropic (Claude), OpenAI, Google Gemini, Groq, OpenRouter, Ollama Cloud, **Ollama on your own computer** (free, but the computer must be on and reachable from the internet), or any other OpenAI-compatible service. Paste that service's key on **Accounts & keys** (AI key for the chat). The AI only uses your answers and shop facts, and if it ever fails the chat answers on its own. **Try it** shows which one answered." },
           { tip: "Hide an answer (the switch) instead of deleting it if it's only out of date for now, like a holiday shipping note." },
+        ],
+      },
+      {
+        id: "live-chat",
+        title: "Live chat",
+        match: ["/admin/live"],
+        summary: "Chat with customers on the shop yourself while you're available.",
+        blocks: [
+          { p: "The **Live** switch in the dashboard's top bar decides whether customers can reach you. While it's on (a slow red pulse) **and** a dashboard page is open on your screen, the shop's chat button shows a red pulse and **Live chat**, and the chat window says who's here with a **Talk to a person** button. Asking the chat helper for a real person starts a live chat too." },
+          {
+            steps: [
+              "A customer starts a chat: your phone gets a notification and a box pops up in the dashboard.",
+              "Tap **Answer** (or open **Live chat** in the menu). You'll see what they asked the chat helper first.",
+              "Type your reply. Their messages appear within a couple of seconds.",
+              "**End chat** when you're done. **Save to Inbox** keeps a copy with your messages.",
+            ],
+          },
+          { p: "Switch to **Away**, lock your phone, or close the dashboard and live chat turns off within about a minute; the chat helper answers as usual. If nobody joins a chat within 90 seconds, the customer is asked for their email and the message lands in your **Inbox**." },
+          { tip: "Don't want live chat at all? Untick it in **Chat > Settings & try it**." },
         ],
       },
       {

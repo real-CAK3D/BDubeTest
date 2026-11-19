@@ -26,6 +26,7 @@ export const ADMIN_PAGES: AdminPage[] = [
   { group: "Customers", href: "/admin/customers", label: "Customers", note: "Who's buying, email sign-ups, downloads", icon: "M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M22 19v-1a4 4 0 0 0-3-3.9M16 4.1a3 3 0 0 1 0 5.8" },
   { group: "Customers", href: "/admin/requests", label: "Requests", note: "Quote or decline custom order requests", icon: "M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6M9 9h2" },
   { group: "Customers", href: "/admin/chat", label: "Chat", note: "The Ask us chat: questions, answers and what people asked", icon: "M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12zM8 11h8M8 14h5" },
+  { group: "Customers", href: "/admin/live", label: "Live chat", note: "Chat with customers on the shop while you're available", icon: "M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12zM8 12h.01M12 12h.01M16 12h.01" },
   { group: "Customers", href: "/admin/reviews", label: "Reviews", note: "Approve customer reviews and photos", icon: "M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z" },
   { group: "Customers", href: "/admin/inbox", label: "Inbox", note: "Messages from the contact form", icon: "M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6z" },
   { group: "Your site", href: "/admin/gallery", label: "Our work", note: "Photos and descriptions of finished pieces", icon: "M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5M15 9.5v.01" },

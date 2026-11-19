@@ -421,7 +421,7 @@ function one(text: string, idx: Index, shop: BrainShop, context: BrainProduct | 
   if (asksSell && !items.length && !looseProducts(raw, shop).length && (!best || best.lex < 0.25) && words.length)
     return shop.customOrders
       ? { reply: "I don't see that in the shop right now, but we do a lot of custom work. Want me to send your idea to us for a price? Just say yes.", answered: false, product: context, offer: "custom", conf: 0.4 }
-      : { reply: "I don't see that in the shop right now. Have a look at /shop for everything we have.", answered: false, product: context, conf: 0.4 };
+      : { reply: "I don't see that in the shop right now. Want me to ask us whether we can get it for you? Just say yes and we'll reply by email.", answered: false, product: context, offer: "message", conf: 0.4 };
 
   // asking for a design by name goes to the design library first
   const design = designSearch(text, shop, m);

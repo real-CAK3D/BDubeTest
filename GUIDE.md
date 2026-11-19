@@ -30,6 +30,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Blanks (stock to engrave)](#blanks): Count the plain pieces you engrave and get warned before you run out.
 - [Previews: design on a photo, 3D, scans and 360°](#previews): Extra ways for customers to see an item, set at the bottom of each item in Products.
 - [Chat (Ask us)](#chat): A chat button on the shop that answers customers' questions from your own answers.
+- [Live chat](#live-chat): Chat with customers on the shop yourself while you're available.
 - [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
 - [Links (Facebook, Instagram, phone...)](#links): Your social pages and contact links, each with its own icon.
 - [Order codes, QR codes, packing slips and labels](#codes): One code per order that ties the receipt, packing slip and box together.
@@ -390,6 +391,8 @@ Customers tap **Ask us** in the corner of the shop and type a question. The chat
 2. Tap **Add a question**, type the question how a customer would ask it, and your answer.
 3. Save. The chat uses it straight away, even if the customer words the question differently.
 
+Answers are filed under topics (Shipping & pickup, Orders & changes...) that fold open and closed. Change an answer's **Topic** box to move it, or type a new topic name to start a new group.
+
 **What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it. If it's really a question you already answered in other words, pick it under **Same as…** and the chat learns that wording.
 
 #### What the chat can do for customers
@@ -400,7 +403,7 @@ Customers tap **Ask us** in the corner of the shop and type a question. The chat
 - **Designs**: "do you have a flag design?" searches your design library and says which items offer it.
 - **Your policies**: "can I return a personalized item?" quotes the right sentence from your policies.
 - **Custom requests**: when someone wants something made, the chat offers to send it; it asks what they want, their name and email, and it lands in **Requests** with a phone ping.
-- **Messages to you**: "can I talk to a real person?" or any question it can't answer: it offers to pass the message on, and it lands in your **Inbox**.
+- **Messages to you**: "can I talk to a real person?", something you don't carry, or any question it can't answer: it offers to pass the question on (they just add their email), and it lands in your **Inbox** to answer by email. If you're available, "talk to a person" starts a **live chat** instead.
 
 #### The built-in meaning model (free)
 
@@ -420,6 +423,22 @@ A small model (about 23 MB) lives inside the website. It doesn't write anything;
 In **Chat > Settings & try it**, tick **Let an AI write the replies** and pick a service: Anthropic (Claude), OpenAI, Google Gemini, Groq, OpenRouter, Ollama Cloud, **Ollama on your own computer** (free, but the computer must be on and reachable from the internet), or any other OpenAI-compatible service. Paste that service's key on **Accounts & keys** (AI key for the chat). The AI only uses your answers and shop facts, and if it ever fails the chat answers on its own. **Try it** shows which one answered.
 
 > **Tip:** Hide an answer (the switch) instead of deleting it if it's only out of date for now, like a holiday shipping note.
+
+<a id="live-chat"></a>
+### Live chat
+
+_Chat with customers on the shop yourself while you're available._
+
+The **Live** switch in the dashboard's top bar decides whether customers can reach you. While it's on (a slow red pulse) **and** a dashboard page is open on your screen, the shop's chat button shows a red pulse and **Live chat**, and the chat window says who's here with a **Talk to a person** button. Asking the chat helper for a real person starts a live chat too.
+
+1. A customer starts a chat: your phone gets a notification and a box pops up in the dashboard.
+2. Tap **Answer** (or open **Live chat** in the menu). You'll see what they asked the chat helper first.
+3. Type your reply. Their messages appear within a couple of seconds.
+4. **End chat** when you're done. **Save to Inbox** keeps a copy with your messages.
+
+Switch to **Away**, lock your phone, or close the dashboard and live chat turns off within about a minute; the chat helper answers as usual. If nobody joins a chat within 90 seconds, the customer is asked for their email and the message lands in your **Inbox**.
+
+> **Tip:** Don't want live chat at all? Untick it in **Chat > Settings & try it**.
 
 <a id="hiding"></a>
 ### Hide instead of delete

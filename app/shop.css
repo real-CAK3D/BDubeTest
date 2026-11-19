@@ -735,3 +735,20 @@ model-viewer.viewer3d-stage { --poster-color: transparent; }
 .receipt-code { display: grid; gap: 0.3rem; justify-items: start; margin: 1rem 0; padding: 0.8rem; background: #fff; border-radius: var(--radius); border: 1px solid var(--line); max-width: 320px; color: #111; }
 .receipt-code svg { width: 260px; max-width: 100%; height: auto; }
 .chat-msg a { color: inherit; font-weight: 600; text-decoration: underline; }
+
+/* live chat: the slow red pulse while someone from the shop is available */
+.live-dot { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%; background: #e0262b; animation: livepulse 2.4s ease-in-out infinite; }
+@keyframes livepulse { 0% { box-shadow: 0 0 0 0 rgba(224, 38, 43, 0.55); opacity: 1; } 70% { box-shadow: 0 0 0 10px rgba(224, 38, 43, 0); opacity: 0.7; } 100% { box-shadow: 0 0 0 0 rgba(224, 38, 43, 0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+.chat-fab { overflow: visible; }
+.chat-fab .fab-dot { position: absolute; top: -3px; right: -3px; width: 13px; height: 13px; border: 2px solid var(--bg); }
+.chat-box { display: flex; flex-direction: column; }
+.chat-box .chat-list { flex: 1; min-height: 0; }
+.chat-box header .row { display: flex; align-items: center; gap: 0.4rem; }
+.chat-live-bar { display: flex; gap: 0.55rem; align-items: center; width: 100%; margin: 0; padding: 0.6rem 1rem; background: rgba(224, 38, 43, 0.09); border: 0; border-bottom: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 0.9rem; text-align: left; cursor: pointer; }
+.chat-live-bar.waiting { cursor: default; }
+.chat-live-bar u { font-weight: 700; }
+.chat-sys { margin: 0.1rem 0; text-align: center; font-size: 0.78rem; color: var(--muted); }
+.chat-by { display: block; font-size: 0.72rem; font-weight: 700; opacity: 0.75; margin-bottom: 0.1rem; }
+.chat-msg.person { border-left: 3px solid #e0262b; }
+.chat-end { background: none; border: 1px solid currentColor; border-radius: 999px; color: inherit; padding: 0.15rem 0.65rem; font: inherit; font-size: 0.78rem; cursor: pointer; }

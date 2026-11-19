@@ -141,7 +141,7 @@ export async function answer(history: ChatTurn[], opts: { state?: unknown; req?:
       if (pol) brain = { ...brain, reply: pol.reply, answered: true, offer: undefined, confidence: 0.6 };
     }
   }
-  const nextState: ChatState = brain.offer ? { offer: brain.offer } : null;
+  const nextState: ChatState = brain.offer ? { offer: brain.offer, q: question.slice(0, 500) } : null;
   // small talk, bare numbers and anything with an email address stay out of the "What people asked" list
   const log = !brain.small && !/@/.test(question) && !/^[\s\d#-]+$/.test(question) && !/^\s*(yes|yeah|yep|sure|ok(ay)?|no|nope)\b/i.test(question);
   const plain = (error?: string): ChatReply => ({ ...brain, state: nextState, via: "brain", log, ...(error ? { error } : {}) });
@@ -196,7 +196,7 @@ export async function answer(history: ChatTurn[], opts: { state?: unknown; req?:
       if (!out.reply) return plain("The AI sent an empty reply.");
       return out.answered
         ? { reply: out.reply.slice(0, 1500), answered: true, faq: out.faq ?? brain.faq, via: `${prov.name} (${model})`, log, state: null }
-        : { reply: `${out.reply.slice(0, 1400)}\n\nI can pass your question to us if you like; just say yes.`, answered: false, faq: out.faq ?? brain.faq, via: `${prov.name} (${model})`, log, state: { offer: "message" } };
+        : { reply: `${out.reply.slice(0, 1400)}\n\nI can pass your question to us if you like; just say yes.`, answered: false, faq: out.faq ?? brain.faq, via: `${prov.name} (${model})`, log, state: { offer: "message", q: question.slice(0, 500) } };
     }
 
     // every other service: the OpenAI-style chat completions API
@@ -222,7 +222,7 @@ export async function answer(history: ChatTurn[], opts: { state?: unknown; req?:
     const unsure = text.includes(UNSURE);
     text = text.replaceAll(UNSURE, "").replace(/\*\*(.+?)\*\*/g, "$1").trim();
     return unsure
-      ? { reply: `${text.slice(0, 1400)}\n\nI can pass your question to us if you like; just say yes.`, answered: false, faq: brain.faq, via: `${prov.name} (${model})`, log, state: { offer: "message" } }
+      ? { reply: `${text.slice(0, 1400)}\n\nI can pass your question to us if you like; just say yes.`, answered: false, faq: brain.faq, via: `${prov.name} (${model})`, log, state: { offer: "message", q: question.slice(0, 500) } }
       : { reply: text.slice(0, 1500), answered: true, faq: brain.faq, via: `${prov.name} (${model})`, log, state: null };
   } catch (e) {
     console.error("chat:", (e as Error).message);

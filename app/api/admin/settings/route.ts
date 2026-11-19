@@ -124,6 +124,7 @@ export async function PUT(req: Request) {
       patch[k] = {
         on: Boolean(c.on),
         useAI: Boolean(c.useAI),
+        live: c.live !== false,
         ai: (() => {
           const a = (c.ai ?? {}) as Row;
           const url = str(a.baseUrl, 300).trim();
@@ -135,7 +136,8 @@ export async function PUT(req: Request) {
           .slice(0, 400)
           .map((x) => {
             const alts = (Array.isArray(x.alts) ? (x.alts as unknown[]) : []).map((y) => str(y, 300).trim()).filter(Boolean).slice(0, 30);
-            return { id: slugOf(x.id || x.q) || Math.random().toString(36).slice(2, 8), q: str(x.q, 300).trim(), a: str(x.a, 2000).trim(), hidden: Boolean(x.hidden), ...(alts.length ? { alts } : {}) };
+            const topic = str(x.topic, 40).trim();
+            return { id: slugOf(x.id || x.q) || Math.random().toString(36).slice(2, 8), q: str(x.q, 300).trim(), a: str(x.a, 2000).trim(), hidden: Boolean(x.hidden), ...(alts.length ? { alts } : {}), ...(topic ? { topic } : {}) };
           })
           .filter((x) => x.q && !seen.has(x.id) && seen.add(x.id)),
       };

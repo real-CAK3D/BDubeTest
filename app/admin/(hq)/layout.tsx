@@ -1,3 +1,5 @@
+import { LiveAgent } from "@/components/admin/LiveAgent";
+import { listChats } from "@/lib/live-chat";
 import Link from "next/link";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AuthCard } from "@/components/admin/AuthCard";
@@ -19,7 +21,7 @@ export default async function HQLayout({ children }: { children: React.ReactNode
         <ChoosePassword name={me.name} />
       </AuthCard>
     );
-  const [s, notes, orders, requests, reviews, messages] = await Promise.all([getSettings(), getNotifications(), getOrders(), getRequests(), getReviews(), getMessages()]);
+  const [s, notes, orders, requests, reviews, messages, live] = await Promise.all([getSettings(), getNotifications(), getOrders(), getRequests(), getReviews(), getMessages(), listChats().catch(() => [])]);
   const unread = notes.filter((n) => !n.read).length;
   const a = s.admin;
   const accent = /^#[0-9a-f]{6}$/i.test(a.accent) ? a.accent : "";
@@ -28,6 +30,7 @@ export default async function HQLayout({ children }: { children: React.ReactNode
     "/admin/requests": requests.filter((r) => r.status === "new").length,
     "/admin/reviews": reviews.filter((r) => r.status === "pending").length,
     "/admin/inbox": messages.filter((m) => !m.read).length,
+    "/admin/live": live.filter((c) => c.status !== "closed" && c.unread > 0).length,
   };
   return (
     <div className="hq-shell" data-mode={a.mode} data-density={a.density} data-text={a.textSize} style={accent ? ({ "--owner-accent": accent } as React.CSSProperties) : undefined}>
@@ -45,6 +48,7 @@ export default async function HQLayout({ children }: { children: React.ReactNode
             </svg>
             <span className="view-site-text">View shop</span>
           </a>
+          <LiveAgent />
           <HelpButton />
           <Link href="/admin/notifications" className="bell" aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>

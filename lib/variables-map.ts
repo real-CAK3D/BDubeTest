@@ -15,7 +15,7 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
     chat: v.chat
-      ? { on: v.chat.on, useAI: v.chat.useAI, ai: v.chat.ai ?? DEFAULT_CHAT.ai, title: v.chat.title, greeting: v.chat.greeting, faqs: v.chat.questions.map((f) => ({ id: f.id, q: f.question, a: f.answer, hidden: Boolean(f.hidden), ...(f.alsoAsked?.length ? { alts: [...f.alsoAsked] } : {}) })) }
+      ? { on: v.chat.on, useAI: v.chat.useAI, ai: v.chat.ai ?? DEFAULT_CHAT.ai, live: v.chat.live !== false, title: v.chat.title, greeting: v.chat.greeting, faqs: v.chat.questions.map((f) => ({ id: f.id, q: f.question, a: f.answer, hidden: Boolean(f.hidden), ...(f.alsoAsked?.length ? { alts: [...f.alsoAsked] } : {}), ...(f.topic ? { topic: f.topic } : {}) })) }
       : structuredClone(DEFAULT_CHAT),
     discounts: v.discounts
       ? {

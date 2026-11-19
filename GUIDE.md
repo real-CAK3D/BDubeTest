@@ -390,11 +390,20 @@ Customers tap **Ask us** in the corner of the shop and type a question. The chat
 2. Tap **Add a question**, type the question how a customer would ask it, and your answer.
 3. Save. The chat uses it straight away, even if the customer words the question differently.
 
-**What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it.
+**What people asked** lists every question customers typed (just the question, no names). If one keeps coming up, tap **Answer this** to add it. If it's really a question you already answered in other words, pick it under **Same as…** and the chat learns that wording.
 
-#### Smart replies (optional)
+#### Without any AI (free, the default)
 
-With an **Anthropic API key** on Accounts & keys, the chat writes natural replies using only your answers and shop facts; it never makes up prices or promises. Without a key it still works: it shows the closest matching answer, or points to the contact page. Try it on the **Settings & try it** tab.
+- Fixes typos ("shiping", "tumblr") and knows that ship / shipping / delivery mean the same.
+- Answers from your items: prices, sizes, in stock or made to order, with a link ("how much is the 40 oz tumbler?").
+- Follows up: after an item comes up, "how much is it?" or "is it in stock?" means that item.
+- Knows your shipping, free-shipping amount, pickup, bulk savings, military discount, gift cards, payment and contact details from your settings.
+- Answers two questions in one message, and offers "Were you asking…" choices when it isn't sure.
+- Use **Other ways people ask it** under any answer to teach it new wordings.
+
+#### With an AI (optional)
+
+In **Chat > Settings & try it**, tick **Let an AI write the replies** and pick a service: Anthropic (Claude), OpenAI, Google Gemini, Groq, OpenRouter, Ollama Cloud, **Ollama on your own computer** (free, but the computer must be on and reachable from the internet), or any other OpenAI-compatible service. Paste that service's key on **Accounts & keys** (AI key for the chat). The AI only uses your answers and shop facts, and if it ever fails the chat answers on its own. **Try it** shows which one answered.
 
 > **Tip:** Hide an answer (the switch) instead of deleting it if it's only out of date for now, like a holiday shipping note.
 
@@ -582,7 +591,7 @@ Go to your site address with `/admin` on the end, or tap the **version and build
 
 _One spot for every service: sign-in links, API keys, saved logins and your own links._
 
-Each service (Stripe, Supabase, Vercel, GitHub, Anthropic for the chat, Shippo, Resend, Facebook and Google listings) has a card showing whether it's connected, links to sign in or make a key, and a box to paste the key.
+Each service (Stripe, Supabase, Vercel, GitHub, an AI service for the chat (optional), Shippo, Resend, Facebook and Google listings) has a card showing whether it's connected, links to sign in or make a key, and a box to paste the key.
 
 - **Saved logins**: usernames and passwords for any site (supplier, Etsy, the laser's software...). Stored encrypted; the password only shows when you tap **Show**.
 - **My links**: bookmarks to the pages you use (Stripe payouts, USPS pickup...).

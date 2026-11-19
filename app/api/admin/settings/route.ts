@@ -124,11 +124,19 @@ export async function PUT(req: Request) {
       patch[k] = {
         on: Boolean(c.on),
         useAI: Boolean(c.useAI),
+        ai: (() => {
+          const a = (c.ai ?? {}) as Row;
+          const url = str(a.baseUrl, 300).trim();
+          return { provider: str(a.provider, 30) || "anthropic", model: str(a.model, 120).trim(), baseUrl: /^https?:\/\//.test(url) ? url : "" };
+        })(),
         title: str(c.title, 60),
         greeting: str(c.greeting, 300),
         faqs: (Array.isArray(c.faqs) ? (c.faqs as Row[]) : [])
           .slice(0, 400)
-          .map((x) => ({ id: slugOf(x.id || x.q) || Math.random().toString(36).slice(2, 8), q: str(x.q, 300).trim(), a: str(x.a, 2000).trim(), hidden: Boolean(x.hidden) }))
+          .map((x) => {
+            const alts = (Array.isArray(x.alts) ? (x.alts as unknown[]) : []).map((y) => str(y, 300).trim()).filter(Boolean).slice(0, 30);
+            return { id: slugOf(x.id || x.q) || Math.random().toString(36).slice(2, 8), q: str(x.q, 300).trim(), a: str(x.a, 2000).trim(), hidden: Boolean(x.hidden), ...(alts.length ? { alts } : {}) };
+          })
           .filter((x) => x.q && !seen.has(x.id) && seen.add(x.id)),
       };
     }

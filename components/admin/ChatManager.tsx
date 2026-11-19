@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { AI_PROVIDERS, providerOf } from "@/lib/ai-providers";
 import type { ChatLogEntry, Faq, SiteSettings } from "@/lib/types";
 import { api } from "./api";
 import { Tabs } from "./Tabs";
@@ -21,7 +22,7 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
   const [q, setQ] = useState("");
   const [log, setLog] = useState(initialLog);
   const [test, setTest] = useState("");
-  const [reply, setReply] = useState<{ reply: string; answered: boolean } | null>(null);
+  const [reply, setReply] = useState<{ reply: string; answered: boolean; via?: string; error?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [focus, setFocus] = useState("");
 
@@ -37,6 +38,16 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
     }, {})
   ).sort((a, b) => Number(a.answered) - Number(b.answered) || b.n - a.n);
   const unanswered = asked.filter((a) => !a.answered).length;
+
+  const ai = c.ai ?? { provider: "anthropic", model: "", baseUrl: "" };
+  const prov = providerOf(ai.provider);
+  const aiOn = c.useAI && (hasKey || !prov.needsKey) && (prov.id === "anthropic" || Boolean(ai.baseUrl || prov.baseUrl));
+
+  // a customer's wording becomes another way to ask an answer you already have
+  function sameAs(question: string, id: string) {
+    up({ faqs: c.faqs.map((f) => (f.id === id ? { ...f, alts: [...new Set([...(f.alts ?? []), question])] } : f)) });
+    void forget(question);
+  }
 
   function addAnswer(question = "") {
     const f = { id: newId(), q: question, a: "", hidden: false };
@@ -69,7 +80,7 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
       </div>
       <p className="muted lead">
         The <strong>Ask us</strong> button on the shop. It answers from the questions and answers below plus your items, prices, shipping, discounts and policies.
-        {hasKey && c.useAI ? " Claude writes the replies in plain, friendly words." : " Right now it replies with the closest answer as written."}
+        {aiOn ? ` ${prov.name} writes the replies in plain, friendly words.` : " It answers on its own (no AI key needed): it fixes typos, looks up item prices and stock, discounts and shipping, follows \"how much is it?\" questions, and picks your closest written answer."}
         {" "}When people ask something it can&apos;t answer, it shows up under <strong>What people asked</strong> so you can add an answer.
       </p>
       <Tabs
@@ -88,6 +99,10 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
                     <li key={f.id} className={`panel ${f.hidden ? "hidden-item" : ""}`}>
                       <label className="f"><span>Question</span><input autoFocus={focus === f.id} value={f.q} onChange={(e) => setFaq(f.id, { q: e.target.value })} placeholder="What a customer might ask" /></label>
                       <label className="f"><span>Answer</span><textarea rows={3} value={f.a} onChange={(e) => setFaq(f.id, { a: e.target.value })} placeholder="How you'd answer it" /></label>
+                      <label className="f">
+                        <span>Other ways people ask it <span className="muted small">(optional, one per line)</span></span>
+                        <textarea rows={Math.min(5, Math.max(1, (f.alts?.length ?? 0) + 1))} value={(f.alts ?? []).join("\n")} onChange={(e) => setFaq(f.id, { alts: e.target.value.split("\n").map((x) => x.trimStart()).slice(0, 30) })} placeholder="e.g. how long till I get it" />
+                      </label>
                       <div className="row wrap">
                         <label className="switch" title={f.hidden ? "Hidden" : "In use"}>
                           <input type="checkbox" checked={!f.hidden} onChange={(e) => setFaq(f.id, { hidden: !e.target.checked })} aria-label="Use this answer" />
@@ -109,7 +124,7 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
             badge: unanswered || undefined,
             content: (
               <section className="panel">
-                <p className="hint">Only the question is kept, never who asked. Ones the chat couldn&apos;t answer are at the top; tap <strong>Answer this</strong> to add it to your answers.</p>
+                <p className="hint">Only the question is kept, never who asked. Ones the chat couldn&apos;t answer are at the top. <strong>Answer this</strong> adds a new answer; <strong>Same as…</strong> teaches the chat that this wording means a question you already answered. Remember to save.</p>
                 {asked.length ? (
                   <ul className="rows asked-list">
                     {asked.slice(0, 200).map((a) => (
@@ -120,6 +135,12 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
                         </span>
                         <span className="row">
                           {a.answered ? <span className="pill s-shipped">Answered</span> : <button className="b b-primary b-sm" onClick={() => addAnswer(a.q)}>Answer this</button>}
+                          {a.answered ? null : (
+                            <select className="b-sm" value="" aria-label="Same as an answer you already have" onChange={(e) => e.target.value && sameAs(a.q, e.target.value)}>
+                              <option value="">Same as…</option>
+                              {c.faqs.filter((f) => f.q).map((f) => <option key={f.id} value={f.id}>{f.q.length > 50 ? f.q.slice(0, 49) + "…" : f.q}</option>)}
+                            </select>
+                          )}
                           <button className="b b-ghost b-sm" aria-label="Remove from the list" onClick={() => forget(a.q)}>✕</button>
                         </span>
                       </li>
@@ -139,8 +160,24 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
               <>
                 <section className="panel stack">
                   <label className="check"><input type="checkbox" checked={c.on} onChange={(e) => up({ on: e.target.checked })} /> Show the chat button on the shop</label>
-                  <label className="check"><input type="checkbox" checked={c.useAI} onChange={(e) => up({ useAI: e.target.checked })} /> Write natural replies with Claude</label>
-                  <p className="hint">{hasKey ? "Your Anthropic key is saved." : "Needs an Anthropic API key on the Accounts & keys page; without it the chat sends the closest answer as written."} Each reply costs a fraction of a cent.</p>
+                  <p className="hint">The chat works with no AI at all. An AI just makes the wording more natural and handles odd questions better.</p>
+                  <label className="check"><input type="checkbox" checked={c.useAI} onChange={(e) => up({ useAI: e.target.checked })} /> Let an AI write the replies</label>
+                  {c.useAI ? (
+                    <>
+                      <label className="f">
+                        <span>AI service</span>
+                        <select value={prov.id} onChange={(e) => up({ ai: { provider: e.target.value, model: "", baseUrl: "" } })}>
+                          {AI_PROVIDERS.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                        </select>
+                      </label>
+                      <p className="hint">{prov.note}{prov.keyUrl ? <> <a href={prov.keyUrl} target="_blank" rel="noreferrer">{prov.needsKey ? "Get a key" : "Download"}</a></> : null}</p>
+                      <label className="f"><span>Model</span><input value={ai.model} onChange={(e) => up({ ai: { ...ai, model: e.target.value.trim() } })} placeholder={prov.model || "the model's name, e.g. llama3.3"} /></label>
+                      {prov.id !== "anthropic" ? (
+                        <label className="f"><span>Address (base URL)</span><input value={ai.baseUrl} onChange={(e) => up({ ai: { ...ai, baseUrl: e.target.value.trim() } })} placeholder={prov.baseUrl || "https://your-server.example.com/v1"} /></label>
+                      ) : null}
+                      <p className="hint">Leave model{prov.id !== "anthropic" ? " and address" : ""} empty to use the usual one shown in grey. {hasKey ? <>Your AI key is saved. </> : prov.needsKey ? <><strong>No AI key saved yet</strong>: paste it on <a href="/admin/keys">Accounts &amp; keys</a> (AI key for the chat). Until then the chat answers on its own. </> : null}If the AI ever fails, the chat answers on its own instead, so customers always get a reply.</p>
+                    </>
+                  ) : null}
                   <label className="f"><span>Title</span><input value={c.title} onChange={(e) => up({ title: e.target.value })} /></label>
                   <label className="f"><span>Greeting</span><textarea rows={2} value={c.greeting} onChange={(e) => up({ greeting: e.target.value })} /></label>
                 </section>
@@ -151,7 +188,12 @@ export function ChatManager({ initial, log: initialLog, hasKey }: { initial: Sit
                     <input style={{ flex: 1 }} value={test} onChange={(e) => setTest(e.target.value)} onKeyDown={(e) => e.key === "Enter" && tryIt()} placeholder="e.g. do you ship to Texas?" />
                     <button className="b b-primary" disabled={busy} onClick={tryIt}>{busy ? "Thinking…" : "Ask"}</button>
                   </div>
-                  {reply ? <p className={`chat-try ${reply.answered ? "" : "warn"}`}>{reply.reply}{reply.answered ? "" : " (not covered by your answers yet)"}</p> : null}
+                  {reply ? (
+                    <>
+                      <p className={`chat-try ${reply.answered ? "" : "warn"}`}>{reply.reply}{reply.answered ? "" : " (not covered by your answers yet)"}</p>
+                      <p className="muted small">Answered by {reply.via === "brain" || !reply.via ? "the shop's own chat (no AI)" : reply.via}{reply.error ? `. The AI didn't work: ${reply.error}` : ""}</p>
+                    </>
+                  ) : null}
                 </section>
               </>
             ),

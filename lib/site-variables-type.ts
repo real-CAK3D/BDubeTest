@@ -87,7 +87,7 @@ export type SiteVariables = {
   categories: string[];
   hiddenText?: string[];
   links?: { icon: string; label: string; url: string; hidden?: boolean }[];
-  chat?: { on: boolean; useAI: boolean; title: string; greeting: string; questions: { id: string; question: string; answer: string; hidden?: boolean }[] };
+  chat?: { on: boolean; useAI: boolean; ai?: { provider: string; model: string; baseUrl: string }; title: string; greeting: string; questions: { id: string; question: string; answer: string; alsoAsked?: string[]; hidden?: boolean }[] };
   discounts?: {
     thankYouCode: { on: boolean; percentOff: number; validDays: number };
     military: { on: boolean; percentOff: number; checkFirst: boolean; code: string; heading: string; text: string };

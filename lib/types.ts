@@ -52,8 +52,9 @@ export type GiftCard = { id: string; code: string; promoId: string; amount: numb
 // A link with a picture (footer and contact page): Facebook, a phone number, an email...
 export type LinkItem = { id: string; icon: string; label: string; url: string; hidden?: boolean };
 // The "Ask us" chat on the shop
-export type Faq = { id: string; q: string; a: string; hidden: boolean };
-export type ChatSettings = { on: boolean; useAI: boolean; title: string; greeting: string; faqs: Faq[] };
+export type Faq = { id: string; q: string; a: string; hidden: boolean; alts?: string[] }; // alts: other ways customers ask it
+export type ChatAi = { provider: string; model: string; baseUrl: string }; // provider id from lib/ai-providers.ts; "" = its usual model / address
+export type ChatSettings = { on: boolean; useAI: boolean; ai?: ChatAi; title: string; greeting: string; faqs: Faq[] };
 export type ChatLogEntry = { at: string; q: string; answered: boolean; faq?: string };
 // One entry in the shop's page list (top menu and footer).
 export type MenuItem = { id: string; label: string; href?: string; top: boolean; footer: boolean; off?: boolean };

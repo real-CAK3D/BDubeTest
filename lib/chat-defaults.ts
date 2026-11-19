@@ -10,6 +10,7 @@ const qa = (id: string, q: string, a: string) => ({ id, q, a, hidden: false });
 export const DEFAULT_CHAT: ChatSettings = {
   on: true,
   useAI: true,
+  ai: { provider: "anthropic", model: "", baseUrl: "" },
   title: "Questions? Ask us",
   greeting: "Hi! Ask me anything about our tumblers, signs, custom orders, shipping or discounts.",
   faqs: [

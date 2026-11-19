@@ -6,6 +6,6 @@ import { getKey } from "@/lib/keys";
 export const metadata = { title: "Chat" };
 
 export default async function ChatPage() {
-  const [s, log, key] = await Promise.all([getSettings(), getChatLog(), getKey("ANTHROPIC_API_KEY")]);
+  const [s, log, key] = await Promise.all([getSettings(), getChatLog(), getKey("AI_API_KEY").then(async (k) => k ?? (await getKey("ANTHROPIC_API_KEY")))]);
   return <ChatManager initial={s} log={log} hasKey={Boolean(key)} />;
 }

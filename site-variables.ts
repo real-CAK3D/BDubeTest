@@ -178,10 +178,11 @@ export const SITE_VARIABLES = {
 
   // Chat
   // The 'Ask us' chat on the shop. It answers from these questions and answers (and the shop's own info).
-  // hidden: true keeps an answer but stops the chat using it.
+  // alsoAsked: other ways customers word the same question. hidden: true keeps an answer but stops the chat using it.
   chat: {
     on: true, // show the chat button on the shop
-    useAI: true, // write natural replies with Claude (needs a key); false = reply with the closest answer as written
+    useAI: true, // let an AI write the replies when a key is saved; false = the shop's own answers only
+    ai: { provider: "anthropic", model: "", baseUrl: "" }, // provider: anthropic, openai, gemini, groq, openrouter, ollama, ollama-own, custom ("" = its usual model / address)
     title: "Questions? Ask us",
     greeting: "Hi! Ask me anything about our tumblers, signs, custom orders, shipping or discounts.",
     questions: [

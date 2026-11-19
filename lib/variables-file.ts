@@ -52,7 +52,7 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" |
     categories: s.categories,
     hiddenText: s.hiddenFields,
     links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) })),
-    chat: { on: s.chat.on, useAI: s.chat.useAI, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, question: x.q, answer: x.a, ...(x.hidden ? { hidden: true } : {}) })) },
+    chat: { on: s.chat.on, useAI: s.chat.useAI, ai: s.chat.ai ?? { provider: "anthropic", model: "", baseUrl: "" }, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, question: x.q, answer: x.a, ...(x.alts?.length ? { alsoAsked: x.alts } : {}), ...(x.hidden ? { hidden: true } : {}) })) },
     discounts: {
       thankYouCode: { on: s.discounts.thankYou.on, percentOff: s.discounts.thankYou.percent, validDays: s.discounts.thankYou.days },
       military: { on: s.discounts.veteran.on, percentOff: s.discounts.veteran.percent, checkFirst: s.discounts.veteran.verify, code: s.discounts.veteran.code, heading: s.discounts.veteran.heading, text: s.discounts.veteran.text },
@@ -273,15 +273,17 @@ export function variablesFile(v: SiteVariables): string {
   sec("Shop categories", ["In the order they show in the shop. Each product's category should match one of these."]);
   L.push(`  ${field("categories", v.categories)}`);
   if (v.chat) {
-    sec("Chat", ["The 'Ask us' chat on the shop. It answers from these questions and answers (and the shop's own info).", "hidden: true keeps an answer but stops the chat using it."]);
+    sec("Chat", ["The 'Ask us' chat on the shop. It answers from these questions and answers (and the shop's own info).", "alsoAsked: other ways customers word the same question. hidden: true keeps an answer but stops the chat using it."]);
+    const ai = v.chat.ai ?? { provider: "anthropic", model: "", baseUrl: "" };
     L.push(
       "  chat: {",
       `    ${field("on", v.chat.on, "show the chat button on the shop")}`,
-      `    ${field("useAI", v.chat.useAI, "write natural replies with Claude (needs a key); false = reply with the closest answer as written")}`,
+      `    ${field("useAI", v.chat.useAI, "let an AI write the replies when a key is saved; false = the shop's own answers only")}`,
+      `    ai: { provider: ${q(ai.provider)}, model: ${q(ai.model)}, baseUrl: ${q(ai.baseUrl)} }, // provider: anthropic, openai, gemini, groq, openrouter, ollama, ollama-own, custom ("" = its usual model / address)`,
       `    ${field("title", v.chat.title)}`,
       `    ${field("greeting", v.chat.greeting)}`,
       "    questions: [",
-      ...v.chat.questions.map((x) => `      { id: ${q(x.id)}, question: ${q(x.question)}, answer: ${q(x.answer)}${x.hidden ? ", hidden: true" : ""} },`),
+      ...v.chat.questions.map((x) => `      { id: ${q(x.id)}, question: ${q(x.question)}, answer: ${q(x.answer)}${x.alsoAsked?.length ? `, alsoAsked: [${x.alsoAsked.map(q).join(", ")}]` : ""}${x.hidden ? ", hidden: true" : ""} },`),
       "    ],",
       "  },"
     );

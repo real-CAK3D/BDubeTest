@@ -2,6 +2,21 @@
 import { useEffect, useRef, useState } from "react";
 
 type Turn = { role: "user" | "assistant"; content: string };
+
+// shop pages (/contact, /product/...) and web addresses in a reply become links
+const LINK = /(https?:\/\/[^\s)]+[^\s).,!?]|\/(?:product|shop|contact|custom-order|gift-cards|military|order-status|policies|pages|gallery|about|cart)(?:\/[\w-]+)*)/g;
+const LABEL: Record<string, string> = { product: "View item", shop: "the shop", contact: "Contact", "custom-order": "Custom orders", "gift-cards": "Gift cards", military: "Military discount", "order-status": "Order status", policies: "Policies", pages: "this page", gallery: "Our work", about: "About us", cart: "your cart" };
+function linkify(text: string) {
+  return text.split(LINK).map((part, i) =>
+    i % 2 ? (
+      <a key={i} href={part} {...(part.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}>
+        {part.startsWith("http") ? part.replace(/^https?:\/\/(www\.)?/, "") : (LABEL[part.split("/")[1]] ?? "this page")}
+      </a>
+    ) : (
+      part
+    )
+  );
+}
 const KEY = "chat:v1";
 
 /** The "Ask us" button and chat window on every shop page. */
@@ -57,7 +72,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
           </header>
           <div className="chat-list" ref={list} aria-live="polite">
             <p className="chat-msg bot">{greeting}</p>
-            {turns.map((t, i) => <p key={i} className={`chat-msg ${t.role === "user" ? "me" : "bot"}`}>{t.content}</p>)}
+            {turns.map((t, i) => <p key={i} className={`chat-msg ${t.role === "user" ? "me" : "bot"}`}>{t.role === "user" ? t.content : linkify(t.content)}</p>)}
             {busy ? <p className="chat-msg bot typing" aria-label="Typing"><span /><span /><span /></p> : null}
             {!turns.length && suggestions.length ? (
               <div className="chat-suggest">

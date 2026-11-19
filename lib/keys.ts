@@ -66,12 +66,11 @@ export const KEY_DEFS: KeyDef[] = [
     secret: true,
   },
   {
-    envName: "ANTHROPIC_API_KEY",
-    label: "Anthropic API key (optional)",
+    envName: "AI_API_KEY",
+    label: "AI key for the chat (optional)",
     group: "Chat",
-    where: "Lets the shop's chat write natural answers with Claude from your questions and answers. Without it, the chat replies with the closest answer as written. Get one at console.anthropic.com > API keys (starts with sk-ant-). It's pay-as-you-go; set a monthly spend limit there.",
-    link: "https://console.anthropic.com/settings/keys",
-    prefix: /^sk-ant-/,
+    where: "Lets the shop's chat write natural answers with an AI. Works with any service picked in Dashboard > Chat > Settings: Anthropic, OpenAI, Gemini, Groq, OpenRouter, Ollama or any OpenAI-compatible one. Paste that service's key here. Without a key the chat still answers on its own from your answers and items.",
+    link: "/admin/chat",
     secret: true,
   },
   {

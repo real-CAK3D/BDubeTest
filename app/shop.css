@@ -734,3 +734,4 @@ model-viewer.viewer3d-stage { --poster-color: transparent; }
 
 .receipt-code { display: grid; gap: 0.3rem; justify-items: start; margin: 1rem 0; padding: 0.8rem; background: #fff; border-radius: var(--radius); border: 1px solid var(--line); max-width: 320px; color: #111; }
 .receipt-code svg { width: 260px; max-width: 100%; height: auto; }
+.chat-msg a { color: inherit; font-weight: 600; text-decoration: underline; }

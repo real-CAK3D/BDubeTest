@@ -1,18 +1,23 @@
-// Service worker for the owner dashboard: shows push notifications for new orders.
+// Service worker for the owner dashboard: shows push notifications (orders, requests,
+// messages, live chats, team chat) and keeps the number on the home-screen icon up to date.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener("push", (event) => {
   let data = { title: "Shop update", body: "", url: "/admin" };
   try { data = { ...data, ...event.data.json() }; } catch {}
-  event.waitUntil(
+  const tasks = [
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
       data: { url: data.url },
-    })
-  );
+      tag: `${Date.now()}`, // each one stays in the list (3, 5, 10... all show)
+    }),
+  ];
+  // the number on the home-screen icon
+  if (typeof data.badge === "number" && self.navigator.setAppBadge) tasks.push(data.badge > 0 ? self.navigator.setAppBadge(data.badge) : self.navigator.clearAppBadge());
+  event.waitUntil(Promise.all(tasks).catch(() => {}));
 });
 
 self.addEventListener("notificationclick", (event) => {

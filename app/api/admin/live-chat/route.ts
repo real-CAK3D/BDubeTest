@@ -3,6 +3,7 @@ import { getSession } from "@/lib/admin-security";
 import { adminClaim, adminClose, adminDelete, adminRead, adminSend, agentHere, agentLeave, availableAgents, chatToInbox, listChats } from "@/lib/live-chat";
 import { currentSession } from "@/lib/session";
 import { teamSummary } from "@/lib/team-chat";
+import { getNotifications } from "@/lib/db";
 
 async function me() {
   const sid = await currentSession();
@@ -31,7 +32,8 @@ export async function POST(req: Request) {
       // a chat someone else is answering doesn't pop up for you
       const forMe = chats.filter((c) => !c.ownerName || c.mine);
       const team = await teamSummary(name);
-      return NextResponse.json({ on, waiting: forMe.filter((c) => c.unread > 0).length, chats: forMe.map((c) => ({ id: c.id, name: c.name, unread: c.unread, status: c.status })), team });
+      const bell = (await getNotifications().catch(() => [])).filter((n) => !n.read).length;
+      return NextResponse.json({ badge: bell + team.unread, on, waiting: forMe.filter((c) => c.unread > 0).length, chats: forMe.map((c) => ({ id: c.id, name: c.name, unread: c.unread, status: c.status })), team });
     }
     case "away":
       await agentLeave(sid);

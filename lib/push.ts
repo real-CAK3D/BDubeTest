@@ -3,6 +3,7 @@ import webpush from "web-push";
 import { getNotifications, getPushSubs, newId, saveNotifications, savePushSubs } from "./db";
 import { getKey, saveKey } from "./keys";
 import { withLock } from "./store";
+import { teamUnread } from "./team-unread";
 
 export async function vapidKeys() {
   const [pub, priv] = await Promise.all([getKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY"), getKey("VAPID_PRIVATE_KEY")]);
@@ -22,11 +23,12 @@ export const pushConfigured = async () => Boolean(await vapidKeys());
 
 /** opts.except: don't ping that person's devices (their own team message). opts.bell: false = phone ping only, not the bell list. */
 async function _notifyOwner(title: string, body: string, url = "/admin", opts: { except?: string; bell?: boolean } = {}) {
+  const list = await getNotifications();
   if (opts.bell !== false) {
-    const list = await getNotifications();
     list.unshift({ id: newId(), createdAt: new Date().toISOString(), title, body, url, read: false });
     await saveNotifications(list);
   }
+  const unread = list.filter((n) => !n.read).length;
 
   const keys = await vapidKeys();
   if (!keys) return;
@@ -37,7 +39,9 @@ async function _notifyOwner(title: string, body: string, url = "/admin", opts: {
     subs.map(async (s) => {
       if (opts.except && s.who && s.who.toLowerCase() === opts.except.toLowerCase()) return;
       try {
-        await webpush.sendNotification(s, JSON.stringify({ title, body, url }));
+        // the number on the home-screen icon: unread notifications + this person's unread team messages
+        const badge = unread + (s.who ? (await teamUnread(s.who).catch(() => 0)) : 0);
+        await webpush.sendNotification(s, JSON.stringify({ title, body, url, badge }));
       } catch (e: unknown) {
         const code = (e as { statusCode?: number }).statusCode;
         if (code === 404 || code === 410) dead.push(s.endpoint);

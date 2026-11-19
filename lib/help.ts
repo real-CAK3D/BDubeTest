@@ -73,6 +73,8 @@ export const HELP: HelpGroup[] = [
             ],
           },
           { p: "You stay logged in for 60 days. On Android, Chrome offers **Install app** from its menu, and notifications work the same way." },
+          { p: "Every notification shows up on its own on your lock screen and in Notification Center, so 3, 5 or 10 new things means 3, 5 or 10 notifications. The **Shop HQ** icon also shows a red number with how many you haven't seen yet (new orders, requests, messages, live chats, and team chat messages for you). It goes down as you open them, and disappears once you've seen everything." },
+          { tip: "No number on the icon? On iPhone check **Settings > Notifications > Shop HQ** and make sure **Badges** is on." },
           { tip: "iPhones only allow notifications from the home-screen app, not from a Safari tab, and need iOS 16.4 or newer." },
         ],
       },

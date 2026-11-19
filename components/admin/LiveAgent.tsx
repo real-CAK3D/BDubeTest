@@ -28,6 +28,7 @@ export function LiveAgent() {
     onRef.current = d.on;
     setWaiting((d.chats as Waiting[]).filter((c) => c.unread > 0));
     if (d.team) setTeam(d.team);
+    setIconBadge(d.badge);
   }
 
   useEffect(() => {
@@ -48,6 +49,12 @@ export function LiveAgent() {
       document.removeEventListener("visibilitychange", vis);
     };
   }, []);
+
+  // after moving to another page (e.g. Notifications, which marks them read), refresh the icon number
+  useEffect(() => {
+    const t = setTimeout(() => here(), 2500);
+    return () => clearTimeout(t);
+  }, [path]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const show = waiting.filter((w) => w.id !== hide);
   const onLive = path?.startsWith("/admin/live");
@@ -87,4 +94,11 @@ export function LiveAgent() {
       ) : null}
     </>
   );
+}
+
+/** The number on the home-screen app icon (iPhone 16.4+ and Android, when added to the home screen). */
+export function setIconBadge(n: unknown) {
+  const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
+  if (typeof n !== "number" || !nav.setAppBadge) return;
+  (n > 0 ? nav.setAppBadge(n) : nav.clearAppBadge?.())?.catch(() => {});
 }

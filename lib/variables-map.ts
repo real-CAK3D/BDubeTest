@@ -1,5 +1,6 @@
 import type { SiteVariables } from "./site-variables-type";
 import { DEFAULT_CHAT } from "./chat-defaults";
+import { DEFAULT_UPCOMING } from "./upcoming-defaults";
 import { DEFAULT_DISCOUNTS } from "./discount-defaults";
 import { DEFAULT_WATERMARK } from "./watermark";
 import type { Product, SiteSettings } from "./types";
@@ -14,6 +15,9 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
   return {
     menu: (v.menu ?? []).map((m) => ({ id: m.page, label: m.label, ...(m.link ? { href: m.link } : {}), top: m.inMenu, footer: m.inFooter, ...(m.on === false ? { off: true } : {}) })),
     categories: [...(v.categories ?? [])],
+    upcoming: v.upcoming
+      ? { on: v.upcoming.on, heading: v.upcoming.heading, intro: v.upcoming.intro, items: v.upcoming.items.map((x) => ({ id: x.id, title: x.title, text: x.text, image: x.image ?? "", when: x.when ?? "", stage: x.stage, ...(x.hidden ? { hidden: true } : {}) })) }
+      : structuredClone(DEFAULT_UPCOMING),
     chat: v.chat
       ? { on: v.chat.on, useAI: v.chat.useAI, ai: v.chat.ai ?? DEFAULT_CHAT.ai, live: v.chat.live !== false, title: v.chat.title, greeting: v.chat.greeting, faqs: v.chat.questions.map((f) => ({ id: f.id, q: f.question, a: f.answer, hidden: Boolean(f.hidden), ...(f.alsoAsked?.length ? { alts: [...f.alsoAsked] } : {}), ...(f.topic ? { topic: f.topic } : {}) })) }
       : structuredClone(DEFAULT_CHAT),

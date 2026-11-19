@@ -52,6 +52,7 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" |
     categories: s.categories,
     hiddenText: s.hiddenFields,
     links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) })),
+    upcoming: { on: s.upcoming.on, heading: s.upcoming.heading, intro: s.upcoming.intro, items: s.upcoming.items.map((x) => ({ id: x.id, title: x.title, text: x.text, image: x.image, when: x.when, stage: x.stage, ...(x.hidden ? { hidden: true } : {}) })) },
     chat: { on: s.chat.on, useAI: s.chat.useAI, live: s.chat.live !== false, ai: s.chat.ai ?? { provider: "anthropic", model: "", baseUrl: "" }, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, ...(x.topic ? { topic: x.topic } : {}), question: x.q, answer: x.a, ...(x.alts?.length ? { alsoAsked: x.alts } : {}), ...(x.hidden ? { hidden: true } : {}) })) },
     discounts: {
       thankYouCode: { on: s.discounts.thankYou.on, percentOff: s.discounts.thankYou.percent, validDays: s.discounts.thankYou.days },
@@ -270,6 +271,19 @@ export function variablesFile(v: SiteVariables): string {
   L.push("  links: [", ...(v.links ?? []).map((l) => `    { icon: ${q(l.icon)}, label: ${q(l.label)}, url: ${q(l.url)}${l.hidden ? ", hidden: true" : ""} },`), "  ],");
   sec("Hidden text", ["Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos)."]);
   L.push(`  ${field("hiddenText", v.hiddenText ?? [])}`);
+  if (v.upcoming) {
+    sec("What's to come", ["New things on the way, shown on the home page and the What's to come page.", "stage: idea, working or soon. when: e.g. \"This spring\" (\"\" = no date). hidden: true keeps it but doesn't show it."]);
+    L.push(
+      "  upcoming: {",
+      `    ${field("on", v.upcoming.on, "show the section on the home page")}`,
+      `    ${field("heading", v.upcoming.heading)}`,
+      `    ${field("intro", v.upcoming.intro)}`,
+      "    items: [",
+      ...v.upcoming.items.map((x) => `      { id: ${q(x.id)}, title: ${q(x.title)}, text: ${q(x.text)}, image: ${q(x.image ?? "")}, when: ${q(x.when ?? "")}, stage: ${q(x.stage)}${x.hidden ? ", hidden: true" : ""} },`),
+      "    ],",
+      "  },"
+    );
+  }
   sec("Shop categories", ["In the order they show in the shop. Each product's category should match one of these."]);
   L.push(`  ${field("categories", v.categories)}`);
   if (v.chat) {

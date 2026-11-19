@@ -51,6 +51,9 @@ export type VetRequest = { id: string; createdAt: string; name: string; email: s
 export type GiftCard = { id: string; code: string; promoId: string; amount: number; createdAt: string; fromName: string; buyerEmail: string; toName: string; toEmail: string; message: string; orderNumber?: number; sentAt?: string };
 // A link with a picture (footer and contact page): Facebook, a phone number, an email...
 export type LinkItem = { id: string; icon: string; label: string; url: string; hidden?: boolean };
+// "What's to come": products and options being worked on, with an "I want this" button
+export type UpcomingItem = { id: string; title: string; text: string; image: string; when: string; stage: "idea" | "working" | "soon"; hidden?: boolean };
+export type UpcomingSettings = { on: boolean; heading: string; intro: string; items: UpcomingItem[] };
 // The "Ask us" chat on the shop
 export type Faq = { id: string; q: string; a: string; hidden: boolean; alts?: string[]; topic?: string }; // alts: other ways customers ask it; topic: the group it's filed under in Dashboard > Chat
 export type ChatAi = { provider: string; model: string; baseUrl: string }; // provider id from lib/ai-providers.ts; "" = its usual model / address
@@ -220,7 +223,8 @@ export type SiteSettings = {
   stepsHeading: string;
   customSteps: Step[];
   hiddenFields: string[];
-  links: LinkItem[]; // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)
+  links: LinkItem[];
+  upcoming: UpcomingSettings; // "What's to come": new things on the way // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)
   showReviews: boolean;
   reviewsHeading: string;
   reviewsText: string;

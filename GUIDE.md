@@ -31,6 +31,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Previews: design on a photo, 3D, scans and 360°](#previews): Extra ways for customers to see an item, set at the bottom of each item in Products.
 - [Chat (Ask us)](#chat): A chat button on the shop that answers customers' questions from your own answers.
 - [Live chat](#live-chat): Chat with customers on the shop yourself while you're available.
+- [What's to come](#coming-soon): Show customers what you're working on and find out what they want most.
 - [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
 - [Links (Facebook, Instagram, phone...)](#links): Your social pages and contact links, each with its own icon.
 - [Order codes, QR codes, packing slips and labels](#codes): One code per order that ties the receipt, packing slip and box together.
@@ -439,6 +440,17 @@ The **Live** switch in the dashboard's top bar decides whether customers can rea
 Switch to **Away**, lock your phone, or close the dashboard and live chat turns off within about a minute; the chat helper answers as usual. If nobody joins a chat within 90 seconds, the customer is asked for their email and the message lands in your **Inbox**.
 
 > **Tip:** Don't want live chat at all? Untick it in **Chat > Settings & try it**.
+
+<a id="coming-soon"></a>
+### What's to come
+
+_Show customers what you're working on and find out what they want most._
+
+Add new products or options you're working on: a name, a sentence about it, how far along it is (just an idea, in the works, coming soon), an optional date and an optional photo or sketch. The first three show on the home page; all of them are on the **What's to come** page (linked in the footer).
+
+Customers tap **I want this** (counted once per phone) and can leave their email to hear when it's ready. You see the count and the emails on each item; **Email them all** opens an email to everyone waiting.
+
+> **Tip:** When something's ready: add it in Products, email the people waiting, then hide or delete it here.
 
 <a id="hiding"></a>
 ### Hide instead of delete

@@ -61,7 +61,7 @@ function cleanMenu(rows: Row[]) {
         ...(m.off ? { off: true } : {}),
       };
     })
-    .filter((m) => /^(shop|gallery|custom|about|contact|status|review|military|giftcards|page:[a-z0-9-]+|link:[a-z0-9-]+)$/.test(m.id) && !seen.has(m.id) && seen.add(m.id) && (!m.id.startsWith("link:") || m.href));
+    .filter((m) => /^(shop|gallery|custom|about|contact|status|review|military|giftcards|socials|coming|page:[a-z0-9-]+|link:[a-z0-9-]+)$/.test(m.id) && !seen.has(m.id) && seen.add(m.id) && (!m.id.startsWith("link:") || m.href));
 }
 
 function cleanDesignList(rows: Row[]) {
@@ -119,6 +119,27 @@ async function handlePUT(req: Request) {
         height: Math.max(0.5, Number(p.height) || 1),
         weightOz: Math.max(1, Number(p.weightOz) || 1),
       }));
+    else if (k === "upcoming") {
+      const u = (v ?? {}) as unknown as Row;
+      const seen = new Set<string>();
+      patch[k] = {
+        on: Boolean(u.on),
+        heading: str(u.heading, 80),
+        intro: str(u.intro, 400),
+        items: (Array.isArray(u.items) ? (u.items as Row[]) : [])
+          .slice(0, 40)
+          .map((x) => ({
+            id: slugOf(x.id || x.title) || Math.random().toString(36).slice(2, 8),
+            title: str(x.title, 80).trim(),
+            text: str(x.text, 600).trim(),
+            image: /^(https:\/\/|\/)/.test(str(x.image, 500)) ? str(x.image, 500) : "",
+            when: str(x.when, 40).trim(),
+            stage: (["idea", "working", "soon"].includes(String(x.stage)) ? x.stage : "idea") as "idea" | "working" | "soon",
+            ...(x.hidden ? { hidden: true } : {}),
+          }))
+          .filter((x) => x.title && !seen.has(x.id) && seen.add(x.id)),
+      };
+    }
     else if (k === "chat") {
       const c = (v ?? {}) as unknown as Row;
       const seen = new Set<string>();

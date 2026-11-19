@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LINK_ICONS, LinkIcon, linkHref } from "@/components/LinkIcon";
+import { LINK_ICONS, LinkBadge, linkHref } from "@/components/LinkIcon";
 import { Logo } from "@/components/shop/Logo";
 import { Tracker } from "@/components/shop/Tracker";
 import { shopSettings } from "@/lib/shop-data";
@@ -33,7 +33,7 @@ export default async function Socials() {
             return (
               <li key={l.id}>
                 <a href={href} {...(outside ? { target: "_blank", rel: "noreferrer" } : {})}>
-                  <span className="social-ic"><LinkIcon icon={l.icon} size={22} /></span>
+                  <LinkBadge icon={l.icon} size={48} />
                   <span className="linktree-label">{l.label || LINK_ICONS[l.icon]?.name || "Link"}</span>
                   <span aria-hidden className="linktree-arrow">›</span>
                 </a>

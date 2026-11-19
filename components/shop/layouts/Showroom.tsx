@@ -7,6 +7,7 @@ import { Patch } from "../Logo";
 import { Price, StockNote } from "../Price";
 import { ProductImage } from "../ProductImage";
 import { featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
+import { ComingSoonHome } from "../ComingSoon";
 
 function Rows({ s, items }: { s: SiteSettings; items: Product[] }) {
   if (!items.length) return <p className="empty">New items are on the way. Check back soon.</p>;
@@ -53,6 +54,7 @@ export function ShowroomHome({ s, products, reviews }: HomeProps) {
         {products.length > 3 ? <SeeAll /> : null}
       </section>
       <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ComingSoonHome s={s} />
       <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>

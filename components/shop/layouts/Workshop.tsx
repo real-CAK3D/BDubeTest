@@ -8,6 +8,7 @@ import { Price } from "../Price";
 import { ProductImage } from "../ProductImage";
 import { VeteranBadge } from "../Sections";
 import { featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
+import { ComingSoonHome } from "../ComingSoon";
 
 function Gallery({ s, items }: { s: SiteSettings; items: Product[] }) {
   if (!items.length) return <p className="empty">New pieces are on the way. Check back soon.</p>;
@@ -70,6 +71,7 @@ export function WorkshopHome({ s, products, reviews }: HomeProps) {
         {products.length > 9 ? <SeeAll /> : null}
       </section>
       <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ComingSoonHome s={s} />
       <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>

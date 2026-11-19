@@ -8,6 +8,7 @@ import { Price, StockNote } from "../Price";
 import { ProductImage } from "../ProductImage";
 import { VeteranBadge } from "../Sections";
 import { featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
+import { ComingSoonHome } from "../ComingSoon";
 
 function List({ s, items }: { s: SiteSettings; items: Product[] }) {
   if (!items.length) return <p className="empty">New items are on the way. Check back soon.</p>;
@@ -58,6 +59,7 @@ export function QuartermasterHome({ s, products, reviews }: HomeProps) {
         {products.length > 8 ? <SeeAll label="Full list" /> : null}
       </section>
       <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ComingSoonHome s={s} />
       <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>

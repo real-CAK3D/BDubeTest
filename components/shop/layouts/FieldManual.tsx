@@ -9,6 +9,7 @@ import { Patch } from "../Logo";
 import { ProductGrid } from "../ProductCard";
 import { VeteranBadge } from "../Sections";
 import { byCategory, categoryHref, featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
+import { ComingSoonHome } from "../ComingSoon";
 
 function Shell({ s, products, current, children }: { s: SiteSettings; products: Product[]; current?: string | null; children: React.ReactNode }) {
   const groups = byCategory(products);
@@ -51,6 +52,7 @@ export function FieldManualHome({ s, products, reviews }: HomeProps) {
         <ProductGrid items={featuredOf(products, 6)} currency={s.currency} low={s.lowStockAlert} />
         {products.length > 6 ? <SeeAll /> : null}
       </section>
+      <ComingSoonHome s={s} />
       <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </Shell>

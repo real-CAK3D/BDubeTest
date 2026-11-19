@@ -172,6 +172,20 @@ export const SITE_VARIABLES = {
   // Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos).
   hiddenText: [],
 
+  // What's to come
+  // New things on the way, shown on the home page and the What's to come page.
+  // stage: idea, working or soon. when: e.g. "This spring" ("" = no date). hidden: true keeps it but doesn't show it.
+  upcoming: {
+    on: true, // show the section on the home page
+    heading: "What's to come",
+    intro: "New things we're working on for more custom creations. Tap “I want this” so we know what to make first, or ask us to let you know when it's ready.",
+    items: [
+      { id: "photo-engraving", title: "Photo engraving", text: "Your favorite photo engraved onto a tumbler, slate or wood. Great for memorials and gifts.", image: "", when: "", stage: "working" },
+      { id: "unit-coins", title: "Unit & challenge coin displays", text: "Custom display cases built around your unit's coins, patches and insignia.", image: "", when: "", stage: "idea" },
+      { id: "more-colors", title: "More tumbler colors", text: "More colors and finishes to engrave, beyond what's in the shop now.", image: "", when: "", stage: "soon" },
+    ],
+  },
+
   // Shop categories
   // In the order they show in the shop. Each product's category should match one of these.
   categories: ["Drinkware", "Home decor", "Leather goods", "Patriotic & military", "Gifts & keepsakes"],

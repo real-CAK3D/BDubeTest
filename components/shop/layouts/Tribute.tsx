@@ -6,6 +6,7 @@ import { Patch } from "../Logo";
 import { ProductGrid } from "../ProductCard";
 import { VeteranBadge } from "../Sections";
 import { featuredOf, slice, type CatalogProps, type HomeProps } from "./types";
+import { ComingSoonHome } from "../ComingSoon";
 
 export function TributeHome({ s, products, reviews }: HomeProps) {
   return (
@@ -24,6 +25,7 @@ export function TributeHome({ s, products, reviews }: HomeProps) {
         {products.length > 6 ? <SeeAll /> : null}
       </section>
       <CategoryTiles products={products} heading={s.categoriesHeading} />
+      <ComingSoonHome s={s} />
       <ReviewsStrip s={s} reviews={reviews} />
       <AboutTeaser s={s} />
     </>

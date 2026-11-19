@@ -433,6 +433,17 @@ export const HELP: HelpGroup[] = [
         ],
       },
       {
+        id: "coming-soon",
+        title: "What's to come",
+        match: ["/admin/coming-soon"],
+        summary: "Show customers what you're working on and find out what they want most.",
+        blocks: [
+          { p: "Add new products or options you're working on: a name, a sentence about it, how far along it is (just an idea, in the works, coming soon), an optional date and an optional photo or sketch. The first three show on the home page; all of them are on the **What's to come** page (linked in the footer)." },
+          { p: "Customers tap **I want this** (counted once per phone) and can leave their email to hear when it's ready. You see the count and the emails on each item; **Email them all** opens an email to everyone waiting." },
+          { tip: "When something's ready: add it in Products, email the people waiting, then hide or delete it here." },
+        ],
+      },
+      {
         id: "hiding",
         title: "Hide instead of delete",
         match: ["/admin/content", "/admin/gallery"],

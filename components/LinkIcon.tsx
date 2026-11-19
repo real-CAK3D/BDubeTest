@@ -54,3 +54,23 @@ export function LinkIcon({ icon, size = 22, colored = true }: { icon: string; si
     </svg>
   );
 }
+
+// brand backgrounds for the badges (a solid color unless listed here)
+const BADGE_BG: Record<string, string> = {
+  instagram: "radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%)",
+  tiktok: "linear-gradient(135deg, #25f4ee 0%, #111 35%, #111 65%, #fe2c55 100%)",
+  google: "conic-gradient(from -45deg, #ea4335 0 25%, #4285f4 0 50%, #34a853 0 75%, #fbbc05 0 100%)",
+};
+
+/** A modern app-style badge: the brand's color with a white icon. */
+export function LinkBadge({ icon, size = 44 }: { icon: string; size?: number }) {
+  const i = LINK_ICONS[icon] ?? LINK_ICONS.link;
+  const dark = icon === "snapchat";
+  return (
+    <span className="link-badge" style={{ width: size, height: size, background: BADGE_BG[icon] ?? i.color, color: dark ? "#111" : "#fff" }} aria-hidden>
+      <svg width={Math.round(size * 0.58)} height={Math.round(size * 0.58)} viewBox="0 0 24 24">
+        {i.draw}
+      </svg>
+    </span>
+  );
+}

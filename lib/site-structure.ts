@@ -17,6 +17,7 @@ export const BUILTIN_PAGES: { id: string; label: string; href: string; canTurnOf
   { id: "military", label: "Military discount", href: "/military", canTurnOff: true, note: "Veteran, military & first responder discount" },
   { id: "giftcards", label: "Gift cards", href: "/gift-cards", canTurnOff: true, note: "Buy a gift card" },
   { id: "socials", label: "Socials", href: "/socials", canTurnOff: true, note: "All your social links on one page, like a link tree" },
+  { id: "coming", label: "What's to come", href: "/coming-soon", canTurnOff: true, note: "New things you're working on, with an \"I want this\" button" },
 ];
 
 export const DEFAULT_MENU: MenuItem[] = [
@@ -30,6 +31,7 @@ export const DEFAULT_MENU: MenuItem[] = [
   { id: "military", label: "Military discount", top: false, footer: true },
   { id: "giftcards", label: "Gift cards", top: false, footer: true },
   { id: "socials", label: "Socials", top: false, footer: false }, // the footer already has its own Socials button
+  { id: "coming", label: "What's to come", top: false, footer: true },
 ];
 
 export type ResolvedItem = MenuItem & { href: string; kind: "builtin" | "page" | "link"; note: string };

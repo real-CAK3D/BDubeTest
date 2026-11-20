@@ -7,8 +7,9 @@ import { Newsletter } from "./Newsletter";
 import { Social } from "./Social";
 import { pageOn } from "@/lib/site-structure";
 import { VersionTap } from "./VersionTap";
+import { Accepts } from "./PayChoices";
 
-export function Footer({ s }: { s: SiteSettings }) {
+export function Footer({ s, accepts = [] }: { s: SiteSettings; accepts?: { file: string; name: string }[] }) {
   const policy = (group: "Help" | "Legal") =>
     Object.entries(POLICY_PAGES)
       .filter(([, p]) => p.group === group && s[p.field])
@@ -42,6 +43,7 @@ export function Footer({ s }: { s: SiteSettings }) {
           Small print at the very bottom of every shop page. The business name and
           the note after it come from the dashboard (Words & logos > Footer).
           */}
+      <Accepts list={accepts} />
       <p className="fine">
         © {new Date().getFullYear()} {s.businessName}. All rights reserved.{s.footerNote ? ` ${s.footerNote}` : ""}
       </p>

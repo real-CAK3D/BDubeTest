@@ -5,7 +5,7 @@ import { emailReady, sendEmail } from "./email";
 import { getPrivate, setPrivate } from "./private-data";
 import { siteUrl, stripe } from "./stripe";
 import type { GiftCard, VetRequest } from "./types";
-import { withLock } from "./store";
+import { kv, withLock } from "./store";
 
 /*
  * EDIT-POINT: DISCOUNTS
@@ -143,4 +143,37 @@ export function addVetRequest(...a: Parameters<typeof _addVetRequest>) {
 }
 export function issueGiftCard(...a: Parameters<typeof _issueGiftCard>) {
   return withLock("write", () => _issueGiftCard(...a));
+}
+
+// ---------- codes typed in the cart when paying by PayPal or directly ----------
+// (Stripe's own checkout page checks codes itself; these reuse the same codes from Stripe)
+
+const dollars = (c: number) => `$${(c / 100).toFixed(2)}`;
+
+/** Checks a promo or gift card code against an order subtotal (cents). */
+export async function checkCode(raw: string, subtotal: number): Promise<{ promoId: string; code: string; off: number } | { error: string }> {
+  const code = String(raw ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 30);
+  if (!code) return { error: "Type a code." };
+  const s = await stripe();
+  if (!s) return { error: "Codes only work with card checkout right now." };
+  const found = (await s.promotionCodes.list({ code, active: true, limit: 1 }).catch(() => null))?.data[0];
+  if (!found || !found.coupon.valid) return { error: `${code} isn't a working code.` };
+  if (found.expires_at && found.expires_at * 1000 < Date.now()) return { error: `${code} has expired.` };
+  const outside = Number((await kv.hgetall("codeUsesOutside").catch(() => ({}) as Record<string, number>))[found.id] ?? 0);
+  if (found.max_redemptions && found.times_redeemed + outside >= found.max_redemptions) return { error: `${code} has already been used.` };
+  const min = found.restrictions?.minimum_amount;
+  if (min && subtotal < min) return { error: `${code} needs an order of at least ${dollars(min)}.` };
+  const c = found.coupon;
+  const off = Math.min(subtotal, c.amount_off ? c.amount_off : Math.round((subtotal * (c.percent_off ?? 0)) / 100));
+  if (off <= 0) return { error: `${code} doesn't take anything off this order.` };
+  return { promoId: found.id, code: found.code, off };
+}
+
+/** Counts a code used outside Stripe, and switches it off in Stripe once it's used up. */
+export async function useCodeOutside(promoId: string) {
+  await kv.hincrby("codeUsesOutside", promoId, 1);
+  const s = await stripe();
+  const p = s ? await s.promotionCodes.retrieve(promoId).catch(() => null) : null;
+  const outside = Number((await kv.hgetall("codeUsesOutside"))[promoId] ?? 0);
+  if (s && p?.max_redemptions && p.times_redeemed + outside >= p.max_redemptions) await s.promotionCodes.update(promoId, { active: false }).catch(() => {});
 }

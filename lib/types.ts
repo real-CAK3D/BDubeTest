@@ -50,7 +50,16 @@ export type Abandoned = { id: string; createdAt: string; email: string; name: st
 export type VetRequest = { id: string; createdAt: string; name: string; email: string; group: string; note: string; status: "new" | "approved" | "declined"; code?: string };
 export type GiftCard = { id: string; code: string; promoId: string; amount: number; createdAt: string; fromName: string; buyerEmail: string; toName: string; toEmail: string; message: string; orderNumber?: number; sentAt?: string };
 // A link with a picture (footer and contact page): Facebook, a phone number, an email...
-export type LinkItem = { id: string; icon: string; label: string; url: string; hidden?: boolean };
+export type LinkItem = {
+  id: string;
+  icon: string;
+  label: string;
+  url: string;
+  hidden?: boolean;
+  place?: "button" | "icon" | "both"; // on the Socials page: a big button, a small icon at the top, or both (unset = see placeOf in lib/link-page.ts)
+  thumb?: string; // picture on its Socials page button ("" = the icon)
+  featured?: boolean; // gently wiggles on the Socials page to catch the eye
+};
 // "What's to come": products and options being worked on, with an "I want this" button
 export type UpcomingItem = { id: string; title: string; text: string; image: string; when: string; stage: "idea" | "working" | "soon"; hidden?: boolean };
 export type UpcomingSettings = { on: boolean; heading: string; intro: string; items: UpcomingItem[] };
@@ -113,7 +122,7 @@ export type OrderItem = {
   unitAmount: number; // cents
 };
 
-export type OrderStatus = "paid" | "shipped" | "delivered" | "refunded" | "cancelled";
+export type OrderStatus = "awaiting" | "paid" | "shipped" | "delivered" | "refunded" | "cancelled"; // awaiting = paying by Cash App, Venmo, Zelle or cash, not received yet
 
 // Where packages ship from (on labels) and the box sizes he uses. Kept out of site-variables.ts (private).
 export type ShipFrom = { name: string; company: string; street1: string; street2: string; city: string; state: string; zip: string; phone: string; email: string };
@@ -156,6 +165,8 @@ export type Order = {
   shipTo?: ShipTo; // the address in parts, for shipping labels
   label?: { url: string; carrier: string; service: string; cost: number; boughtAt: string }; // a label bought in the dashboard
   note?: string;
+  viewKey?: string; // lets the customer see their order on the thank-you page (PayPal and pay-directly orders)
+  payWith?: string; // pay-directly orders: cashapp, venmo, zelle or cash
 };
 
 export type Expense = {
@@ -224,6 +235,8 @@ export type SiteSettings = {
   customSteps: Step[];
   hiddenFields: string[];
   links: LinkItem[];
+  payments: import("./payments").PaymentSettings; // ways to pay besides Stripe (Settings > Payments)
+  linkPage: import("./link-page").LinkPageSettings; // the Socials page look (Dashboard > Link page)
   upcoming: UpcomingSettings; // "What's to come": new things on the way
   seasons: import("./seasons").SeasonsSettings; // holiday banners (Dashboard > Seasonal banners) // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)
   showReviews: boolean;

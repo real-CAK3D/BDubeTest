@@ -5,8 +5,9 @@ import { currentSession } from "@/lib/session";
 import { emailReady, sendEmail, shippedEmail } from "@/lib/email";
 import type { OrderStatus } from "@/lib/types";
 import { mutating } from "@/lib/store";
+import { markDirectPaid } from "@/lib/direct-orders";
 
-const STATUSES: OrderStatus[] = ["paid", "shipped", "delivered", "refunded", "cancelled"];
+const STATUSES: OrderStatus[] = ["awaiting", "paid", "shipped", "delivered", "refunded", "cancelled"];
 
 // { id, status?, note?, trackingNumber?, carrier?, emailCustomer? }
 async function handlePATCH(req: Request) {
@@ -16,6 +17,11 @@ async function handlePATCH(req: Request) {
   if (!o) return NextResponse.json({ error: "Order not found." }, { status: 404 });
   const sid = await currentSession();
   const by = sid ? (await getSession(sid))?.name : undefined;
+  // a pay-directly order: the money arrived (gives the thank-you code too)
+  if (b.markPaid) {
+    const paid = await markDirectPaid(o.id, by ?? "");
+    return NextResponse.json(paid ?? o);
+  }
   if (STATUSES.includes(b.status) && b.status !== o.status) {
     o.status = b.status;
     logOn(o, `Marked ${b.status === "paid" ? "to ship" : b.status}`, by);

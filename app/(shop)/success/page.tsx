@@ -7,18 +7,30 @@ import { barcodeSvg } from "@/lib/codes";
 import { money } from "@/lib/format";
 import { orderCode } from "@/lib/order-code";
 import { fillPolicy } from "@/lib/policy-text";
+import { payInstructions } from "@/lib/direct-orders";
+import { payLink, MANUAL_INFO, type ManualId } from "@/lib/payments";
+import { timingSafeEqual } from "node:crypto";
+
+const sameKey = (a = "", b = "") => a.length > 0 && a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
 export const metadata = { title: "Thank you" };
 
-export default async function Success({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
-  const { session_id } = await searchParams;
+export default async function Success({ searchParams }: { searchParams: Promise<{ session_id?: string; order?: string; k?: string }> }) {
+  const { session_id, order: orderId, k } = await searchParams;
   const s = await shopSettings();
   let order = null;
   if (session_id && /^cs_[A-Za-z0-9_]+$/.test(session_id)) {
     // Records the order now in case the webhook hasn't arrived yet (safe to repeat).
     await recordOrderFromSession(session_id).catch((e) => console.error(e));
     order = (await getOrders()).find((o) => o.id === session_id) ?? null;
+  } else if (orderId && /^(pp|pd)_[A-Za-z0-9_-]+$/.test(orderId)) {
+    // PayPal and pay-directly orders: shown only with the private key from the link
+    const o = (await getOrders()).find((x) => x.id === orderId);
+    if (o && sameKey(o.viewKey, k)) order = o;
   }
+  const waiting = order?.status === "awaiting";
+  const method = waiting ? s.payments.manual.find((m) => m.id === order!.payWith) : undefined;
+  const link = waiting && method ? payLink(method, order!.total, order!.number) : "";
   return (
     <section className="section success">
       <ClearCart />
@@ -26,8 +38,16 @@ export default async function Success({ searchParams }: { searchParams: Promise<
       {order ? (
         <>
           <p className="lede">
-            Order #{order.number} is confirmed. A receipt is on its way to {order.email}.
+            {waiting ? <>Order #{order.number} is saved. One more step: send the payment.</> : <>Order #{order.number} is confirmed. A receipt is on its way to {order.email}.</>}
           </p>
+          {waiting ? (
+            <div className="pay-box">
+              <h2>How to pay: {MANUAL_INFO[(order.payWith ?? "cash") as ManualId]?.name}</h2>
+              {payInstructions(order, method?.handle ?? "", method?.note ?? "").map((line, i) => <p key={i}>{line}</p>)}
+              {link ? <a className="btn" href={link} target="_blank" rel="noreferrer">Open {MANUAL_INFO[order.payWith as ManualId].name} and pay {money(order.total, order.currency)}</a> : null}
+              <p className="muted small">We&apos;ve emailed these details to {order.email} too.</p>
+            </div>
+          ) : null}
           <div className="receipt-code">
             <span className="muted small">Your order code</span>
             <div dangerouslySetInnerHTML={{ __html: barcodeSvg(orderCode(order, s.businessName)) }} />
@@ -46,7 +66,7 @@ export default async function Success({ searchParams }: { searchParams: Promise<
             {order.discount ? <li><span>Discount{order.promoCode ? ` (${order.promoCode})` : ""}</span><span>−{money(order.discount, order.currency)}</span></li> : null}
             {order.shipping ? <li><span>Shipping</span><span>{money(order.shipping, order.currency)}</span></li> : null}
             {order.tax ? <li><span>Tax</span><span>{money(order.tax, order.currency)}</span></li> : null}
-            <li className="total"><span>Total paid</span><span>{money(order.total, order.currency)}</span></li>
+            <li className="total"><span>{waiting ? "Total to pay" : "Total paid"}</span><span>{money(order.total, order.currency)}</span></li>
           </ul>
           {order.giftCodes?.length ? (
             <div className="code-box">

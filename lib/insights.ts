@@ -16,7 +16,7 @@ export const saveChartNotes = (l: ChartNote[]) => kv.set("chartNotes", l.slice(0
 export async function insightsData(days: number) {
   const [orders, products, expenses, s, notes] = await Promise.all([getOrders(), getProducts(), getExpenses(), getSettings(), getChartNotes()]);
   const since = Date.now() - days * 86400_000;
-  const live = orders.filter((o) => o.status !== "cancelled" && Date.parse(o.createdAt) >= since);
+  const live = orders.filter((o) => o.status !== "cancelled" && o.status !== "awaiting" && Date.parse(o.createdAt) >= since); // not paid yet = not money yet
   const counted = live.filter((o) => o.status !== "refunded");
   const day = (iso: string) => iso.slice(0, 10);
 

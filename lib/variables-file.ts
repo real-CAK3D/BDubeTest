@@ -51,7 +51,9 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" |
     menu: s.menu.map((m) => ({ page: m.id, label: m.label, ...(m.href ? { link: m.href } : {}), inMenu: m.top, inFooter: m.footer, on: !m.off })),
     categories: s.categories,
     hiddenText: s.hiddenFields,
-    links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) })),
+    links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}), ...(l.place ? { place: l.place } : {}), ...(l.thumb ? { thumb: l.thumb } : {}), ...(l.featured ? { featured: true } : {}) })),
+    linkPage: s.linkPage,
+    payments: s.payments,
     seasons: { on: s.seasons.on, items: s.seasons.items },
     upcoming: { on: s.upcoming.on, heading: s.upcoming.heading, intro: s.upcoming.intro, items: s.upcoming.items.map((x) => ({ id: x.id, title: x.title, text: x.text, image: x.image, when: x.when, stage: x.stage, ...(x.hidden ? { hidden: true } : {}) })) },
     chat: { on: s.chat.on, useAI: s.chat.useAI, live: s.chat.live !== false, ai: s.chat.ai ?? { provider: "anthropic", model: "", baseUrl: "" }, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, ...(x.topic ? { topic: x.topic } : {}), question: x.q, answer: x.a, ...(x.alts?.length ? { alsoAsked: x.alts } : {}), ...(x.hidden ? { hidden: true } : {}) })) },
@@ -268,8 +270,16 @@ export function variablesFile(v: SiteVariables): string {
     ...v.menu.map((m) => `    { page: ${q(m.page)}, label: ${q(m.label)}, ${m.link ? `link: ${q(m.link)}, ` : ""}inMenu: ${m.inMenu}, inFooter: ${m.inFooter}, on: ${m.on} },`),
     "  ],"
   );
-  sec("Links", ["Links with a picture in the footer and on the contact page. icon is one of: facebook, instagram, tiktok, youtube, x,", "pinterest, etsy, google, whatsapp, linkedin, threads, snapchat, amazon, phone, text, email, website, map, reviews, link.", "label: leave \"\" to use the usual name. For phone, text and email, url is just the number or address."]);
-  L.push("  links: [", ...(v.links ?? []).map((l) => `    { icon: ${q(l.icon)}, label: ${q(l.label)}, url: ${q(l.url)}${l.hidden ? ", hidden: true" : ""} },`), "  ],");
+  sec("Links", ["Links with a picture in the footer and on the contact page. icon is one of: facebook, instagram, tiktok, youtube, x,", "pinterest, etsy, google, whatsapp, linkedin, threads, snapchat, amazon, discord, reddit, spotify, twitch, telegram, messenger, github,", "phone, text, email, website, map, reviews, link.", "label: leave \"\" to use the usual name. For phone, text and email, url is just the number or address."]);
+  L.push("  links: [", ...(v.links ?? []).map((l) => `    { icon: ${q(l.icon)}, label: ${q(l.label)}, url: ${q(l.url)}${l.hidden ? ", hidden: true" : ""}${l.place ? `, place: ${q(l.place)}` : ""}${l.thumb ? `, thumb: ${q(l.thumb)}` : ""}${l.featured ? ", featured: true" : ""} },`), "  ],");
+  if (v.payments) {
+    sec("Payments", ["Ways to pay besides Stripe's card checkout. Keys for Stripe and PayPal go in the dashboard (Accounts & keys), never here.", "manual: pay us directly. handle is your $cashtag, Venmo @username or Zelle email/phone. Those orders wait until you mark them paid."]);
+    L.push(`  payments: ${JSON.stringify(v.payments, null, 2).replace(/"(\w+)":/g, "$1:").replace(/\n/g, "\n  ")},`);
+  }
+  if (v.linkPage) {
+    sec("Link page", ["The Socials page (/socials), a link-in-bio page. \"\" = use the usual (business name, tagline, logo, theme colors).", "bg: theme, color, gradient or image. button: fill, outline, soft, shadow or glass. shape: pill, round or square. iconsAt: top or bottom.", "On each link above, place: button, icon or both (social networks default to both), thumb: a picture for its button, featured: true makes it wiggle."]);
+    L.push(`  linkPage: ${JSON.stringify(v.linkPage, null, 2).replace(/"(\w+)":/g, "$1:").replace(/\n/g, "\n  ")},`);
+  }
   sec("Hidden text", ["Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos)."]);
   L.push(`  ${field("hiddenText", v.hiddenText ?? [])}`);
   if (v.seasons) {

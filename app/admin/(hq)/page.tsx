@@ -40,6 +40,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     ),
     alerts: st.toShip || st.lowStock.length || newRequests ? (
         <div key="alerts" className="alerts">
+          {st.awaiting ? <Link href="/admin/orders?status=awaiting" className="alert">{st.awaiting} order{st.awaiting === 1 ? "" : "s"} waiting for payment (Cash App, Venmo, Zelle, cash)</Link> : null}
           {st.toShip ? <Link href="/admin/orders?status=paid" className="alert">{st.toShip} order{st.toShip === 1 ? "" : "s"} waiting to ship</Link> : null}
           {newRequests ? <Link href="/admin/requests" className="alert">{newRequests} custom request{newRequests === 1 ? "" : "s"} to answer</Link> : null}
           {st.lowStock.map((p) => (
@@ -85,7 +86,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                   <Link href={`/admin/orders?open=${o.id}`}>
                     <span><strong>#{o.number}</strong> {o.name || o.email}</span>
                     <span className="muted">{shortDate(o.createdAt)}</span>
-                    <span className={`pill s-${o.status}`}>{o.status === "paid" ? "To ship" : o.status}</span>
+                    <span className={`pill s-${o.status}`}>{o.status === "paid" ? "To ship" : o.status === "awaiting" ? "Not paid yet" : o.status}</span>
                     <strong>{money(o.total, o.currency)}</strong>
                   </Link>
                 </li>

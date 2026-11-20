@@ -1,3 +1,4 @@
+import { paypalKeys } from "@/lib/paypal";
 import { ensureVapidKeys } from "@/lib/push";
 import { SettingsForm } from "@/components/admin/SettingsForm";
 import { getPushSubs, getSettings } from "@/lib/db";
@@ -18,6 +19,7 @@ export default async function Settings() {
       hasResend={Boolean(resend)}
       repo={repo}
       github={{ token: Boolean(ghToken), last: ghLast }}
+      payReady={{ stripe: Boolean(stripeKey), paypal: Boolean(await paypalKeys()) }}
     />
   );
 }

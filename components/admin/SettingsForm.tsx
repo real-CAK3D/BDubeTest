@@ -9,6 +9,7 @@ import { PushToggle } from "./PushToggle";
 import { SecurityPanel } from "./SecurityPanel";
 import { Tabs } from "./Tabs";
 import { useSettings } from "./useSettings";
+import { PaymentsPanel } from "./PaymentsPanel";
 
 function PasswordForm() {
   const [f, setF] = useState({ current: "", next: "", again: "" });
@@ -44,7 +45,7 @@ function PasswordForm() {
   );
 }
 
-export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasResend, repo, github }: { initial: SiteSettings; vapidKey: string; deviceCount: number; stripeTest: boolean; hasResend: boolean; repo: string; github: { token: boolean; last: SyncStatus | null } }) {
+export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasResend, repo, github, payReady = { stripe: false, paypal: false } }: { initial: SiteSettings; vapidKey: string; deviceCount: number; stripeTest: boolean; hasResend: boolean; repo: string; github: { token: boolean; last: SyncStatus | null }; payReady?: { stripe: boolean; paypal: boolean } }) {
   const { s, set, bar } = useSettings(initial);
   const dollars = (c: number) => (c / 100).toFixed(2);
   const cents = (v: string) => Math.round((parseFloat(v) || 0) * 100);
@@ -136,6 +137,7 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
 
           </>
           ) },
+          { id: "payments", label: "Payments", content: <PaymentsPanel value={s.payments} onChange={(payments) => set({ payments })} ready={payReady} /> },
           { id: "checkout", label: "Checkout & emails", content: (
         <>
         <section className="panel">

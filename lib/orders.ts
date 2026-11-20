@@ -118,9 +118,51 @@ async function record(sessionId: string) {
     order = (await getOrders()).find((o) => o.id === session.id) ?? null;
     if (!order?.pending) return null;
   }
+  return runSteps(order, items, {
+    recoveredFrom: session.recovered_from ?? undefined,
+    gifts: async (o, save) => {
+      let failed = "";
+      const giftCodes = [...(o.giftCodes ?? [])];
+      let need = 0;
+      for (const li of session.line_items?.data ?? []) {
+        const meta = ((li.price?.product as Stripe.Product | undefined)?.metadata ?? {}) as Record<string, string>;
+        if (meta.kind !== "giftcard") continue;
+        for (let n = 0; n < (li.quantity ?? 1); n++, need++) {
+          if (need < giftCodes.length) continue; // made on an earlier try
+          try {
+            const card = await issueGiftCard({
+              amount: li.price?.unit_amount ?? 0,
+              fromName: meta.fromName ?? "",
+              buyerEmail: o.email,
+              toName: meta.toName ?? "",
+              toEmail: meta.toEmail ?? "",
+              message: meta.message ?? "",
+              orderNumber: o.number,
+            });
+            giftCodes.push(card.code);
+            await save({ giftCodes, history: [...(o.history ?? []), { at: new Date().toISOString(), what: `Gift card code made: ${card.code}` }] });
+          } catch (e) {
+            console.error("gift card:", e);
+            failed = `gift card code: ${(e as Error).message}`;
+          }
+        }
+      }
+      return failed;
+    },
+  });
+}
+
+/**
+ * The steps after an order is placed, for every way to pay: take the items off
+ * the shelf, make gift card codes, give a thank-you code (only once it's paid)
+ * and send the phone notification. Each step is marked done, so a retry only
+ * finishes what's missing.
+ */
+export async function runSteps(start: Order, items: OrderItem[], extra: { recoveredFrom?: string; gifts?: (o: Order, save: (p: Partial<Order>) => Promise<void>) => Promise<string>; notifyTitle?: string } = {}) {
+  let order: Order = start;
   const steps = { ...(order.steps ?? {}) };
   const done = async (patch: Partial<Order>) => {
-    order = (await updateOrder(order!.id, { ...patch, steps: { ...steps } })) ?? order;
+    order = (await updateOrder(order.id, { ...patch, steps: { ...steps } })) ?? order;
   };
   const settings = await getSettings();
   let failed = "";
@@ -140,38 +182,14 @@ async function record(sessionId: string) {
       await saveProducts(products);
     });
     await useBlanks(items).catch((e) => console.error("blanks:", e));
-    if (session.recovered_from) await markRecovered(session.recovered_from).catch(() => {});
+    if (extra.recoveredFrom) await markRecovered(extra.recoveredFrom).catch(() => {});
     steps.stock = true;
     await done({});
   }
 
-  // Gift cards bought in this order: make each code and email it (saved one by one, so a retry never makes extras)
+  // Gift cards bought in this order (Stripe only)
   if (!steps.gifts) {
-    const giftCodes = [...(order.giftCodes ?? [])];
-    let need = 0;
-    for (const li of session.line_items?.data ?? []) {
-      const meta = ((li.price?.product as Stripe.Product | undefined)?.metadata ?? {}) as Record<string, string>;
-      if (meta.kind !== "giftcard") continue;
-      for (let n = 0; n < (li.quantity ?? 1); n++, need++) {
-        if (need < giftCodes.length) continue; // made on an earlier try
-        try {
-          const card = await issueGiftCard({
-            amount: li.price?.unit_amount ?? 0,
-            fromName: meta.fromName ?? "",
-            buyerEmail: order.email,
-            toName: meta.toName ?? "",
-            toEmail: meta.toEmail ?? "",
-            message: meta.message ?? "",
-            orderNumber: order.number,
-          });
-          giftCodes.push(card.code);
-          await done({ giftCodes, history: [...(order.history ?? []), { at: new Date().toISOString(), what: `Gift card code made: ${card.code}` }] });
-        } catch (e) {
-          console.error("gift card:", e);
-          failed = `gift card code: ${(e as Error).message}`;
-        }
-      }
-    }
+    failed = extra.gifts ? await extra.gifts(order, done) : "";
     if (!failed) {
       steps.gifts = true;
       await done({});
@@ -182,7 +200,7 @@ async function record(sessionId: string) {
 
   // A thank-you code for their next order
   const ty = settings.discounts.thankYou;
-  if (!steps.thanks) {
+  if (!steps.thanks && order.status !== "awaiting") {
     if (ty.on && items.some((i) => i.productId) && !order.nextCode) {
       const nextCode = await createCode({ code: randomCode("THANKS", 5), name: `Thank-you ${ty.percent}% off`, percent: ty.percent, maxUses: 1, expiresDays: ty.days, kind: "thanks" })
         .then((c) => c.code)
@@ -200,7 +218,7 @@ async function record(sessionId: string) {
    */
   if (!steps.notified) {
     await notifyOwner(
-      `New order #${order.number}: ${money(order.total, order.currency)}`,
+      extra.notifyTitle ?? `New order #${order.number}: ${money(order.total, order.currency)}`,
       `${order.name || order.email} bought ${count} item${count === 1 ? "" : "s"}.`,
       `/admin/orders?open=${order.id}`
     );

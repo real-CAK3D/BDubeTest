@@ -13,6 +13,7 @@ type Result = {
 };
 
 const SAY: Record<string, (pickup: boolean) => string> = {
+  awaiting: (p) => (p ? "We haven't received the payment yet (or you're paying at pickup). Check your email for how to pay." : "We haven't received the payment yet. Check your email for how to pay; we start as soon as it arrives."),
   paid: (p) => (p ? "We're working on it. We'll let you know when it's ready to pick up." : "We're working on it. You'll get an email with tracking when it ships."),
   shipped: (p) => (p ? "Ready for pickup." : "On its way."),
   delivered: (p) => (p ? "Picked up. Thank you!" : "Delivered. Thank you!"),

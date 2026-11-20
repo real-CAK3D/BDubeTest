@@ -97,7 +97,7 @@ export function ContentForm({ initial }: { initial: SiteSettings }) {
                 {text("contactPhone", "Phone")}
                 {text("location", "Location", { placeholder: "e.g. Fort Leonard Wood, MO" })}
                 <h2>Socials</h2>
-                <p className="hint">Facebook, Instagram, TikTok, a phone number to call or text, an email, your website... They all show on your <strong>Socials</strong> page, a link-tree style page (<a href="/socials" target="_blank" rel="noreferrer">see it</a>). The footer, contact page and About page show one <strong>Socials</strong> button that opens it.</p>
+                <p className="hint">Facebook, Instagram, TikTok, a phone number to call or text, an email, your website... They all show on your <strong>Socials</strong> page, a link-in-bio page like Linktree (<a href="/socials" target="_blank" rel="noreferrer">see it</a>; change its look under <a href="/admin/link-page">Link page</a>). The footer, contact page and About page show one <strong>Socials</strong> button that opens it.</p>
                 <LinksEditor value={s.links} onChange={(links) => set({ links })} />
               </section>
             ),

@@ -162,11 +162,73 @@ export const SITE_VARIABLES = {
 
   // Links
   // Links with a picture in the footer and on the contact page. icon is one of: facebook, instagram, tiktok, youtube, x,
-  // pinterest, etsy, google, whatsapp, linkedin, threads, snapchat, amazon, phone, text, email, website, map, reviews, link.
+  // pinterest, etsy, google, whatsapp, linkedin, threads, snapchat, amazon, discord, reddit, spotify, twitch, telegram, messenger, github,
+  // phone, text, email, website, map, reviews, link.
   // label: leave "" to use the usual name. For phone, text and email, url is just the number or address.
   links: [
     { icon: "facebook", label: "", url: "https://www.facebook.com/groups/2154317351855824/" },
   ],
+
+  // Payments
+  // Ways to pay besides Stripe's card checkout. Keys for Stripe and PayPal go in the dashboard (Accounts & keys), never here.
+  // manual: pay us directly. handle is your $cashtag, Venmo @username or Zelle email/phone. Those orders wait until you mark them paid.
+  payments: {
+    stripe: true,
+    paypal: false,
+    paypalMode: "live",
+    manual: [
+      {
+        id: "cashapp",
+        on: false,
+        handle: "",
+        note: ""
+      },
+      {
+        id: "venmo",
+        on: false,
+        handle: "",
+        note: ""
+      },
+      {
+        id: "zelle",
+        on: false,
+        handle: "",
+        note: ""
+      },
+      {
+        id: "cash",
+        on: false,
+        handle: "",
+        note: ""
+      }
+    ],
+    accepts: true
+  },
+
+  // Link page
+  // The Socials page (/socials), a link-in-bio page. "" = use the usual (business name, tagline, logo, theme colors).
+  // bg: theme, color, gradient or image. button: fill, outline, soft, shadow or glass. shape: pill, round or square. iconsAt: top or bottom.
+  // On each link above, place: button, icon or both (social networks default to both), thumb: a picture for its button, featured: true makes it wiggle.
+  linkPage: {
+    title: "",
+    handle: "",
+    bio: "",
+    avatar: "",
+    bg: "theme",
+    color1: "#1f2a44",
+    color2: "#7a2e3a",
+    image: "",
+    button: "fill",
+    shape: "pill",
+    btnColor: "",
+    btnText: "",
+    textColor: "",
+    iconsAt: "top",
+    shopButton: true,
+    share: true,
+    subscribe: false,
+    footer: ""
+  },
 
   // Hidden text
   // Names of text kept in this file but not shown on the shop (the eye button in Dashboard > Words & logos).
@@ -231,7 +293,7 @@ export const SITE_VARIABLES = {
       { id: "bulk", topic: "Discounts & payment", question: "Do you offer bulk or group pricing?", answer: "Yes. The more items in one order, the bigger the discount; it comes off automatically in the cart. For large unit, team or event orders, send a custom request with the quantity.", alsoAsked: ["Do you do wholesale?", "Discount for a big order?", "Can I order 50 for my team?"] },
       { id: "gift", topic: "Discounts & payment", question: "Do you sell gift cards?", answer: "Yes. Visit the Gift cards page, pick an amount, and we'll email the code to whoever it's for. It's used in one order." },
       { id: "codes", topic: "Discounts & payment", question: "How do I use a promo code?", answer: "Type it in the promo code box on the checkout page, before you pay.", alsoAsked: ["Where do I put my coupon?", "My code isn't working"] },
-      { id: "pay", topic: "Discounts & payment", question: "How can I pay?", answer: "All major cards, Apple Pay and Google Pay, through Stripe's secure checkout. Your card details never touch our site.", alsoAsked: ["Do you take Apple Pay?", "Can I pay with PayPal?", "What payment do you accept?"] },
+      { id: "pay", topic: "Discounts & payment", question: "How can I pay?", answer: "We take {payments}. Pick how you'd like to pay in the cart.", alsoAsked: ["Do you take Apple Pay?", "Can I pay with PayPal?", "What payment do you accept?", "Do you take Venmo?", "Can I pay with Cash App?", "Do you take Zelle?"] },
       { id: "rush", topic: "Orders & changes", question: "I need it by a certain date. Can you rush it?", answer: "Send us a message or a custom request with the date before you order, and we'll tell you honestly whether we can make it.", alsoAsked: ["Can I get it by Friday?", "I need it fast", "Can you have it done by a certain date?"] },
       { id: "who", topic: "About us", question: "Who are you?", answer: "We're a veteran-owned family business. Everything is made by hand in our workshop, much of it with our laser engraver.", alsoAsked: ["Who makes these?", "Who runs this shop?", "Is this a small business?"] },
       { id: "contact", topic: "About us", question: "How do I contact you?", answer: "Use the Contact page to send us a message, or reach us through our Facebook group. We usually reply within a day or two.", alsoAsked: ["How do I reach you?", "Can I talk to a real person?", "What's your email?"] },
@@ -368,7 +430,7 @@ export const SITE_VARIABLES = {
 
   // Footer
   footer: {
-    note: "Secure checkout by Stripe. Apple Pay and Google Pay accepted.", // small print after the copyright line
+    note: "", // small print after the copyright line
   },
 
   // Images

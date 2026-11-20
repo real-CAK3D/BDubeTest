@@ -75,7 +75,7 @@ const SAME: Record<string, string> = {
   canada: "outside", mexico: "outside", international: "outside", internation: "outside", overseas: "outside", abroad: "outside", country: "outside", countri: "outside", worldwid: "outside", worldwide: "outside", uk: "outside", europe: "outside",
   wash: "care", clean: "care", dishwasher: "care", dishwash: "care", care: "care", maintain: "care", scratch: "care",
   sign: "sign", plaque: "sign", wood: "wood", wooden: "wood",
-  pay: "pay", paypal: "pay", card: "pay", venmo: "pay", cash: "pay", apple: "pay", google: "pay", klarna: "pay", afterpay: "pay",
+  pay: "pay", paypal: "pay", card: "pay", venmo: "pay", cash: "pay", cashapp: "pay", zelle: "pay", apple: "pay", google: "pay", klarna: "pay", afterpay: "pay",
   gift: "gift", present: "gift",
   stock: "stock", avail: "stock", available: "stock", sold: "stock", left: "stock",
   big: "size", bigger: "size", small: "size", smaller: "size", oz: "size", ounce: "size", inch: "size", size: "size", larg: "size", large: "size",
@@ -283,7 +283,7 @@ const TOPICS: Topic[] = [
   },
   { test: (w, raw) => raw.some((x) => ["contact", "email", "phone", "call", "reach", "talk", "human", "person", "someone", "owner"].includes(x)), say: (s) => `I can pass a message to us right now; just say yes. Or reach us ${list([s.email ? `by email at ${s.email}` : "", s.phone ? `by phone at ${s.phone}` : "", "through /contact", s.facebook ? "on our socials (/socials)" : ""].filter(Boolean))}.`, offer: () => "message" },
   { test: (w, raw) => raw.some((x) => ["located", "location", "based", "address", "city"].includes(x)), say: (s) => (s.location ? `We're based in ${s.location}.${s.localPickup ? " Local pickup is free." : ""}` : null) },
-  { test: (w) => has(w, "pay"), say: () => "We take all major cards, Apple Pay and Google Pay, through a secure Stripe checkout." },
+  { test: (w) => has(w, "pay"), say: () => "Pick how you'd like to pay in the cart: it lists every way we take." },
 ];
 
 const SMALL: [RegExp, (s: BrainShop) => string][] = [

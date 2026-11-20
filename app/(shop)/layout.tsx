@@ -10,6 +10,7 @@ import { Header } from "@/components/shop/Header";
 import { ThemeStyle } from "@/components/shop/ThemeStyle";
 import { shopProducts, shopSettings } from "@/lib/shop-data";
 import { getTheme } from "@/lib/themes";
+import { payOptions } from "@/lib/pay-options";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const [s, products, owner] = await Promise.all([shopSettings(), shopProducts(), signedInOwner()]);
+  const accepts = (await payOptions(s)).accepts;
   const cartProducts = products.map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.images[0], slug: p.slug, stock: p.stock, sizes: p.sizes ?? null, designs: p.designs ?? null }));
   const used = new Set(products.flatMap((p) => (p.designs ? Object.values(p.designs.fit).flat() : [])));
   const cartDesigns = s.designs.filter((d) => d.active && used.has(d.id)).map((d) => ({ id: d.id, name: d.name, image: d.image, extra: d.extra, active: d.active, group: d.group }));
@@ -37,7 +39,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       <CartProvider products={cartProducts} designs={cartDesigns}>
         <Header s={s} />
         <main className="main">{children}</main>
-        <Footer s={s} />
+        <Footer s={s} accepts={accepts} />
         {owner ? <AdminBar /> : <Presence />}
         {s.chat.on ? <ChatWidget title={s.chat.title} greeting={s.chat.greeting} suggestions={s.chat.faqs.filter((f) => !f.hidden).slice(0, 4).map((f) => f.q)} /> : null}
       </CartProvider>

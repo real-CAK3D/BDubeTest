@@ -43,6 +43,22 @@ export const KEY_DEFS: KeyDef[] = [
     secret: true,
   },
   {
+    envName: "PAYPAL_CLIENT_ID",
+    label: "PayPal client ID (optional)",
+    group: "PayPal & Venmo",
+    where: "Lets customers pay with PayPal, Venmo (US phones) and Pay Later, as well as or instead of Stripe. developer.paypal.com > Apps & Credentials > pick Live (or Sandbox to practice) > Create App > copy the Client ID. Then switch PayPal on under Settings > Payments.",
+    link: "https://developer.paypal.com/dashboard/applications/live",
+    secret: false,
+  },
+  {
+    envName: "PAYPAL_CLIENT_SECRET",
+    label: "PayPal secret (optional)",
+    group: "PayPal & Venmo",
+    where: "Same page as the client ID: Secret key 1. Keep it private.",
+    link: "https://developer.paypal.com/dashboard/applications/live",
+    secret: true,
+  },
+  {
     envName: "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
     label: "Notification public key",
     group: "Phone notifications",

@@ -1,6 +1,8 @@
 import type { SiteVariables } from "./site-variables-type";
 import { DEFAULT_CHAT } from "./chat-defaults";
 import { DEFAULT_UPCOMING } from "./upcoming-defaults";
+import { cleanLinkPage } from "./link-page";
+import { cleanPayments } from "./payments";
 import { DEFAULT_DISCOUNTS } from "./discount-defaults";
 import { DEFAULT_WATERMARK } from "./watermark";
 import type { Product, SiteSettings } from "./types";
@@ -59,8 +61,10 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
     customSteps: v.homePage.customSteps.map((s) => ({ title: s.title, text: s.text, ...(s.hidden ? { hidden: true } : {}) })),
     hiddenFields: [...(v.hiddenText ?? [])],
     links: v.links
-      ? v.links.map((l, i) => ({ id: `l${i + 1}`, icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}) }))
+      ? v.links.map((l, i) => ({ id: `l${i + 1}`, icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}), ...(l.place ? { place: l.place } : {}), ...(l.thumb ? { thumb: l.thumb } : {}), ...(l.featured ? { featured: true } : {}) }))
       : (Object.entries(v.social) as [string, string][]).filter(([, u]) => u).map(([k, u], i) => ({ id: `l${i + 1}`, icon: k, label: "", url: u })),
+    linkPage: cleanLinkPage(v.linkPage),
+    payments: cleanPayments(v.payments),
     showCustomOrders: v.customOrders.show,
     customOrderHeading: v.customOrders.heading,
     customOrderIntro: v.customOrders.intro,

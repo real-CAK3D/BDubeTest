@@ -105,7 +105,9 @@ async function meaningOf(parts: string[], s: SiteSettings, shop: BrainShop) {
 }
 
 export async function answer(history: ChatTurn[], opts: { state?: unknown; req?: Request } = {}): Promise<ChatReply> {
-  const [s, products] = await Promise.all([getSettings(), getActiveProducts()]);
+  const [raw, products] = await Promise.all([getSettings(), getActiveProducts()]);
+  // fill {payments}, {email}... in the owner's answers
+  const s = { ...raw, chat: { ...raw.chat, faqs: raw.chat.faqs.map((f) => ({ ...f, a: fillPolicy(f.a, raw) })) } };
   const question = history.at(-1)?.content ?? "";
 
   // 1. things the chat can do: look up an order, quote shipping, take a request or a message

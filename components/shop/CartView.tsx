@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { money } from "@/lib/format";
 import { useCart } from "./CartProvider";
+import { PayChoices, type PayOptions } from "./PayChoices";
 
 type Props = {
   currency: string;
@@ -18,6 +19,7 @@ type Props = {
   giftNotes: boolean;
   bulk: { minQty: number; percent: number }[];
   military: { percent: number; href: string } | null;
+  pay: PayOptions;
 };
 type Quote = { amount: number; label: string; free?: boolean };
 
@@ -180,18 +182,23 @@ export function CartView(props: Props) {
           <p className="muted small">Add {money(props.freeOver - afterBulk, props.currency)} more for free shipping.</p>
         ) : null}
         {props.storeOpen ? (
-          <button className="btn btn-lg btn-block" onClick={checkout} disabled={busy}>
-            {busy ? "Opening secure checkout…" : "Check out"}
-          </button>
+          <PayChoices
+            opts={props.pay}
+            body={{ items: cart.lines, delivery: props.ships ? delivery : "none", zip, abroad }}
+            total={shipping === null && props.ships ? null : afterBulk + (shipping ?? 0)}
+            currency={props.currency}
+            ships={props.ships && delivery === "ship"}
+            pickup={props.ships && delivery === "pickup"}
+            promoCodes={props.promoCodes}
+            giftNotes={props.giftNotes}
+            onCard={checkout}
+            cardBusy={busy}
+            ready={() => (needZip ? "Enter your ZIP code so we can work out shipping." : "")}
+          />
         ) : (
           <p>{props.closedMessage}</p>
         )}
-        <p className="pay-note">
-          Pay with card, Apple Pay or Google Pay on Stripe&apos;s secure page.
-          {props.promoCodes ? " Have a promo code? Enter it there." : ""}
-          {props.tax ? " Sales tax is added at checkout." : ""}
-          {props.giftNotes ? " You can add a gift message there too." : ""}
-        </p>
+        {props.tax && props.pay.stripe ? <p className="pay-note">Sales tax is added on the card checkout page.</p> : null}
         {error ? <p className="error" role="alert">{error}</p> : null}
       </aside>
     </div>

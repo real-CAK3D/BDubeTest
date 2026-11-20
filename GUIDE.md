@@ -32,6 +32,8 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Chat (Ask us)](#chat): A chat button on the shop that answers customers' questions from your own answers.
 - [Live chat](#live-chat): Chat with customers on the shop yourself while you're available.
 - [Seasonal banners](#seasonal): Holiday banners at the top of the shop that come and go by themselves.
+- [Link page (Socials)](#link-page): One link for your Instagram, TikTok and Facebook bio, like Linktree.
+- [Ways to pay (PayPal, Venmo, Cash App, Zelle)](#payments): Take payments without relying only on Stripe.
 - [What's to come](#coming-soon): Show customers what you're working on and find out what they want most.
 - [Team chat](#team-chat): Message each other inside the dashboard.
 - [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
@@ -463,6 +465,48 @@ Tap **Edit** to change the message, the button (the shop, the military discount,
 While a holiday banner is showing it takes the place of your usual top message. If two overlap, the sooner holiday wins. Customers can close it with the ✕. Untick **Show holiday banners** to turn them all off at once.
 
 > **Tip:** Military dates are in the list too: Armed Forces Day, the Army birthday, and the Military Police Corps birthday (Sept 26). Switch on the ones you want.
+
+<a id="link-page"></a>
+### Link page (Socials)
+
+_One link for your Instagram, TikTok and Facebook bio, like Linktree._
+
+Your **Socials** page (yourshop.com/socials) works like Linktree: your picture, your name, a row of social icons and a big button for every link. It stands on its own, with no shop menu, so it looks clean when someone taps it from your bio.
+
+Copy the link at the top of **Link page** and paste it in your bio: Instagram (Edit profile › Links), TikTok (Edit profile › Website), Facebook (Edit details › Website), YouTube (Customize channel › Links), X (Edit profile › Website). Print the QR code on business cards, stickers or packing slips.
+
+**Profile**: the round picture (empty = your logo), your name, an @handle and a short bio. **Links**: the same list as the footer. For each one choose whether it shows as a big button, a small icon at the top, or both; add a picture to its button; or tick **Wiggle** so it gently shakes to catch the eye (good for a sale). The **Shop** button sits at the top.
+
+**Look**: tap a quick look (Shop colors, Midnight, Old Glory...), or pick your own background (theme, a color, a gradient or a photo), button style (filled, outline, soft, hard shadow, glass), corners and colors. The phone on the right shows the page after you save.
+
+Visitors can share the page with the button in the top corner: copy the link, save a QR code, or post it to Facebook, X, WhatsApp, Messenger and more. Each button also has a ⋮ to share just that link. When the link is posted, it shows a picture with your logo, name and bio.
+
+> **Tip:** **Last 30 days** shows visits and how many times each link was tapped, so you can see what people care about. Your own visits while signed in don't count.
+
+<a id="payments"></a>
+### Ways to pay (PayPal, Venmo, Cash App, Zelle)
+
+_Take payments without relying only on Stripe._
+
+In **Settings › Payments** tick every way customers can pay; they choose in the cart. Prices, bulk discounts and shipping are worked out by the shop the same way for all of them.
+
+#### Card, Apple Pay, Google Pay (Stripe)
+
+Stripe's secure checkout page. Needs the Stripe key on **Accounts & keys**. Sales tax, gift messages and abandoned-checkout reminders only work with this one.
+
+#### PayPal, Venmo and Pay Later
+
+- Make a free PayPal Business account, then go to developer.paypal.com › Apps & Credentials › Live › Create App.
+- Paste the **Client ID** and **Secret** on **Accounts & keys** (PayPal & Venmo).
+- Back in Settings › Payments, tick PayPal and leave it on **Live**. Use **Sandbox** with sandbox keys to practice with fake money.
+
+The cart shows PayPal's buttons: PayPal, Venmo (on phones in the US), Pay Later and card. PayPal asks where to ship it. The order appears in **Orders** right away, paid, and the money lands in your PayPal balance.
+
+#### Pay us directly
+
+Cash App, Venmo or Zelle to your own account, or cash at local pickup. Type your $cashtag, @username or Zelle email/phone. The customer places the order and gets the instructions on screen and by email (put "Order #1043" in the note). The order waits in **Orders › Waiting for payment**; when the money shows up, open it and tap **Got it: mark paid**. Then it moves to **To ship** and the thank-you code is given.
+
+> **Tip:** Promo and gift card codes work with every way to pay (codes live in Stripe, so Stripe needs to be connected for codes). The "We accept" pictures in the footer and cart update by themselves.
 
 <a id="coming-soon"></a>
 ### What's to come

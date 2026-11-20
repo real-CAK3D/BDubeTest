@@ -7,6 +7,7 @@ import { ShippingLabel } from "./ShippingLabel";
 import { api } from "./api";
 
 const STATUSES: { id: OrderStatus; label: string }[] = [
+  { id: "awaiting", label: "Waiting for payment" },
   { id: "paid", label: "To ship" },
   { id: "shipped", label: "Shipped" },
   { id: "delivered", label: "Delivered" },
@@ -124,7 +125,7 @@ export function OrderList({ initial, openId, status, canEmail, designs = [], par
                         {o.shipping ? <li className="muted">Shipping {money(o.shipping, o.currency)}</li> : null}
                         {o.tax ? <li className="muted">Tax {money(o.tax, o.currency)}</li> : null}
                       </ul>
-                      {o.paymentMethod ? <p className="muted small">Paid with {o.paymentMethod}</p> : null}
+                      {o.paymentMethod ? <p className="muted small">{o.status === "awaiting" ? "Paying with" : "Paid with"} {o.paymentMethod}</p> : null}
                       {o.giftNote ? <div className="engrave">Gift message: <strong>&ldquo;{o.giftNote}&rdquo;</strong></div> : null}
                       {o.bulkPercent ? <p className="muted small">Bulk order discount: {o.bulkPercent}% off</p> : null}
                       {o.giftCodes?.length ? <p className="small">Gift card code{o.giftCodes.length > 1 ? "s" : ""} made: {o.giftCodes.map((c) => <code key={c}>{c} </code>)}</p> : null}
@@ -140,6 +141,14 @@ export function OrderList({ initial, openId, status, canEmail, designs = [], par
                       </p>
                     </div>
                   </div>
+                  {o.status === "awaiting" ? (
+                    <div className="await-pay">
+                      <span>
+                        <strong>Waiting for {money(o.total, o.currency)} by {o.paymentMethod ?? "direct payment"}.</strong> Check your {o.paymentMethod ?? "app"} for a payment with &ldquo;Order #{o.number}&rdquo; in the note.
+                      </span>
+                      <button className="b b-primary b-sm" disabled={busy === o.id} onClick={async () => { setBusy(o.id); try { await update(o, { markPaid: true } as Partial<Order>); } finally { setBusy(""); } }}>Got it: mark paid</button>
+                    </div>
+                  ) : null}
                   <div className="row wrap">
                     <label className="f inline">
                       <span>Status</span>
@@ -147,7 +156,8 @@ export function OrderList({ initial, openId, status, canEmail, designs = [], par
                         {STATUSES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                       </select>
                     </label>
-                    <a className="b b-sm b-ghost" href={`https://dashboard.stripe.com/payments?query=${encodeURIComponent(o.email)}`} target="_blank" rel="noreferrer">Open in Stripe</a>
+                    {o.id.startsWith("cs_") ? <a className="b b-sm b-ghost" href={`https://dashboard.stripe.com/payments?query=${encodeURIComponent(o.email)}`} target="_blank" rel="noreferrer">Open in Stripe</a> : null}
+                    {o.id.startsWith("pp_") ? <a className="b b-sm b-ghost" href="https://www.paypal.com/activities" target="_blank" rel="noreferrer">Open PayPal</a> : null}
                   </div>
                   {o.history?.length ? (
                     <details className="order-history">

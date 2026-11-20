@@ -4,6 +4,8 @@ import { DEFAULT_SETTINGS, getSettings, saveSettings } from "@/lib/db";
 import { DEFAULT_ADMIN } from "@/lib/site-structure";
 import type { AdminPrefs, DiscountPrograms, SiteSettings } from "@/lib/types";
 import { mutating } from "@/lib/store";
+import { cleanLinkPage } from "@/lib/link-page";
+import { cleanPayments } from "@/lib/payments";
 
 type Row = Record<string, unknown>;
 const str = (v: unknown, max: number) => String(v ?? "").slice(0, max);
@@ -97,9 +99,9 @@ async function handlePUT(req: Request) {
       patch[k] = Array.isArray(v) ? v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 50) : def;
     else if (k === "admin") patch[k] = cleanAdmin((v ?? {}) as Row);
     else if (k === "links") {
-      const rows = (Array.isArray(v) ? (v as unknown as Row[]) : []).slice(0, 20);
+      const rows = (Array.isArray(v) ? (v as unknown as Row[]) : []).slice(0, 40);
       patch[k] = rows
-        .map((l, i) => ({ id: str(l.id, 20) || `l${i + 1}`, icon: /^[a-z]{1,20}$/.test(String(l.icon)) ? String(l.icon) : "link", label: str(l.label, 40).trim(), url: str(l.url, 500).trim(), ...(l.hidden ? { hidden: true } : {}) }))
+        .map((l, i) => ({ id: str(l.id, 20) || `l${i + 1}`, icon: /^[a-z]{1,20}$/.test(String(l.icon)) ? String(l.icon) : "link", label: str(l.label, 40).trim(), url: str(l.url, 500).trim(), ...(l.hidden ? { hidden: true } : {}), ...(["button", "icon", "both"].includes(String(l.place)) ? { place: l.place as "button" } : {}), ...(/^(https:\/\/|\/)/.test(str(l.thumb, 500)) ? { thumb: str(l.thumb, 500) } : {}), ...(l.featured ? { featured: true } : {}) }))
         .filter((l) => l.url && !/^(javascript|data):/i.test(l.url));
       // the older social fields stay in step (the chat and a few pages read Facebook from there)
       const social = { ...(body.social ?? DEFAULT_SETTINGS.social) } as Record<string, string>;
@@ -214,6 +216,8 @@ async function handlePUT(req: Request) {
         onDesigns: Boolean(w.onDesigns),
       };
     }
+    else if (k === "linkPage") patch[k] = cleanLinkPage(v);
+    else if (k === "payments") patch[k] = cleanPayments(v);
     else if (k === "menu") patch[k] = Array.isArray(v) ? cleanMenu(v as unknown as Row[]) : def;
     else if (k === "designs") patch[k] = Array.isArray(v) ? cleanDesignList(v as unknown as Row[]) : def;
     else if (k === "categories") patch[k] = Array.isArray(v) ? [...new Set(v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean))].slice(0, 40) : def;

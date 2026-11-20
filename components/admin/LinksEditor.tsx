@@ -1,10 +1,16 @@
 "use client";
 import { useState } from "react";
 import { LinkIcon, LINK_ICONS } from "@/components/LinkIcon";
+import { placeOf } from "@/lib/link-page";
 import type { LinkItem } from "@/lib/types";
+import { ImageField } from "./ImageField";
 
-/** Links with pictures for the footer and contact page: pick an icon, paste the address, order, hide. */
-export function LinksEditor({ value, onChange }: { value: LinkItem[]; onChange: (v: LinkItem[]) => void }) {
+/**
+ * Links with pictures for the Socials page, footer and contact page: pick an icon,
+ * paste the address, order, hide. With `extras` (Dashboard > Link page) each link
+ * also says how it shows on the Socials page, its own picture, and a wiggle.
+ */
+export function LinksEditor({ value, onChange, extras = false, taps }: { value: LinkItem[]; onChange: (v: LinkItem[]) => void; extras?: boolean; taps?: Record<string, number> }) {
   const [picking, setPicking] = useState<string | null>(null);
   const up = (id: string, patch: Partial<LinkItem>) => onChange(value.map((l) => (l.id === id ? { ...l, ...patch } : l)));
   const move = (i: number, d: number) => {
@@ -36,6 +42,24 @@ export function LinksEditor({ value, onChange }: { value: LinkItem[]; onChange: 
             <input className="label-in" value={l.label} onChange={(e) => up(l.id, { label: e.target.value })} placeholder={LINK_ICONS[l.icon]?.name ?? "Name"} aria-label="Name shown" />
             <button type="button" className="b b-ghost b-sm" onClick={() => up(l.id, { hidden: !l.hidden })}>{l.hidden ? "Show" : "Hide"}</button>
             <button type="button" className="b b-ghost b-sm" aria-label="Delete" onClick={() => confirm("Delete this link? (Hide keeps it.)") && onChange(value.filter((x) => x.id !== l.id))}>✕</button>
+            {extras ? (
+              <div className="link-extras">
+                <label>
+                  Shows as{" "}
+                  <select value={placeOf(l)} onChange={(e) => up(l.id, { place: e.target.value as LinkItem["place"] })}>
+                    <option value="button">a big button</option>
+                    <option value="icon">a small icon at the top</option>
+                    <option value="both">both</option>
+                  </select>
+                </label>
+                <label className="check"><input type="checkbox" checked={Boolean(l.featured)} onChange={(e) => up(l.id, { featured: e.target.checked || undefined })} /> Wiggle to catch the eye</label>
+                {taps ? <span className="muted small">{taps[l.id] ?? 0} taps in 30 days</span> : null}
+                <details>
+                  <summary>{l.thumb ? "Button picture ✓" : "Add a button picture"}</summary>
+                  <ImageField label="Picture on the button" hint="Square works best. Empty = the icon." value={l.thumb ?? ""} onChange={(thumb) => up(l.id, { thumb: thumb || undefined })} folder="links" shape="square" />
+                </details>
+              </div>
+            ) : null}
             {picking === l.id ? (
               <div className="icon-grid">
                 {Object.entries(LINK_ICONS).map(([k, ic]) => (

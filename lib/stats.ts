@@ -72,6 +72,7 @@ export async function getStats(rangeDays: number) {
     mostViewed,
     referrers,
     toShip: orders.filter((o) => o.status === "paid").length,
+    awaiting: orders.filter((o) => o.status === "awaiting").length,
     lowStock: products.filter((p) => p.active && p.stock !== null && p.stock <= 2),
   };
 }

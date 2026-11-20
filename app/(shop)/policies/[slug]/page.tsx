@@ -19,7 +19,13 @@ export default async function Policy({ params }: Params) {
   return (
     <article className="section policy prose">
       <h1>{page.title}</h1>
-      {text ? paragraphs(text).map((p, i) => <p key={i}>{p}</p>) : <p className="muted">Coming soon.</p>}
+      {text
+        ? paragraphs(text).map((p, i) => {
+            // "Processing time. Ready-made items..." shows the short lead-in in bold
+            const m = /^([A-Z][^.!?]{2,40}[.?]) (.+)$/s.exec(p);
+            return m && m[1].split(" ").length <= 6 ? <p key={i}><strong>{m[1]}</strong> {m[2]}</p> : <p key={i}>{p}</p>;
+          })
+        : <p className="muted">Coming soon.</p>}
     </article>
   );
 }

@@ -92,7 +92,7 @@ function stem(w: string) {
     .replace(/(.)\1$/, "$1");
 }
 
-function tokens(s: string) {
+export function tokens(s: string) {
   return s
     .toLowerCase()
     .replace(/[’']/g, "'")
@@ -103,14 +103,14 @@ function tokens(s: string) {
     .filter(Boolean);
 }
 
-function norm(w: string) {
+export function norm(w: string) {
   if (SAME[w]) return SAME[w];
   const st = stem(w);
   return SAME[st] ?? st;
 }
 
 /** Edit distance with swaps (Damerau), stopping early past the limit. */
-function dist(a: string, b: string, max: number) {
+export function dist(a: string, b: string, max: number) {
   if (Math.abs(a.length - b.length) > max) return max + 1;
   const d: number[][] = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
   for (let j = 1; j <= b.length; j++) d[0][j] = j;

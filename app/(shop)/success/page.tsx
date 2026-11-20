@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ClearCart } from "@/components/shop/ClearCart";
+import { ClaimAccount } from "@/components/shop/ClaimAccount";
 import { recordOrderFromSession } from "@/lib/orders";
 import { getOrders } from "@/lib/db";
 import { shopSettings } from "@/lib/shop-data";
@@ -34,6 +35,7 @@ export default async function Success({ searchParams }: { searchParams: Promise<
   return (
     <section className="section success">
       <ClearCart />
+      {order ? <ClaimAccount order={order.id} k={k} /> : null}
       <h1>{order || session_id ? "Thank you" : "Thanks for stopping by"}{order?.name ? `, ${order.name.split(" ")[0]}` : ""}.</h1>
       {order ? (
         <>
@@ -66,6 +68,7 @@ export default async function Success({ searchParams }: { searchParams: Promise<
             {order.discount ? <li><span>Discount{order.promoCode ? ` (${order.promoCode})` : ""}</span><span>−{money(order.discount, order.currency)}</span></li> : null}
             {order.shipping ? <li><span>Shipping</span><span>{money(order.shipping, order.currency)}</span></li> : null}
             {order.tax ? <li><span>Tax</span><span>{money(order.tax, order.currency)}</span></li> : null}
+            {order.giftPaid ? <li><span>Gift card{order.giftCode ? ` (${order.giftCode})` : ""}</span><span>−{money(order.giftPaid, order.currency)}</span></li> : null}
             <li className="total"><span>{waiting ? "Total to pay" : "Total paid"}</span><span>{money(order.total, order.currency)}</span></li>
           </ul>
           {order.giftCodes?.length ? (
@@ -89,6 +92,7 @@ export default async function Success({ searchParams }: { searchParams: Promise<
         <p className="lede">There&apos;s no order to show here. If you just paid, your receipt email has everything, or check <Link href="/order-status">Order status</Link>.</p>
       )}
       {order || session_id ? <p>{fillPolicy(s.shippingPolicy, s)}</p> : null}
+      {order ? <p className="muted small">Your orders are always on <Link href="/account">Your orders</Link> (the person icon at the top).</p> : null}
       <Link href="/" className="btn">Back to the shop</Link>
     </section>
   );

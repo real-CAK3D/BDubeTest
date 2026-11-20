@@ -2,9 +2,11 @@ import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { Price, StockNote } from "./Price";
 import { ProductImage } from "./ProductImage";
+import { WishButton } from "./WishButton";
 
 export function ProductCard({ p, currency, low }: { p: Product; currency: string; low: number }) {
   return (
+    <div className="card-wrap">
     <Link href={`/product/${p.slug}`} className="card">
       <div className="card-media">
         <ProductImage p={p} />
@@ -19,6 +21,8 @@ export function ProductCard({ p, currency, low }: { p: Product; currency: string
         </div>
       </div>
     </Link>
+    <WishButton id={p.id} name={p.name} />
+    </div>
   );
 }
 

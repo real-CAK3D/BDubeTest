@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CartButton } from "./CartButton";
+import { HeaderIcons } from "./HeaderIcons";
 
 /*
  * The menu links in the top bar of the shop. Which pages show and in what
@@ -27,6 +28,7 @@ export function NavLinks({ links }: { links: NavLink[] }) {
           </Link>
         ))}
       </div>
+      <HeaderIcons />
       <CartButton />
     </nav>
   );

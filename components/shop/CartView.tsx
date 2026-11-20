@@ -22,6 +22,7 @@ type Props = {
   pay: PayOptions;
 };
 type Quote = { amount: number; label: string; free?: boolean };
+type Estimate = { subtotal: number; discount: number; shipping: number; tax: number; taxLabel: string; taxLater: boolean; gift: number; giftLeft: number; total: number; codes: string[]; errors: string[] };
 
 export function CartView(props: Props) {
   const cart = useCart();
@@ -37,6 +38,10 @@ export function CartView(props: Props) {
   const [zip, setZip] = useState("");
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(false);
+  const [codes, setCodes] = useState<string[]>([]);
+  const [code, setCode] = useState("");
+  const [codeErr, setCodeErr] = useState("");
+  const [est, setEst] = useState<Estimate | null>(null);
 
   useEffect(() => {
     try {
@@ -64,6 +69,39 @@ export function CartView(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zip, itemsKey, delivery, abroad, props.ships]);
 
+  // the real totals from the shop: codes, shipping and sales tax (worked out on the server)
+  const zipOk = !props.ships || delivery !== "ship" || abroad || /^\d{5}$/.test(zip);
+  const codesKey = codes.join(",");
+  useEffect(() => {
+    setEst(null);
+    if (!cart.lines.length || !zipOk) return;
+    let stale = false;
+    const t = setTimeout(async () => {
+      const r = await fetch("/api/pay/estimate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ items: cart.lines, delivery: props.ships ? delivery : "none", zip, abroad, codes }) }).catch(() => null);
+      const d = r?.ok ? ((await r.json()) as Estimate) : null;
+      if (stale || !d) return;
+      setEst(d);
+      // a code that didn't work comes off, with the reason
+      if (d.errors.length) {
+        setCodeErr(d.errors[0]);
+        setCodes(codes.filter((c) => d.codes.includes(c)));
+      }
+    }, 400);
+    return () => {
+      stale = true;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zip, itemsKey, delivery, abroad, props.ships, codesKey, zipOk]);
+
+  function applyCode() {
+    const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!c) return;
+    setCodeErr("");
+    setCodes((l) => [...new Set([...l, c])].slice(-2));
+    setCode("");
+  }
+
   if (!cart.lines.length) {
     return (
       <div className="empty">
@@ -85,7 +123,7 @@ export function CartView(props: Props) {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ items: cart.lines, delivery: props.ships ? delivery : "none", zip, abroad }),
+        body: JSON.stringify({ items: cart.lines, delivery: props.ships ? delivery : "none", zip, abroad, codes }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
@@ -103,7 +141,7 @@ export function CartView(props: Props) {
           const p = cart.products.find((x) => x.id === l.productId)!;
           return (
             <li key={`${l.productId}|${l.size ?? ""}|${l.design ?? ""}|${l.art ?? ""}|${l.option ?? ""}|${l.custom ?? ""}`} className="cart-line">
-              <Link href={`/product/${p.slug}`} className="cart-thumb">
+              <Link href={`/product/${p.slug}`} className="cart-thumb" aria-label={p.name}>
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.image} alt="" />
@@ -149,8 +187,31 @@ export function CartView(props: Props) {
               <dd>{shipping === null ? (quoting ? "…" : "Enter ZIP") : shipping === 0 ? "Free" : money(shipping, props.currency)}</dd>
             </div>
           ) : null}
-          <div className="total"><dt>Total</dt><dd>{money(afterBulk + (shipping ?? 0), props.currency)}{shipping === null && props.ships ? " + shipping" : ""}</dd></div>
+          {est?.discount ? <div className="saving"><dt>Code {codes.find((c) => !c.startsWith("GIFT")) ?? ""}</dt><dd>−{money(est.discount, props.currency)}</dd></div> : null}
+          {est?.tax ? <div><dt>{est.taxLabel || "Sales tax"}</dt><dd>{money(est.tax, props.currency)}</dd></div> : est?.taxLater ? <div><dt>Sales tax</dt><dd className="muted small">worked out at checkout</dd></div> : null}
+          {est?.gift ? <div className="saving"><dt>Gift card</dt><dd>−{money(est.gift, props.currency)}</dd></div> : null}
+          <div className="total">
+            <dt>Total</dt>
+            <dd>{est ? money(est.total, props.currency) : <>{money(afterBulk + (shipping ?? 0), props.currency)}{shipping === null && props.ships ? " + shipping" : ""}</>}</dd>
+          </div>
         </dl>
+        {est?.gift && est.giftLeft > 0 ? <p className="muted small">{money(est.giftLeft, props.currency)} stays on your gift card for next time.</p> : null}
+        <div className="pay-code">
+          <div className="row-inline">
+            <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCode())} placeholder={props.promoCodes ? "Promo or gift card code" : "Gift card code"} aria-label={props.promoCodes ? "Promo or gift card code" : "Gift card code"} />
+            <button type="button" className="btn btn-sm" onClick={applyCode}>Apply</button>
+          </div>
+          {codes.length ? (
+            <p className="small">
+              {codes.map((c) => (
+                <span key={c} className="code-chip">
+                  {c} <button type="button" className="linkish" aria-label={`Remove ${c}`} onClick={() => (setCodes(codes.filter((x) => x !== c)), setCodeErr(""))}>✕</button>
+                </span>
+              ))}
+            </p>
+          ) : null}
+          {codeErr ? <p className="error small" role="alert">{codeErr}</p> : null}
+        </div>
         {props.ships ? (
           <fieldset className="delivery">
             <legend>Delivery</legend>
@@ -184,12 +245,11 @@ export function CartView(props: Props) {
         {props.storeOpen ? (
           <PayChoices
             opts={props.pay}
-            body={{ items: cart.lines, delivery: props.ships ? delivery : "none", zip, abroad }}
-            total={shipping === null && props.ships ? null : afterBulk + (shipping ?? 0)}
+            request={{ items: cart.lines, delivery: props.ships ? delivery : "none", zip, abroad, codes }}
+            total={est ? est.total : null}
             currency={props.currency}
             ships={props.ships && delivery === "ship"}
             pickup={props.ships && delivery === "pickup"}
-            promoCodes={props.promoCodes}
             giftNotes={props.giftNotes}
             onCard={checkout}
             cardBusy={busy}
@@ -198,7 +258,6 @@ export function CartView(props: Props) {
         ) : (
           <p>{props.closedMessage}</p>
         )}
-        {props.tax && props.pay.stripe ? <p className="pay-note">Sales tax is added on the card checkout page.</p> : null}
         {error ? <p className="error" role="alert">{error}</p> : null}
       </aside>
     </div>

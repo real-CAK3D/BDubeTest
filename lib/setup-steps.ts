@@ -298,12 +298,12 @@ export const SETUP_STEPS: SetupStep[] = [
   },
   {
     id: "email",
-    title: "Tracking emails",
+    title: "Customer emails",
     time: "10 min",
     optional: true,
     check: "email",
     blocks: [
-      { p: "Lets you email customers their tracking number with one tap from an order." },
+      { p: "Lets the shop email customers by itself: gift card codes, how-to-pay details for Cash App / Venmo / Zelle orders, sign-in codes for Your orders, and tracking numbers with one tap from an order." },
       {
         steps: [
           "Sign up at resend.com (free for small shops) and add your domain under **Domains** (needs a custom domain, below).",
@@ -332,12 +332,32 @@ export const SETUP_STEPS: SetupStep[] = [
     links: [{ label: "Vercel domains", url: "https://vercel.com/domains" }],
   },
   {
+    id: "business-phone",
+    title: "A free business phone number (Google Voice)",
+    time: "10 min",
+    optional: true,
+    blocks: [
+      { p: "Give customers a separate number for calls and texts instead of your personal cell. Google Voice gives you a free US number that rings and texts on your own phone through the Google Voice app (iPhone and Android), with voicemail that's typed out for you. You can set business hours so it doesn't ring at night." },
+      {
+        steps: [
+          "On your phone, install **Google Voice** (App Store or Google Play) and sign in with a Google account (a separate one for the shop is a good idea).",
+          "Pick a number in your area code. It asks for your existing cell number once, to confirm it's you.",
+          "In the app's settings, turn on **Do not disturb** hours or a greeting with your business hours if you like.",
+          "In the dashboard, put the new number in **Words & logos > Contact page** (Phone), and add **Call** and **Text** links on your **Link page**.",
+        ],
+      },
+      { tip: "Apple doesn't have a free second-number service like this. An iPhone can hold two lines (eSIM), but the second line is a paid plan from a phone carrier. Google Voice works fine on an iPhone." },
+    ],
+    links: [{ label: "Google Voice", url: "https://voice.google.com" }],
+  },
+  {
     id: "tax",
     title: "Sales tax",
     time: "10 min",
     optional: true,
     blocks: [
-      { p: "Stripe Tax works out and adds the right sales tax at checkout. Set it up in Stripe under **Settings > Tax** (add your address and where you're registered), then turn on **Sales tax by Stripe** in **Settings > Checkout & emails**." },
+      { p: "Sales tax is added by where each order ships, with every way to pay. In **Settings > Payments & tax** choose **My own rates** (type the rate for each state you're registered in) or **Stripe Tax** (exact city and county rates; set it up in Stripe under **Settings > Tax** first; small fee per order)." },
+      { p: "Fill in your shop's ZIP under **Settings > Store** too, so local pickup orders are taxed for your state." },
       { tip: "Rules depend on your state. A quick call with a tax preparer about selling online is worth it." },
     ],
     links: [{ label: "Stripe Tax", url: "https://dashboard.stripe.com/settings/tax" }],

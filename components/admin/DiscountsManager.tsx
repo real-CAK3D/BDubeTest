@@ -269,15 +269,15 @@ export function DiscountsManager({ initial, stripeOn }: { initial: SiteSettings;
             label: "Gift cards",
             content: (
               <>
-                {needStripe}
+                <p className="muted small">Gift cards are the shop's own codes with a balance: they work with every way to pay, and whatever isn't spent stays on the card.</p>
                 {note}
-                <GiftMaker busy={busy} disabled={!stripeOn} onMake={(g) => act({ action: "giftCard", ...g })} />
+                <GiftMaker busy={busy} disabled={false} onMake={(g) => act({ action: "giftCard", ...g })} />
                 <section className="panel">
                   <div className="panel-head"><h2>Gift cards</h2></div>
                   {data?.gifts.length ? (
                     <div className="tbl-scroll">
                       <table className="tbl">
-                        <thead><tr><th>Code</th><th>Amount</th><th>For</th><th>From</th><th>Made</th><th>Used</th></tr></thead>
+                        <thead><tr><th>Code</th><th>Amount</th><th>For</th><th>From</th><th>Made</th><th>Left</th></tr></thead>
                         <tbody>
                           {data.gifts.map((g) => {
                             const c = data.codes.find((x) => x.id === g.promoId);
@@ -288,7 +288,7 @@ export function DiscountsManager({ initial, stripeOn }: { initial: SiteSettings;
                                 <td>{g.toName || g.toEmail || g.buyerEmail}{g.sentAt ? " (emailed)" : ""}</td>
                                 <td>{g.fromName}{g.orderNumber ? ` · order #${g.orderNumber}` : ""}</td>
                                 <td>{day(g.createdAt)}</td>
-                                <td>{c ? (c.uses ? "Yes" : "Not yet") : "?"}</td>
+                                <td>{g.promoId ? (c ? (c.uses ? "Used" : "Not yet") : "?") : `$${((g.balance ?? 0) / 100).toFixed(2)}${g.uses?.length ? ` (used on #${g.uses.map((u) => u.order).join(", #")})` : ""}`}</td>
                               </tr>
                             );
                           })}

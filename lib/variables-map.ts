@@ -3,6 +3,7 @@ import { DEFAULT_CHAT } from "./chat-defaults";
 import { DEFAULT_UPCOMING } from "./upcoming-defaults";
 import { cleanLinkPage } from "./link-page";
 import { cleanPayments } from "./payments";
+import { cleanTax } from "./tax";
 import { DEFAULT_DISCOUNTS } from "./discount-defaults";
 import { DEFAULT_WATERMARK } from "./watermark";
 import type { Product, SiteSettings } from "./types";
@@ -65,6 +66,8 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
       : (Object.entries(v.social) as [string, string][]).filter(([, u]) => u).map(([k, u], i) => ({ id: `l${i + 1}`, icon: k, label: "", url: u })),
     linkPage: cleanLinkPage(v.linkPage),
     payments: cleanPayments(v.payments),
+    verify: { google: v.verify?.google ?? "", meta: v.verify?.meta ?? "", pinterest: v.verify?.pinterest ?? "", bing: v.verify?.bing ?? "" },
+    tax: v.tax ? cleanTax(v.tax) : { mode: v.store.salesTaxByStripe ? "stripe" : "off", rates: [] },
     showCustomOrders: v.customOrders.show,
     customOrderHeading: v.customOrders.heading,
     customOrderIntro: v.customOrders.intro,

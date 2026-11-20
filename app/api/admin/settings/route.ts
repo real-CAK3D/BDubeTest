@@ -6,6 +6,7 @@ import type { AdminPrefs, DiscountPrograms, SiteSettings } from "@/lib/types";
 import { mutating } from "@/lib/store";
 import { cleanLinkPage } from "@/lib/link-page";
 import { cleanPayments } from "@/lib/payments";
+import { cleanTax } from "@/lib/tax";
 
 type Row = Record<string, unknown>;
 const str = (v: unknown, max: number) => String(v ?? "").slice(0, max);
@@ -218,12 +219,20 @@ async function handlePUT(req: Request) {
     }
     else if (k === "linkPage") patch[k] = cleanLinkPage(v);
     else if (k === "payments") patch[k] = cleanPayments(v);
+    else if (k === "tax") patch[k] = cleanTax(v);
+    else if (k === "verify") {
+      // just the code: people often paste the whole <meta ...> tag
+      const z = (v ?? {}) as unknown as Row;
+      const code = (x: unknown) => { const t = String(x ?? ""); return (t.match(/content=["']([^"']+)["']/)?.[1] ?? t).replace(/[^\w.=:-]/g, "").slice(0, 120); };
+      patch[k] = { google: code(z.google), meta: code(z.meta), pinterest: code(z.pinterest), bing: code(z.bing) };
+    }
     else if (k === "menu") patch[k] = Array.isArray(v) ? cleanMenu(v as unknown as Row[]) : def;
     else if (k === "designs") patch[k] = Array.isArray(v) ? cleanDesignList(v as unknown as Row[]) : def;
     else if (k === "categories") patch[k] = Array.isArray(v) ? [...new Set(v.map((x) => String(x).trim().slice(0, 40)).filter(Boolean))].slice(0, 40) : def;
     else if (k === "customSteps" || k === "extraPages" || k === "gallery") patch[k] = Array.isArray(v) ? cleanList(k, v as unknown as Row[]) : def;
     else patch[k] = v;
   }
+  if (patch.tax) patch.stripeTax = (patch.tax as { mode: string }).mode === "stripe"; // the older switch stays in step
   return NextResponse.json(await saveSettings(patch as Partial<SiteSettings>));
 }
 

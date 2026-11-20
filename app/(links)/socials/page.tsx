@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `${title} | Links`,
     description,
     alternates: { canonical: "/socials" },
-    icons: s.favicon || s.logo ? { icon: s.favicon || s.logo, apple: s.favicon || s.logo } : undefined,
+    icons: s.favicon || s.logo ? { icon: [16, 32, 48, 192].map((n) => ({ url: `/api/favicon?s=${n}`, sizes: `${n}x${n}`, type: "image/png" })), apple: { url: "/api/favicon?s=180", sizes: "180x180" } } : undefined,
     openGraph: { title, description, url: "/socials", type: "profile", siteName: s.businessName },
     twitter: { card: "summary_large_image", title, description },
   };

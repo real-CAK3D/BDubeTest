@@ -18,6 +18,8 @@ interface KV {
   hgetall(key: string): Promise<Record<string, number>>;
   /** Takes a short-lived lock; false if someone else holds it. */
   claim(key: string, ttlMs: number): Promise<boolean>;
+  /** Every key saved (for backups). */
+  keys(): Promise<string[]>;
   release(key: string): Promise<void>;
 }
 
@@ -42,6 +44,16 @@ function supabaseKV(): KV {
     async hincrby(k, f, by) {
       const { error } = await (await sb()).rpc("shop_hincrby", { p_key: k, p_field: f, p_by: by });
       if (error) throw new Error(error.message);
+    },
+    async keys() {
+      const out: string[] = [];
+      for (let from = 0; from < 50_000; from += 1000) {
+        const { data, error } = await (await sb()).from(TABLE).select("key").range(from, from + 999);
+        if (error) throw new Error(error.message);
+        out.push(...(data ?? []).map((r: { key: string }) => r.key));
+        if ((data ?? []).length < 1000) break;
+      }
+      return out.filter((k) => !k.startsWith("lock:"));
     },
     async hgetall(k) {
       const { data, error } = await (await sb()).from(TABLE).select("value").eq("key", k).maybeSingle();
@@ -81,6 +93,9 @@ function redisKV(): KV {
     },
     async hincrby(k, f, by) {
       await r.hincrby(PREFIX + k, f, by);
+    },
+    async keys() {
+      return ((await r.keys(PREFIX + "*")) as string[]).map((k) => k.slice(PREFIX.length)).filter((k) => !k.startsWith("lock:"));
     },
     async hgetall(k) {
       const res = (await r.hgetall<Record<string, number | string>>(PREFIX + k)) ?? {};
@@ -153,6 +168,9 @@ function fileKV(): KV {
     async hgetall(k) {
       const db = await load();
       return (db[k] as Record<string, number>) ?? {};
+    },
+    async keys() {
+      return Object.keys(await load());
     },
     // one server process uses the file, so an in-memory lock is enough
     async claim(k, ttl) {

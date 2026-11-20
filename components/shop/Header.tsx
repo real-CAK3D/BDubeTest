@@ -15,7 +15,7 @@ export function Header({ s }: { s: SiteSettings }) {
       <header className="band">
         <div className="band-inner">
           <Link href="/" className="brand">
-            <Logo s={s} size={54} />
+            <Logo s={s} size={54} decorative />
             <span className="brand-name">{s.businessName}</span>
           </Link>
           <NavLinks links={resolveMenu(s).filter((m) => m.top && !m.off).map((m) => ({ href: m.href, label: m.label }))} />

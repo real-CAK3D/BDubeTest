@@ -89,6 +89,8 @@ export type SiteVariables = {
   links?: { icon: string; label: string; url: string; hidden?: boolean; place?: "button" | "icon" | "both"; thumb?: string; featured?: boolean }[];
   linkPage?: import("./link-page").LinkPageSettings;
   payments?: import("./payments").PaymentSettings;
+  tax?: import("./tax").TaxSettings;
+  verify?: { google: string; meta: string; pinterest: string; bing: string };
   seasons?: { on: boolean; items: import("./seasons").SeasonSetting[] };
   upcoming?: { on: boolean; heading: string; intro: string; items: { id: string; title: string; text: string; image?: string; when?: string; stage: "idea" | "working" | "soon"; hidden?: boolean }[] };
   chat?: { on: boolean; useAI: boolean; live?: boolean; ai?: { provider: string; model: string; baseUrl: string }; title: string; greeting: string; questions: { id: string; topic?: string; question: string; answer: string; alsoAsked?: string[]; hidden?: boolean }[] };

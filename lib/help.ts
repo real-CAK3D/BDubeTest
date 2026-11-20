@@ -463,7 +463,7 @@ export const HELP: HelpGroup[] = [
         ],
       },
       {
-        id: "payments",
+        id: "ways-to-pay",
         title: "Ways to pay (PayPal, Venmo, Cash App, Zelle)",
         match: ["/admin/settings"],
         summary: "Take payments without relying only on Stripe.",
@@ -480,7 +480,50 @@ export const HELP: HelpGroup[] = [
           { p: "The cart shows PayPal's buttons: PayPal, Venmo (on phones in the US), Pay Later and card. PayPal asks where to ship it. The order appears in **Orders** right away, paid, and the money lands in your PayPal balance." },
           { h: "Pay us directly" },
           { p: "Cash App, Venmo or Zelle to your own account, or cash at local pickup. Type your $cashtag, @username or Zelle email/phone. The customer places the order and gets the instructions on screen and by email (put \"Order #1043\" in the note). The order waits in **Orders › Waiting for payment**; when the money shows up, open it and tap **Got it: mark paid**. Then it moves to **To ship** and the thank-you code is given." },
-          { tip: "Promo and gift card codes work with every way to pay (codes live in Stripe, so Stripe needs to be connected for codes). The \"We accept\" pictures in the footer and cart update by themselves." },
+          { tip: "Customers type promo and gift card codes in the cart, and they work with every way to pay. Gift cards are the shop's own (no Stripe needed, leftover balance stays on the card); promo codes are made in Stripe, so they need Stripe connected. If a gift card covers the whole order, the customer just presses Place order. The \"We accept\" pictures in the footer and cart update by themselves." },
+        ],
+      },
+      {
+        id: "sales-tax",
+        title: "Sales tax",
+        match: ["/admin/settings"],
+        summary: "Tax added by where each order goes, with every way to pay.",
+        blocks: [
+          { p: "In **Settings › Payments & tax › Sales tax** pick **No sales tax**, **My own rates** or **Stripe Tax**. The state comes from the ZIP code the customer types in the cart (local pickup uses your shop's ZIP from **Settings › Store**). The cart shows the tax before they pay." },
+          { p: "**My own rates**: add each state you're registered in and its full rate (state plus the usual local rate), and tick **Tax shipping too** if that state taxes shipping. **Stripe Tax**: exact city and county rates for every address; switch it on in Stripe first, small fee per order." },
+          { p: "Promo codes lower the taxable amount; gift cards don't (a gift card is a payment, not a discount). Each order shows its tax, and the orders spreadsheet download has a Tax column for filing." },
+          { tip: "Only collect tax where you're registered. A tax preparer can tell you where that is." },
+        ],
+      },
+      {
+        id: "sell-online",
+        title: "Sell on Facebook, Instagram & Google",
+        match: ["/admin/sell-online"],
+        summary: "List your items in Facebook & Instagram Shops, Google Shopping and Pinterest.",
+        blocks: [
+          { p: "They all read one product list (feed) from your site, so you connect each one once and new items, prices and stock update by themselves daily. Follow the steps on the **Sell online** page for each platform, and paste the verification code they give you into the boxes at the bottom." },
+          { tip: "Items need a photo and a price to be listed. Customers still check out on your site." },
+        ],
+      },
+      {
+        id: "site-health",
+        title: "Site health and backups",
+        match: ["/admin/health"],
+        summary: "What's working, backups, and alerts if the site goes down.",
+        blocks: [
+          { p: "Every check shows green, orange (worth a look) or red (fix it). The site checks itself every day and sends your phone a notification if something important breaks." },
+          { p: "**Backups**: press **Download a backup** now and then and keep the file somewhere safe. If your GitHub repository is private, a locked copy is also saved there every week automatically. **Put back a backup** restores one (only on this site; customer details stay locked)." },
+          { p: "**Get told if the site goes down**: follow the 3 steps for UptimeRobot (free). It checks every 5 minutes and emails or pushes an alert to your phone." },
+        ],
+      },
+      {
+        id: "customer-accounts",
+        title: "Customer accounts, search and saved items",
+        summary: "What customers see: Your orders, the ♥ and the search.",
+        blocks: [
+          { p: "The person icon at the top of the shop opens **Your orders**. Customers sign in with a 6-digit code emailed to them (no passwords), or are signed in automatically on their phone right after they buy. They see their orders, tracking, and gift card balances." },
+          { p: "The ♥ on every item saves it for later (**Saved items**). The magnifying glass searches the shop and forgives typos and plurals." },
+          { tip: "Sign-in codes need customer emails switched on (Accounts & keys › Resend)." },
         ],
       },
       {
@@ -758,7 +801,7 @@ export const HELP: HelpGroup[] = [
         ],
       },
       {
-        id: "discounts",
+        id: "discount-codes",
         title: "Discounts",
         match: ["/admin/discounts"],
         summary: "Coupons and promo codes, made in Stripe.",

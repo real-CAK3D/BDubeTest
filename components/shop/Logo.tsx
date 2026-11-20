@@ -1,10 +1,10 @@
 import type { SiteSettings } from "@/lib/types";
 import { Emblem, initialsOf } from "./Emblem";
 
-export function Logo({ s, size = 44 }: { s: SiteSettings; size?: number }) {
+export function Logo({ s, size = 44, decorative = false }: { s: SiteSettings; size?: number; decorative?: boolean }) {
   if (s.logo) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={s.logo} alt={s.businessName} style={{ height: size, width: "auto" }} className="logo-img" />;
+    return <img src={s.logo} alt={decorative ? "" : s.businessName} style={{ height: size, width: "auto" }} className="logo-img" />;
   }
   return <Emblem initials={initialsOf(s.businessName)} size={size} />;
 }

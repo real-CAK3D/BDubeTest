@@ -54,6 +54,8 @@ export function settingsToVariables(s: Omit<SiteSettings, "admin" | "shipFrom" |
     links: s.links.map((l) => ({ icon: l.icon, label: l.label, url: l.url, ...(l.hidden ? { hidden: true } : {}), ...(l.place ? { place: l.place } : {}), ...(l.thumb ? { thumb: l.thumb } : {}), ...(l.featured ? { featured: true } : {}) })),
     linkPage: s.linkPage,
     payments: s.payments,
+    tax: s.tax,
+    verify: s.verify,
     seasons: { on: s.seasons.on, items: s.seasons.items },
     upcoming: { on: s.upcoming.on, heading: s.upcoming.heading, intro: s.upcoming.intro, items: s.upcoming.items.map((x) => ({ id: x.id, title: x.title, text: x.text, image: x.image, when: x.when, stage: x.stage, ...(x.hidden ? { hidden: true } : {}) })) },
     chat: { on: s.chat.on, useAI: s.chat.useAI, live: s.chat.live !== false, ai: s.chat.ai ?? { provider: "anthropic", model: "", baseUrl: "" }, title: s.chat.title, greeting: s.chat.greeting, questions: s.chat.faqs.map((x) => ({ id: x.id, ...(x.topic ? { topic: x.topic } : {}), question: x.q, answer: x.a, ...(x.alts?.length ? { alsoAsked: x.alts } : {}), ...(x.hidden ? { hidden: true } : {}) })) },
@@ -275,6 +277,14 @@ export function variablesFile(v: SiteVariables): string {
   if (v.payments) {
     sec("Payments", ["Ways to pay besides Stripe's card checkout. Keys for Stripe and PayPal go in the dashboard (Accounts & keys), never here.", "manual: pay us directly. handle is your $cashtag, Venmo @username or Zelle email/phone. Those orders wait until you mark them paid."]);
     L.push(`  payments: ${JSON.stringify(v.payments, null, 2).replace(/"(\w+)":/g, "$1:").replace(/\n/g, "\n  ")},`);
+  }
+  if (v.tax) {
+    sec("Sales tax", ["mode: off, rates (your own rate per state; the state comes from the ship-to ZIP) or stripe (Stripe Tax, exact local rates).", "rates: state (2 letters), rate in percent, shipping: true if that state taxes shipping. Only collect where you're registered."]);
+    L.push(`  tax: ${JSON.stringify(v.tax).replace(/"(\w+)":/g, "$1: ")},`);
+  }
+  if (v.verify && Object.values(v.verify).some(Boolean)) {
+    sec("Site verification", ["Codes Google, Meta (Facebook/Instagram), Pinterest and Bing give you to prove you own the site (Dashboard > Sell online)."]);
+    L.push(`  verify: ${JSON.stringify(v.verify).replace(/"(\w+)":/g, "$1: ")},`);
   }
   if (v.linkPage) {
     sec("Link page", ["The Socials page (/socials), a link-in-bio page. \"\" = use the usual (business name, tagline, logo, theme colors).", "bg: theme, color, gradient or image. button: fill, outline, soft, shadow or glass. shape: pill, round or square. iconsAt: top or bottom.", "On each link above, place: button, icon or both (social networks default to both), thumb: a picture for its button, featured: true makes it wiggle."]);

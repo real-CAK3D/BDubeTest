@@ -32,13 +32,13 @@ Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 **Extras**
 
 15. [Save dashboard edits to GitHub](#github-sync), 5 min
-16. [Tracking emails](#email) (optional), 10 min
+16. [Customer emails](#email) (optional), 10 min
 17. [Your own web address](#domain) (optional), 10 min
-18. [Sales tax](#tax) (optional), 10 min
+19. [Sales tax](#tax) (optional), 10 min
 
 **Go live**
 
-19. [Go live](#live), 15 min
+20. [Go live](#live), 15 min
 
 ## Get online
 
@@ -217,9 +217,9 @@ Edits made in the dashboard show on the site right away. With a GitHub token, th
 Links: [Create a GitHub token](https://github.com/settings/personal-access-tokens/new), Open Keys (dashboard, `/admin/keys`)
 
 <a id="email"></a>
-### 16. Tracking emails (optional)
+### 16. Customer emails (optional)
 
-Lets you email customers their tracking number with one tap from an order.
+Lets the shop email customers by itself: gift card codes, how-to-pay details for Cash App / Venmo / Zelle orders, sign-in codes for Your orders, and tracking numbers with one tap from an order.
 
 1. Sign up at resend.com (free for small shops) and add your domain under **Domains** (needs a custom domain, below).
 2. Create an API key under **API Keys** and save it on the **Keys** page as **Resend API key**.
@@ -238,10 +238,26 @@ Links: [Resend](https://resend.com/signup)
 
 Links: [Vercel domains](https://vercel.com/domains)
 
-<a id="tax"></a>
-### 18. Sales tax (optional)
+<a id="business-phone"></a>
+### 18. A free business phone number (Google Voice) (optional)
 
-Stripe Tax works out and adds the right sales tax at checkout. Set it up in Stripe under **Settings > Tax** (add your address and where you're registered), then turn on **Sales tax by Stripe** in **Settings > Checkout & emails**.
+Give customers a separate number for calls and texts instead of your personal cell. Google Voice gives you a free US number that rings and texts on your own phone through the Google Voice app (iPhone and Android), with voicemail that's typed out for you. You can set business hours so it doesn't ring at night.
+
+1. On your phone, install **Google Voice** (App Store or Google Play) and sign in with a Google account (a separate one for the shop is a good idea).
+2. Pick a number in your area code. It asks for your existing cell number once, to confirm it's you.
+3. In the app's settings, turn on **Do not disturb** hours or a greeting with your business hours if you like.
+4. In the dashboard, put the new number in **Words & logos > Contact page** (Phone), and add **Call** and **Text** links on your **Link page**.
+
+> **Tip:** Apple doesn't have a free second-number service like this. An iPhone can hold two lines (eSIM), but the second line is a paid plan from a phone carrier. Google Voice works fine on an iPhone.
+
+Links: [Google Voice](https://voice.google.com)
+
+<a id="tax"></a>
+### 19. Sales tax (optional)
+
+Sales tax is added by where each order ships, with every way to pay. In **Settings > Payments & tax** choose **My own rates** (type the rate for each state you're registered in) or **Stripe Tax** (exact city and county rates; set it up in Stripe under **Settings > Tax** first; small fee per order).
+
+Fill in your shop's ZIP under **Settings > Store** too, so local pickup orders are taxed for your state.
 
 > **Tip:** Rules depend on your state. A quick call with a tax preparer about selling online is worth it.
 
@@ -250,7 +266,7 @@ Links: [Stripe Tax](https://dashboard.stripe.com/settings/tax)
 ## Go live
 
 <a id="live"></a>
-### 19. Go live
+### 20. Go live
 
 1. In Stripe, finish **Activate payments** (business details and bank account).
 2. Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).

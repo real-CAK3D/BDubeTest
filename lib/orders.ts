@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { markRecovered } from "./abandoned";
 import { useBlanks } from "./blanks";
 import { addOrderOnce, getOrders, getProducts, getSettings, saveProducts, updateOrder } from "./db";
-import { createCode, issueGiftCard, randomCode } from "./discounts";
+import { createCode, issueGiftCard, randomCode, redeemGift, useCodeOutside } from "./discounts";
 import { money } from "./format";
 import { notifyOwner } from "./push";
 import { stripe } from "./stripe";
@@ -30,6 +30,7 @@ async function record(sessionId: string) {
 
   const items: OrderItem[] = [];
   let shipping = 0;
+  let ownTax = 0; // sales tax the shop worked out (a line on the checkout)
   let cart: [string, string][] = [];
   try {
     cart = JSON.parse(session.metadata?.cart ?? "[]");
@@ -46,6 +47,10 @@ async function record(sessionId: string) {
       shipping += li.amount_total;
       continue;
     }
+    if (meta.kind === "tax") {
+      ownTax += li.amount_total;
+      continue;
+    }
     items.push({
       productId: appProduct?.id ?? meta.productId ?? "",
       name: product?.name ?? li.description ?? "Item",
@@ -58,9 +63,11 @@ async function record(sessionId: string) {
     });
   }
   shipping += session.shipping_cost?.amount_total ?? 0;
-  let promoCode: string | undefined;
+  const md = session.metadata ?? {};
+  const giftOff = Number(md.giftOff) || 0;
+  let promoCode: string | undefined = md.promoCode || undefined;
   const disc = session.discounts?.[0]?.promotion_code;
-  if (disc) {
+  if (disc && !promoCode) {
     try {
       promoCode = typeof disc === "string" ? (await s.promotionCodes.retrieve(disc)).code : disc.code;
     } catch {}
@@ -97,10 +104,13 @@ async function record(sessionId: string) {
       session.metadata?.shipZip && addr?.postal_code && !addr.postal_code.startsWith(session.metadata.shipZip)
         ? `Shipping was priced for ZIP ${session.metadata.shipZip} but the address is ${addr.postal_code}. Check the shipping cost before sending.`
         : undefined,
-    subtotal: session.amount_subtotal ?? 0,
+    subtotal: (session.amount_subtotal ?? 0) - ownTax, // the tax line is not an item
     shipping,
-    discount: session.total_details?.amount_discount || undefined,
-    tax: session.total_details?.amount_tax || undefined,
+    discount: Math.max(0, (session.total_details?.amount_discount ?? 0) - giftOff) || undefined,
+    tax: (session.total_details?.amount_tax ?? 0) + ownTax || undefined,
+    giftPaid: giftOff || undefined,
+    giftCode: md.giftCode || undefined,
+    codes: md.promoId || md.giftId ? { promoId: md.promoId || undefined, giftId: md.giftId || undefined, giftOff: giftOff || undefined } : undefined,
     promoCode,
     total: session.amount_total ?? 0,
     currency: session.currency ?? "usd",
@@ -187,9 +197,35 @@ export async function runSteps(start: Order, items: OrderItem[], extra: { recove
     await done({});
   }
 
-  // Gift cards bought in this order (Stripe only)
-  if (!steps.gifts) {
-    failed = extra.gifts ? await extra.gifts(order, done) : "";
+  // Codes typed in the cart: take the gift card money, count the promo code
+  if (!steps.codes && order.codes) {
+    const c = order.codes;
+    if (c.promoId) await useCodeOutside(c.promoId).catch((e) => console.error("promo count:", e));
+    if (c.giftId && c.giftOff) {
+      const took = await redeemGift(c.giftId, c.giftOff, order.number);
+      if (took < c.giftOff) {
+        const short = c.giftOff - took;
+        await done({ history: [...(order.history ?? []), { at: new Date().toISOString(), what: `Gift card ${order.giftCode ?? ""} was short ${money(short, order.currency)} (spent elsewhere first). Collect that from the customer.` }] });
+        await notifyOwner(`Order #${order.number}: gift card short ${money(short, order.currency)}`, "It was used on another order at the same moment. Collect the difference before shipping.", `/admin/orders?open=${order.id}`);
+      }
+    }
+    steps.codes = true;
+    await done({});
+  }
+
+  // Gift cards bought in this order: made once it's paid
+  if (!steps.gifts && order.status !== "awaiting") {
+    const buy = order.giftCardBuy;
+    failed = extra.gifts
+      ? await extra.gifts(order, done)
+      : buy && !order.giftCodes?.length
+        ? await issueGiftCard({ amount: buy.amount, fromName: buy.fromName, buyerEmail: order.email, toName: buy.toName, toEmail: buy.toEmail, message: buy.message, orderNumber: order.number })
+            .then(async (card) => {
+              await done({ giftCodes: [card.code], history: [...(order.history ?? []), { at: new Date().toISOString(), what: `Gift card code made: ${card.code}` }] });
+              return "";
+            })
+            .catch((e) => `gift card code: ${(e as Error).message}`)
+        : "";
     if (!failed) {
       steps.gifts = true;
       await done({});

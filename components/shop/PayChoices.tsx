@@ -8,8 +8,7 @@ export type PayOptions = {
   manual: { id: string; name: string; icon: string; handle: string; pickupOnly?: boolean }[];
   accepts: { file: string; name: string }[];
 };
-type Body = { items: unknown[]; delivery: string; zip: string; abroad: boolean };
-type PayPalSdk = { Buttons: (o: Record<string, unknown>) => { render: (el: HTMLElement) => Promise<void>; close?: () => void; isEligible?: () => boolean } };
+type PayPalSdk = { Buttons: (o: Record<string, unknown>) => { render: (el: HTMLElement) => Promise<void>; close?: () => void } };
 
 /** "We accept" payment pictures (public/icons/pay). */
 export function Accepts({ list, label = "We accept" }: { list: { file: string; name: string }[]; label?: string }) {
@@ -45,45 +44,47 @@ function loadPayPal(clientId: string, currency: string) {
   return sdk;
 }
 
+const post = (url: string, data: unknown) => fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json().catch(() => ({})));
+
 /**
- * The ways to pay in the cart: card checkout (Stripe), the PayPal / Venmo /
- * Pay Later buttons, and "pay us directly" (Cash App, Venmo, Zelle, cash at
- * pickup) with a short form. Shown only for what the owner switched on.
+ * The ways to pay: card checkout (Stripe), the PayPal / Venmo / Pay Later
+ * buttons, and "pay us directly" (Cash App, Venmo, Zelle, cash at pickup) with
+ * a short form. Used by the cart and the gift card page. When a gift card
+ * covers the whole order, it's just "Place order".
  */
-export function PayChoices({ opts, body, total, currency, ships, pickup, promoCodes, giftNotes, onCard, cardBusy, ready }: {
+export function PayChoices({ opts, request, total, currency, ships, pickup, giftNotes, onCard, cardBusy, ready, kind = "cart" }: {
   opts: PayOptions;
-  body: Body;
-  total: number | null; // cents before a code, null while shipping isn't known
+  request: Record<string, unknown>; // what's sent with every payment request (cart lines + codes, or the gift card)
+  total: number | null; // what's left to pay, null while it's not known yet
   currency: string;
   ships: boolean; // this order gets shipped (address needed)
   pickup: boolean;
-  promoCodes: boolean;
   giftNotes: boolean;
   onCard: () => void;
   cardBusy: boolean;
-  ready: () => string; // "" when the cart is ready to pay, else what's missing
+  ready: () => string; // "" when it's ready to pay, else what's missing
+  kind?: "cart" | "giftcard";
 }) {
-  const choices = [
-    ...(opts.stripe ? [{ id: "card", name: "Card, Apple Pay or Google Pay", icons: ["visa", "mastercard", "apple-pay", "google-pay"] }] : []),
-    ...(opts.paypal ? [{ id: "paypal", name: "PayPal or Venmo", icons: ["paypal", "venmo"] }] : []),
-    ...opts.manual.filter((m) => !m.pickupOnly || pickup).map((m) => ({ id: m.id, name: m.id === "cash" ? m.name : `${m.name} (send it yourself)`, icons: [m.icon] })),
-  ];
+  const covered = kind === "cart" && total === 0;
+  const choices = covered
+    ? [{ id: "covered", name: "Paid by gift card", icons: ["gift-card"] }]
+    : [
+        ...(opts.stripe ? [{ id: "card", name: "Card, Apple Pay or Google Pay", icons: ["visa", "mastercard", "apple-pay", "google-pay"] }] : []),
+        ...(opts.paypal ? [{ id: "paypal", name: "PayPal or Venmo", icons: ["paypal", "venmo"] }] : []),
+        ...opts.manual.filter((m) => (!m.pickupOnly || pickup) && !(kind === "giftcard" && m.pickupOnly)).map((m) => ({ id: m.id, name: m.id === "cash" ? m.name : `${m.name} (send it yourself)`, icons: [m.icon] })),
+      ];
   const [pick, setPick] = useState(choices[0]?.id ?? "");
-  const [code, setCode] = useState("");
-  const [applied, setApplied] = useState<{ code: string; off: number } | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const box = useRef<HTMLDivElement>(null);
-  const latest = useRef({ body, applied, ready });
-  latest.current = { body, applied, ready };
-  const bodyKey = JSON.stringify(body);
+  const latest = useRef({ request, ready });
+  latest.current = { request, ready };
+  const choiceKey = choices.map((c) => c.id).join(",");
 
   useEffect(() => {
     if (!choices.some((c) => c.id === pick)) setPick(choices[0]?.id ?? "");
-  }, [pickup]); // eslint-disable-line react-hooks/exhaustive-deps
-  // a code was checked against this cart; a different cart needs it checked again
-  useEffect(() => setApplied(null), [bodyKey]);
+  }, [choiceKey]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("cart:buyer") ?? "{}");
@@ -110,8 +111,7 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
           },
           createOrder: async () => {
             setErr("");
-            const r = await fetch("/api/pay/paypal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "create", ...latest.current.body, code: latest.current.applied?.code }) });
-            const d = await r.json();
+            const d = await post("/api/pay/paypal", { action: "create", ...latest.current.request });
             if (!d.id) {
               setErr(d.error || "PayPal checkout couldn't start.");
               throw new Error(d.error);
@@ -120,8 +120,7 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
           },
           onApprove: async (data: { orderID: string }) => {
             setBusy(true);
-            const r = await fetch("/api/pay/paypal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "capture", id: data.orderID }) });
-            const d = await r.json();
+            const d = await post("/api/pay/paypal", { action: "capture", id: data.orderID });
             if (d.url) window.location.href = d.url;
             else {
               setBusy(false);
@@ -142,15 +141,6 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
     };
   }, [pick, opts.paypal]);
 
-  async function applyCode() {
-    setErr("");
-    if (!code.trim()) return;
-    const r = await fetch("/api/pay/code", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, code }) });
-    const d = await r.json();
-    if (d.code) setApplied({ code: d.code, off: d.off });
-    else setErr(d.error || "That code didn't work.");
-  }
-
   async function placeDirect(e: React.FormEvent) {
     e.preventDefault();
     const missing = ready();
@@ -160,8 +150,7 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
     try {
       localStorage.setItem("cart:buyer", JSON.stringify({ name: form.name, email: form.email, phone: form.phone, line1: form.line1, line2: form.line2, city: form.city, state: form.state, zip: form.zip, country: form.country }));
     } catch {}
-    const r = await fetch("/api/pay/direct", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, payWith: pick, code: applied?.code, buyer: form, website: form.website }) });
-    const d = await r.json().catch(() => ({}));
+    const d = await post("/api/pay/direct", { ...request, payWith: pick, buyer: form, website: form.website });
     if (d.url) window.location.href = d.url;
     else {
       setErr(d.error || "The order couldn't be placed. Please try again.");
@@ -177,22 +166,7 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
     </label>
   );
   const manual = opts.manual.find((m) => m.id === pick);
-  const codeBox =
-    promoCodes && pick !== "card" ? (
-      <div className="pay-code">
-        {applied ? (
-          <p className="saving small">
-            Code <strong>{applied.code}</strong>: −{money(applied.off, currency)}{" "}
-            <button type="button" className="linkish" onClick={() => setApplied(null)}>Remove</button>
-          </p>
-        ) : (
-          <div className="row-inline">
-            <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Promo or gift card code" aria-label="Promo or gift card code" />
-            <button type="button" className="btn btn-sm" onClick={applyCode}>Apply</button>
-          </div>
-        )}
-      </div>
-    ) : null;
+  const amount = total !== null ? ` · ${money(total, currency)}` : "";
 
   return (
     <div className="pay-choices">
@@ -217,31 +191,30 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
       {pick === "card" ? (
         <>
           <button className="btn btn-lg btn-block" onClick={onCard} disabled={cardBusy}>
-            {cardBusy ? "Opening secure checkout…" : "Check out"}
+            {cardBusy ? "Opening secure checkout…" : `Check out${amount}`}
           </button>
           <p className="pay-note">
             Pay with card, Apple Pay or Google Pay on Stripe&apos;s secure page.
-            {promoCodes ? " Have a promo code? Enter it there." : ""}
-            {giftNotes ? " You can add a gift message there too." : ""}
+            {giftNotes && kind === "cart" ? " You can add a gift message there too." : ""}
           </p>
         </>
       ) : pick === "paypal" ? (
         <>
-          {codeBox}
-          {applied && total !== null ? <p className="small"><strong>New total: {money(Math.max(0, total - applied.off), currency)}</strong></p> : null}
           <div ref={box} className={`paypal-box ${err ? "failed" : ""}`} aria-busy={busy}>
             <p className="muted small">Loading PayPal…</p>
           </div>
-          <p className="pay-note">Pay with your PayPal account, Venmo (on your phone), Pay Later, or a card through PayPal. {ships ? "PayPal asks where to ship it." : ""}</p>
+          <p className="pay-note">Pay with your PayPal account, Venmo (on your phone), Pay Later, or a card through PayPal.{ships ? " PayPal asks where to ship it." : ""}</p>
         </>
-      ) : manual ? (
+      ) : manual || pick === "covered" ? (
         <form className="pay-direct" onSubmit={placeDirect}>
           <p className="small">
-            {manual.id === "cash" ? (
+            {pick === "covered" ? (
+              <>Your gift card covers the whole order. Fill this in and place it.</>
+            ) : manual!.id === "cash" ? (
               <>Place the order now and pay in cash when you pick it up.</>
             ) : (
               <>
-                Place the order, then send the money by <strong>{manual.name}</strong> to <strong>{manual.handle}</strong>. We start as soon as it arrives. The details are on the next page and emailed to you.
+                Place the order, then send the money by <strong>{manual!.name}</strong> to <strong>{manual!.handle}</strong>. We start as soon as it arrives. The details are on the next page and emailed to you.
               </>
             )}
           </p>
@@ -254,16 +227,15 @@ export function PayChoices({ opts, body, total, currency, ships, pickup, promoCo
               {f("line2", "Apt, suite (optional)", { autoComplete: "address-line2", maxLength: 100 })}
               <div className="pay-row">
                 {f("city", "City", { autoComplete: "address-level2", required: true, maxLength: 60 })}
-                {body.abroad ? f("country", "Country code", { autoComplete: "country", required: true, maxLength: 2, placeholder: "CA" }) : f("state", "State", { autoComplete: "address-level1", required: true, maxLength: 30, placeholder: "OK" })}
-                {f("zip", body.abroad ? "Postal code" : "ZIP", { autoComplete: "postal-code", required: true, maxLength: 12 })}
+                {request.abroad ? f("country", "Country code", { autoComplete: "country", required: true, maxLength: 2, placeholder: "CA" }) : f("state", "State", { autoComplete: "address-level1", required: true, maxLength: 30, placeholder: "OK" })}
+                {f("zip", request.abroad ? "Postal code" : "ZIP", { autoComplete: "postal-code", required: true, maxLength: 12 })}
               </div>
             </>
           ) : null}
-          {giftNotes ? f("note", "Gift message (optional)", { maxLength: 255 }) : null}
+          {giftNotes && kind === "cart" ? f("note", "Gift message (optional)", { maxLength: 255 }) : null}
           <input name="website" tabIndex={-1} autoComplete="off" className="hp" aria-hidden value={form.website ?? ""} onChange={(e) => setForm({ ...form, website: e.target.value })} />
-          {codeBox}
           <button className="btn btn-lg btn-block" disabled={busy}>
-            {busy ? "Placing your order…" : `Place order${total !== null ? ` · ${money(Math.max(0, total - (applied?.off ?? 0)), currency)}` : ""}`}
+            {busy ? "Placing your order…" : `Place order${amount}`}
           </button>
         </form>
       ) : null}

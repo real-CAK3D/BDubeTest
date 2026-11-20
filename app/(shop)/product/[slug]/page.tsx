@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/shop/AddToCart";
+import { WishButton } from "@/components/shop/WishButton";
 import { getBlanks } from "@/lib/blanks";
 import { ProductViews } from "@/components/shop/ProductViews";
 import { ShareButtons } from "@/components/shop/ShareButtons";
@@ -76,6 +77,7 @@ export default async function ProductPage({ params }: Params) {
           {s.discounts.bulk.length ? (
             <p className="bulk-note">Buying several? {s.discounts.bulk.map((t) => `${t.minQty}+ items: ${t.percent}% off`).join(" · ")}</p>
           ) : null}
+          <p><WishButton id={p.id} name={p.name} big /></p>
           <ShareButtons title={p.name} path={`/product/${p.slug}`} />
           <div className="prose">
             {paragraphs(p.description).map((x, i) => (

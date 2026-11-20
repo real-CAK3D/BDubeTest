@@ -215,7 +215,7 @@ export function ChatWidget({ title, greeting, suggestions }: { title: string; gr
           <p className="chat-note">{live ? "You're chatting with a real person from our shop." : "Answers come from our own info. Ask for a person any time and we'll pass your message on."}</p>
         </section>
       ) : null}
-      <button type="button" className={`chat-fab ${available ? "has-live" : ""}`} onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? "Close chat" : available ? `${title} (live chat available)` : title}>
+      <button type="button" className={`chat-fab ${available ? "has-live" : ""}`} onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? "Close chat" : available ? "Live chat: someone is here to answer" : `Ask us: ${title}`}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
         </svg>

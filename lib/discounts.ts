@@ -7,6 +7,8 @@ import { siteUrl, stripe } from "./stripe";
 import type { GiftCard, VetRequest } from "./types";
 import { kv, withLock } from "./store";
 
+const dollars = (c: number) => `$${(c / 100).toFixed(2)}`;
+
 /*
  * EDIT-POINT: DISCOUNTS
  * Promo codes made from the dashboard. They live in Stripe (so the code box on
@@ -102,10 +104,16 @@ async function _addVetRequest(r: Omit<VetRequest, "id" | "createdAt" | "status">
 export const getGiftCards = () => getPrivate<GiftCard[]>("giftCards", []);
 export const saveGiftCards = (l: GiftCard[]) => setPrivate("giftCards", l.slice(0, 5000));
 
-/** Makes a one-time code worth `amount` cents, saves it, and emails the recipient if email is set up. */
+/**
+ * Makes a gift card: the shop's own code with a balance (no Stripe needed), saves
+ * it, and emails the recipient if email is set up. It works with every way to
+ * pay; whatever isn't spent stays on the card for next time.
+ */
 async function _issueGiftCard(g: Omit<GiftCard, "id" | "code" | "promoId" | "createdAt" | "sentAt">): Promise<GiftCard> {
-  const { id, code } = await createCode({ code: randomCode("GIFT", 8), name: `Gift card $${(g.amount / 100).toFixed(0)}`, amount: g.amount, maxUses: 1, kind: "gift" });
-  const card: GiftCard = { ...g, id: newId(), code, promoId: id, createdAt: new Date().toISOString() };
+  const list = await getGiftCards();
+  let code = randomCode("GIFT", 8);
+  while (list.some((c) => c.code === code)) code = randomCode("GIFT", 8);
+  const card: GiftCard = { ...g, id: newId(), code, promoId: "", balance: g.amount, createdAt: new Date().toISOString() };
   const s = await getSettings();
   const to = g.toEmail || g.buyerEmail;
   if (to && (await emailReady(s.emailFrom))) {
@@ -113,16 +121,16 @@ async function _issueGiftCard(g: Omit<GiftCard, "id" | "code" | "promoId" | "cre
       await sendEmail({
         from: s.emailFrom,
         to,
-        subject: `${g.fromName ? `${g.fromName} sent you` : "You've got"} a $${(g.amount / 100).toFixed(2)} gift card from ${s.businessName}`,
+        subject: `${g.fromName ? `${g.fromName} sent you` : "You've got"} a ${dollars(g.amount)} gift card from ${s.businessName}`,
         text: [
           g.toName ? `Hi ${g.toName},` : "Hi,",
           "",
           `${g.fromName || "Someone"} sent you a gift card for ${s.businessName}.`,
           g.message ? `\n"${g.message}"\n` : "",
-          `Amount: $${(g.amount / 100).toFixed(2)}`,
+          `Amount: ${dollars(g.amount)}`,
           `Code: ${code}`,
           "",
-          `Pick something out at ${siteUrl()} and type the code on the checkout page. It's used up in one order, so choose items worth at least the gift card amount.`,
+          `Pick something out at ${siteUrl()} and type the code in your cart. Anything you don't spend stays on the card for next time.`,
           "",
           s.businessName,
         ].join("\n"),
@@ -131,15 +139,30 @@ async function _issueGiftCard(g: Omit<GiftCard, "id" | "code" | "promoId" | "cre
       card.sentAt = new Date().toISOString();
     } catch {}
   }
-  const list = await getGiftCards();
   list.unshift(card);
   await saveGiftCards(list);
   return card;
 }
 
+/** Takes money off a gift card for an order. Returns what it could take (less if it was spent elsewhere meanwhile). */
+async function _redeemGift(id: string, amount: number, order: number) {
+  const list = await getGiftCards();
+  const c = list.find((x) => x.id === id);
+  if (!c || c.promoId || c.disabled) return 0;
+  const take = Math.min(amount, c.balance ?? 0);
+  if (take <= 0) return 0;
+  c.balance = (c.balance ?? 0) - take;
+  c.uses = [...(c.uses ?? []), { at: new Date().toISOString(), order, amount: take }].slice(-50);
+  await saveGiftCards(list);
+  return take;
+}
+
 // one change at a time (see withLock in lib/store.ts)
 export function addVetRequest(...a: Parameters<typeof _addVetRequest>) {
   return withLock("write", () => _addVetRequest(...a));
+}
+export function redeemGift(...a: Parameters<typeof _redeemGift>) {
+  return withLock("write", () => _redeemGift(...a));
 }
 export function issueGiftCard(...a: Parameters<typeof _issueGiftCard>) {
   return withLock("write", () => _issueGiftCard(...a));
@@ -148,14 +171,13 @@ export function issueGiftCard(...a: Parameters<typeof _issueGiftCard>) {
 // ---------- codes typed in the cart when paying by PayPal or directly ----------
 // (Stripe's own checkout page checks codes itself; these reuse the same codes from Stripe)
 
-const dollars = (c: number) => `$${(c / 100).toFixed(2)}`;
 
 /** Checks a promo or gift card code against an order subtotal (cents). */
 export async function checkCode(raw: string, subtotal: number): Promise<{ promoId: string; code: string; off: number } | { error: string }> {
   const code = String(raw ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 30);
   if (!code) return { error: "Type a code." };
   const s = await stripe();
-  if (!s) return { error: "Codes only work with card checkout right now." };
+  if (!s) return { error: `${code} isn't a working code.` };
   const found = (await s.promotionCodes.list({ code, active: true, limit: 1 }).catch(() => null))?.data[0];
   if (!found || !found.coupon.valid) return { error: `${code} isn't a working code.` };
   if (found.expires_at && found.expires_at * 1000 < Date.now()) return { error: `${code} has expired.` };

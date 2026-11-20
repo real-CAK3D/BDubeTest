@@ -110,7 +110,6 @@ export function LinkPageClient({ pageUrl, title, avatar, qr, share, counting = t
                 <img src={avatar} alt="" />
               ) : null}
               <strong>{s.page ? title : s.label}</strong>
-              <span>{s.url.replace(/^https?:\/\//, "")}</span>
             </div>
             {s.page && qr ? (
               <div className="lt-qr">

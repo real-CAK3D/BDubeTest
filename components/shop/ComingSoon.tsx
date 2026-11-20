@@ -26,7 +26,7 @@ export function ComingSoon({ s, counts, limit, page }: { s: SiteSettings; counts
             {x.image ? <img src={x.image} alt="" loading="lazy" /> : <div className="coming-art" aria-hidden>✦</div>}
             <div className="coming-body">
               <span className={`coming-stage s-${x.stage}`}>{STAGE[x.stage]}{x.when ? ` · ${x.when}` : ""}</span>
-              <h3>{x.title}</h3>
+              <h2 className="coming-title">{x.title}</h2>
               {x.text ? <p>{x.text}</p> : null}
               <WantButton id={x.id} count={counts[x.id] ?? 0} />
             </div>

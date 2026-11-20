@@ -762,3 +762,14 @@ body:has(.hq-shell[data-mode="dark"]) { background: #0F1311; }
 .pay-row-admin { display: grid; gap: 0.35rem; padding: 0.7rem 0; border-top: 1px solid var(--line); }
 .pay-row-admin .check img { vertical-align: middle; border-radius: 3px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); margin: 0 0.2rem; }
 .pay-row-admin p { margin: 0; }
+.tax-row { align-items: center; gap: 0.6rem 1rem; padding: 0.4rem 0; border-top: 1px solid var(--line); }
+/* Site health */
+.health-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; }
+.health-list li { display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; padding: 0.7rem 0; border-top: 1px solid var(--line); }
+.health-list li:first-child { border-top: 0; }
+.health-list p { margin: 0.15rem 0 0; }
+.h-icon { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; font-weight: 800; color: #fff; }
+.h-ok .h-icon { background: #2e7d32; }
+.h-warn .h-icon { background: #b26a00; }
+.h-bad .h-icon { background: #c62828; }
+.steps-list { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.5rem; line-height: 1.5; }

@@ -16,6 +16,8 @@ export async function GET(req: Request) {
   const [s, products] = await Promise.all([getSettings(), getActiveProducts()]);
   const base = siteUrl(req);
   const abs = (u: string) => (u.startsWith("http") ? u : base + u);
+  // photos as JPG through /api/feed-image (WebP and PNG are turned into JPG)
+  const img = (u: string) => (/\.jpe?g($|\?)/i.test(u) ? abs(u) : `${base}/api/feed-image?src=${encodeURIComponent(u)}`);
   const cur = s.currency.toUpperCase();
   const items: string[] = [];
   for (const p of products) {
@@ -31,8 +33,8 @@ export async function GET(req: Request) {
           `<title>${esc(v.size ? `${p.name} - ${v.size}` : p.name)}</title>`,
           `<description>${esc(desc)}</description>`,
           `<link>${esc(`${base}/product/${p.slug}`)}</link>`,
-          `<g:image_link>${esc(abs(p.images[0]))}</g:image_link>`,
-          ...p.images.slice(1, 10).map((u) => `<g:additional_image_link>${esc(abs(u))}</g:additional_image_link>`),
+          `<g:image_link>${esc(img(p.images[0]))}</g:image_link>`,
+          ...p.images.slice(1, 10).map((u) => `<g:additional_image_link>${esc(img(u))}</g:additional_image_link>`),
           `<g:availability>${p.stock === 0 ? "out_of_stock" : "in_stock"}</g:availability>`,
           `<g:price>${(v.price / 100).toFixed(2)} ${cur}</g:price>`,
           ...(p.compareAtPrice && p.compareAtPrice > v.price && !p.sizes?.length ? [`<g:sale_price>${(p.price / 100).toFixed(2)} ${cur}</g:sale_price>`] : []),
@@ -41,7 +43,8 @@ export async function GET(req: Request) {
           "<g:identifier_exists>no</g:identifier_exists>",
           ...(p.category ? [`<g:product_type>${esc(p.category)}</g:product_type>`] : []),
           ...(p.sizes?.length ? [`<g:item_group_id>${esc(p.slug)}</g:item_group_id>`, `<g:size>${esc(v.size)}</g:size>`] : []),
-          ...(s.collectShipping ? [`<g:shipping><g:country>US</g:country><g:price>${(s.shippingFlat / 100).toFixed(2)} ${cur}</g:price></g:shipping>`] : []),
+          // a flat price only when that's how shipping works; by-distance shipping is set in Merchant Center / Commerce Manager instead
+          ...(s.collectShipping && !s.shippingTiers.length ? [`<g:shipping><g:country>US</g:country><g:price>${(s.shippingFlat / 100).toFixed(2)} ${cur}</g:price></g:shipping>`] : []),
           "</item>",
         ].join("")
       );

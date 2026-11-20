@@ -10,6 +10,8 @@ import { SecurityPanel } from "./SecurityPanel";
 import { Tabs } from "./Tabs";
 import { useSettings } from "./useSettings";
 import { PaymentsPanel } from "./PaymentsPanel";
+import { TaxPanel } from "./TaxPanel";
+import { stateOfZip } from "@/lib/tax";
 
 function PasswordForm() {
   const [f, setF] = useState({ current: "", next: "", again: "" });
@@ -137,14 +139,19 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
 
           </>
           ) },
-          { id: "payments", label: "Payments", content: <PaymentsPanel value={s.payments} onChange={(payments) => set({ payments })} ready={payReady} /> },
+          { id: "payments", label: "Payments & tax", content: (
+            <>
+              <PaymentsPanel value={s.payments} onChange={(payments) => set({ payments })} ready={payReady} />
+              <TaxPanel value={s.tax.mode === "off" && s.stripeTax ? { ...s.tax, mode: "stripe" } : s.tax} onChange={(tax) => set({ tax })} homeState={stateOfZip(s.shipFromZip)} />
+            </>
+          ) },
           { id: "checkout", label: "Checkout & emails", content: (
         <>
         <section className="panel">
           <div className="panel-head"><h2>Checkout & emails</h2></div>
           <div className="stack">
             <label className="check"><input type="checkbox" checked={s.allowPromoCodes} onChange={(e) => set({ allowPromoCodes: e.target.checked })} /> Let customers enter promo codes <Link href="/admin/discounts" className="small">Discounts</Link></label>
-            <label className="check"><input type="checkbox" checked={s.stripeTax} onChange={(e) => set({ stripeTax: e.target.checked })} /> Sales tax by Stripe <a className="small" href="https://dashboard.stripe.com/settings/tax" target="_blank" rel="noreferrer">set up Stripe Tax first</a></label>
+            <p className="muted small">Sales tax is set under <strong>Payments &amp; tax</strong>.</p>
             <label className="check"><input type="checkbox" checked={s.showContactForm} onChange={(e) => set({ showContactForm: e.target.checked })} /> Contact form on the shop <Link href="/admin/inbox" className="small">Inbox</Link></label>
             <label className="check"><input type="checkbox" checked={s.giftNotes} onChange={(e) => set({ giftNotes: e.target.checked })} /> Gift message box at checkout</label>
           <label className="check"><input type="checkbox" checked={s.showNewsletter} onChange={(e) => set({ showNewsletter: e.target.checked })} /> Email sign-up box in the footer</label>

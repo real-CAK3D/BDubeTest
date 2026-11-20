@@ -48,7 +48,7 @@ export type DiscountPrograms = {
 };
 export type Abandoned = { id: string; createdAt: string; email: string; name: string; amount: number; items: string; url: string; emailedAt?: string; recovered?: boolean };
 export type VetRequest = { id: string; createdAt: string; name: string; email: string; group: string; note: string; status: "new" | "approved" | "declined"; code?: string };
-export type GiftCard = { id: string; code: string; promoId: string; amount: number; createdAt: string; fromName: string; buyerEmail: string; toName: string; toEmail: string; message: string; orderNumber?: number; sentAt?: string };
+export type GiftCard = { id: string; code: string; promoId: string; /* "" = the shop's own code with a balance */ balance?: number; /* cents left (own codes) */ uses?: { at: string; order: number; amount: number }[]; disabled?: boolean; amount: number; createdAt: string; fromName: string; buyerEmail: string; toName: string; toEmail: string; message: string; orderNumber?: number; sentAt?: string };
 // A link with a picture (footer and contact page): Facebook, a phone number, an email...
 export type LinkItem = {
   id: string;
@@ -159,7 +159,7 @@ export type Order = {
   // set while the steps after payment (stock, gift card codes, thank-you code, notification) are still running;
   // a retry picks up whatever isn't done yet
   pending?: boolean;
-  steps?: { stock?: boolean; gifts?: boolean; thanks?: boolean; notified?: boolean };
+  steps?: { stock?: boolean; codes?: boolean; gifts?: boolean; thanks?: boolean; notified?: boolean };
   giftCodes?: string[]; // gift card codes bought in this order
   bulkPercent?: number; // bulk discount applied
   shipTo?: ShipTo; // the address in parts, for shipping labels
@@ -167,6 +167,10 @@ export type Order = {
   note?: string;
   viewKey?: string; // lets the customer see their order on the thank-you page (PayPal and pay-directly orders)
   payWith?: string; // pay-directly orders: cashapp, venmo, zelle or cash
+  giftPaid?: number; // paid with a gift card (cents), on top of the total charged
+  giftCode?: string;
+  codes?: { promoId?: string; giftId?: string; giftOff?: number }; // codes typed in the cart, settled once the order is placed
+  giftCardBuy?: { amount: number; fromName: string; toName: string; toEmail: string; message: string }; // a gift card bought (PayPal / pay directly)
 };
 
 export type Expense = {
@@ -235,7 +239,9 @@ export type SiteSettings = {
   customSteps: Step[];
   hiddenFields: string[];
   links: LinkItem[];
-  payments: import("./payments").PaymentSettings; // ways to pay besides Stripe (Settings > Payments)
+  payments: import("./payments").PaymentSettings;
+  tax: import("./tax").TaxSettings;
+  verify: { google: string; meta: string; pinterest: string; bing: string }; // site-verification codes (Sell online page) // sales tax by where the order goes (Settings > Payments) // ways to pay besides Stripe (Settings > Payments)
   linkPage: import("./link-page").LinkPageSettings; // the Socials page look (Dashboard > Link page)
   upcoming: UpcomingSettings; // "What's to come": new things on the way
   seasons: import("./seasons").SeasonsSettings; // holiday banners (Dashboard > Seasonal banners) // footer / contact links with icons (Words & logos > Contact page) // text kept but not shown on the shop (the eye button in Words & logos)

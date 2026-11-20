@@ -21,7 +21,7 @@ export function Footer({ s, accepts = [] }: { s: SiteSettings; accepts?: { file:
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <Logo s={s} size={64} />
+          <Logo s={s} size={64} decorative />
           <div>
             <strong>{s.businessName}</strong>
             {s.showVeteranBadge && s.serviceLine ? <p className="muted">{s.serviceLine}</p> : null}

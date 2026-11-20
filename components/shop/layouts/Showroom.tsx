@@ -1,5 +1,6 @@
 import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
+import { WishButton } from "../WishButton";
 import type { Product, SiteSettings } from "@/lib/types";
 import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, CategoryTabs, CategoryTiles, Pager, SeeAll } from "../CatalogParts";
@@ -15,9 +16,12 @@ function Rows({ s, items }: { s: SiteSettings; items: Product[] }) {
     <div className="show-list">
       {items.map((p, i) => (
         <article key={p.id} className={`show-row ${i % 2 ? "flip" : ""}`}>
-          <Link href={`/product/${p.slug}`} className="show-media">
-            <ProductImage p={p} />
-          </Link>
+          <div className="wall-wrap">
+            <Link href={`/product/${p.slug}`} className="show-media">
+              <ProductImage p={p} />
+            </Link>
+            <WishButton id={p.id} name={p.name} />
+          </div>
           <div className="show-copy">
             {p.category ? <p className="muted">{p.category}</p> : null}
             <h2>

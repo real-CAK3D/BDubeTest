@@ -31,6 +31,8 @@ export const ADMIN_PAGES: AdminPage[] = [
   { group: "Customers", href: "/admin/reviews", label: "Reviews", note: "Approve customer reviews and photos", icon: "M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z" },
   { group: "Customers", href: "/admin/inbox", label: "Inbox", note: "Messages from the contact form", icon: "M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6z" },
   { group: "Your site", href: "/admin/gallery", label: "Our work", note: "Photos and descriptions of finished pieces", icon: "M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5M15 9.5v.01" },
+  { group: "Your site", href: "/admin/sell-online", label: "Sell online", note: "Facebook & Instagram Shops, Google Shopping, Pinterest", icon: "M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7zM9 7V5a3 3 0 0 1 6 0v2" },
+  { group: "Your site", href: "/admin/health", label: "Site health", note: "What's working, backups, alerts if the site goes down", icon: "M3 12h4l2-5 4 10 2-5h6" },
   { group: "Your site", href: "/admin/link-page", label: "Link page", note: "Your Socials page, like Linktree: one link for your bio with all your links", icon: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" },
   { group: "Your site", href: "/admin/coming-soon", label: "What's to come", note: "New things on the way; see who wants them", icon: "M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" },
   { group: "Your site", href: "/admin/seasonal", label: "Seasonal banners", note: "Holiday banners that show by themselves: switch each one on or off", icon: "M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8zM5 21h14" },

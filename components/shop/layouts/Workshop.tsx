@@ -1,5 +1,6 @@
 import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
+import { WishButton } from "../WishButton";
 import type { Product, SiteSettings } from "@/lib/types";
 import { ReviewsStrip } from "../ReviewsStrip";
 import { AboutTeaser, CatalogHead, CategoryTabs, CategoryTiles, Pager, SeeAll } from "../CatalogParts";
@@ -15,14 +16,17 @@ function Gallery({ s, items }: { s: SiteSettings; items: Product[] }) {
   return (
     <div className="gallery-wall">
       {items.map((p) => (
-        <Link key={p.id} href={`/product/${p.slug}`} className="wall-item">
-          <ProductImage p={p} />
-          <span className="wall-cap">
-            <strong>{p.name}</strong>
-            <Price p={p} currency={s.currency} />
-          </span>
-          {p.personalize ? <span className="wall-tag">Can be personalized</span> : null}
-        </Link>
+        <div key={p.id} className="wall-wrap">
+          <Link href={`/product/${p.slug}`} className="wall-item">
+            <ProductImage p={p} />
+            <span className="wall-cap">
+              <strong>{p.name}</strong>
+              <Price p={p} currency={s.currency} />
+            </span>
+            {p.personalize ? <span className="wall-tag">Can be personalized</span> : null}
+          </Link>
+          <WishButton id={p.id} name={p.name} />
+        </div>
       ))}
     </div>
   );

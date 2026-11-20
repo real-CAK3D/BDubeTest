@@ -33,7 +33,11 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Live chat](#live-chat): Chat with customers on the shop yourself while you're available.
 - [Seasonal banners](#seasonal): Holiday banners at the top of the shop that come and go by themselves.
 - [Link page (Socials)](#link-page): One link for your Instagram, TikTok and Facebook bio, like Linktree.
-- [Ways to pay (PayPal, Venmo, Cash App, Zelle)](#payments): Take payments without relying only on Stripe.
+- [Ways to pay (PayPal, Venmo, Cash App, Zelle)](#ways-to-pay): Take payments without relying only on Stripe.
+- [Sales tax](#sales-tax): Tax added by where each order goes, with every way to pay.
+- [Sell on Facebook, Instagram & Google](#sell-online): List your items in Facebook & Instagram Shops, Google Shopping and Pinterest.
+- [Site health and backups](#site-health): What's working, backups, and alerts if the site goes down.
+- [Customer accounts, search and saved items](#customer-accounts): What customers see: Your orders, the ♥ and the search.
 - [What's to come](#coming-soon): Show customers what you're working on and find out what they want most.
 - [Team chat](#team-chat): Message each other inside the dashboard.
 - [Hide instead of delete](#hiding): Take text, steps, photos, links or chat answers off the shop without losing them.
@@ -50,7 +54,7 @@ How each part of the site works. The same guide is in the dashboard under the ? 
 - [Settings](#settings): Store options, checkout, notifications, password and your accounts.
 - [Accounts & keys](#keys): One spot for every service: sign-in links, API keys, saved logins and your own links.
 - [Inbox](#inbox): Messages from your shop's contact form.
-- [Discounts](#discounts): Coupons and promo codes, made in Stripe.
+- [Discounts](#discount-codes): Coupons and promo codes, made in Stripe.
 - [Notifications](#notifications): New orders, refunds and low stock.
 
 **GitHub**
@@ -483,7 +487,7 @@ Visitors can share the page with the button in the top corner: copy the link, sa
 
 > **Tip:** **Last 30 days** shows visits and how many times each link was tapped, so you can see what people care about. Your own visits while signed in don't count.
 
-<a id="payments"></a>
+<a id="ways-to-pay"></a>
 ### Ways to pay (PayPal, Venmo, Cash App, Zelle)
 
 _Take payments without relying only on Stripe._
@@ -506,7 +510,51 @@ The cart shows PayPal's buttons: PayPal, Venmo (on phones in the US), Pay Later 
 
 Cash App, Venmo or Zelle to your own account, or cash at local pickup. Type your $cashtag, @username or Zelle email/phone. The customer places the order and gets the instructions on screen and by email (put "Order #1043" in the note). The order waits in **Orders › Waiting for payment**; when the money shows up, open it and tap **Got it: mark paid**. Then it moves to **To ship** and the thank-you code is given.
 
-> **Tip:** Promo and gift card codes work with every way to pay (codes live in Stripe, so Stripe needs to be connected for codes). The "We accept" pictures in the footer and cart update by themselves.
+> **Tip:** Customers type promo and gift card codes in the cart, and they work with every way to pay. Gift cards are the shop's own (no Stripe needed, leftover balance stays on the card); promo codes are made in Stripe, so they need Stripe connected. If a gift card covers the whole order, the customer just presses Place order. The "We accept" pictures in the footer and cart update by themselves.
+
+<a id="sales-tax"></a>
+### Sales tax
+
+_Tax added by where each order goes, with every way to pay._
+
+In **Settings › Payments & tax › Sales tax** pick **No sales tax**, **My own rates** or **Stripe Tax**. The state comes from the ZIP code the customer types in the cart (local pickup uses your shop's ZIP from **Settings › Store**). The cart shows the tax before they pay.
+
+**My own rates**: add each state you're registered in and its full rate (state plus the usual local rate), and tick **Tax shipping too** if that state taxes shipping. **Stripe Tax**: exact city and county rates for every address; switch it on in Stripe first, small fee per order.
+
+Promo codes lower the taxable amount; gift cards don't (a gift card is a payment, not a discount). Each order shows its tax, and the orders spreadsheet download has a Tax column for filing.
+
+> **Tip:** Only collect tax where you're registered. A tax preparer can tell you where that is.
+
+<a id="sell-online"></a>
+### Sell on Facebook, Instagram & Google
+
+_List your items in Facebook & Instagram Shops, Google Shopping and Pinterest._
+
+They all read one product list (feed) from your site, so you connect each one once and new items, prices and stock update by themselves daily. Follow the steps on the **Sell online** page for each platform, and paste the verification code they give you into the boxes at the bottom.
+
+> **Tip:** Items need a photo and a price to be listed. Customers still check out on your site.
+
+<a id="site-health"></a>
+### Site health and backups
+
+_What's working, backups, and alerts if the site goes down._
+
+Every check shows green, orange (worth a look) or red (fix it). The site checks itself every day and sends your phone a notification if something important breaks.
+
+**Backups**: press **Download a backup** now and then and keep the file somewhere safe. If your GitHub repository is private, a locked copy is also saved there every week automatically. **Put back a backup** restores one (only on this site; customer details stay locked).
+
+**Get told if the site goes down**: follow the 3 steps for UptimeRobot (free). It checks every 5 minutes and emails or pushes an alert to your phone.
+
+<a id="customer-accounts"></a>
+### Customer accounts, search and saved items
+
+_What customers see: Your orders, the ♥ and the search._
+
+The person icon at the top of the shop opens **Your orders**. Customers sign in with a 6-digit code emailed to them (no passwords), or are signed in automatically on their phone right after they buy. They see their orders, tracking, and gift card balances.
+
+The ♥ on every item saves it for later (**Saved items**). The magnifying glass searches the shop and forgives typos and plurals.
+
+> **Tip:** Sign-in codes need customer emails switched on (Accounts & keys › Resend).
 
 <a id="coming-soon"></a>
 ### What's to come
@@ -737,7 +785,7 @@ When a customer fills in the form on your shop's **Contact** page, the message l
 
 Turn the form on or off in **Settings > Checkout & emails**.
 
-<a id="discounts"></a>
+<a id="discount-codes"></a>
 ### Discounts
 
 _Coupons and promo codes, made in Stripe._

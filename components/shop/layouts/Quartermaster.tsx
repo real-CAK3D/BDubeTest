@@ -1,5 +1,6 @@
 import { WorkShowcase } from "../WorkShowcase";
 import Link from "next/link";
+import { WishButton } from "../WishButton";
 import type { Product, SiteSettings } from "@/lib/types";
 import { AddToCart } from "../AddToCart";
 import { ReviewsStrip } from "../ReviewsStrip";
@@ -24,6 +25,7 @@ function List({ s, items }: { s: SiteSettings; items: Product[] }) {
             <span className="muted">{p.summary}</span>
           </div>
           <div className="qm-buy">
+            <WishButton id={p.id} name={p.name} />
             <Price p={p} currency={s.currency} />
             <StockNote p={p} low={s.lowStockAlert} />
             {p.sizes?.length || p.designs ? (

@@ -83,7 +83,7 @@ export function Showcase3D({ items, label }: { items: ShowcaseItem[]; label: str
               onClick={(e) => drag.current?.moved && e.preventDefault()}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={it.image} alt={it.title} draggable={false} loading="lazy" />
+              <img src={it.image} alt="" draggable={false} loading="lazy" />
               <span>{it.title}</span>
             </Link>
           ))}

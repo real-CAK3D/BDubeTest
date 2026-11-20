@@ -22,7 +22,15 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: url ? new URL(url) : undefined,
     title: { default: `${s.businessName}`, template: `%s | ${s.businessName}` },
     description: s.tagline || s.heroText,
-    icons: s.favicon || s.logo ? { icon: s.favicon || s.logo, apple: s.favicon || s.logo } : undefined,
+    icons: s.favicon || s.logo ? { icon: [16, 32, 48, 192].map((n) => ({ url: `/api/favicon?s=${n}`, sizes: `${n}x${n}`, type: "image/png" })), apple: { url: "/api/favicon?s=180", sizes: "180x180" } } : undefined,
+    verification: {
+      google: s.verify?.google || undefined,
+      other: {
+        ...(s.verify?.meta ? { "facebook-domain-verification": s.verify.meta } : {}),
+        ...(s.verify?.pinterest ? { "p:domain_verify": s.verify.pinterest } : {}),
+        ...(s.verify?.bing ? { "msvalidate.01": s.verify.bing } : {}),
+      },
+    },
     openGraph: { title: s.businessName, description: s.tagline, images: ogImage ? [ogImage] : undefined, type: "website", siteName: s.businessName },
   };
 }

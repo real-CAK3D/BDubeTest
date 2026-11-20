@@ -56,10 +56,12 @@ async function call<T>(mode: PayPalMode, path: string, body?: unknown, requestId
 const usd = (cents: number) => (cents / 100).toFixed(2);
 
 export type PayPalItem = { name: string; quantity: number; unit: number; description?: string };
-export async function createPayPalOrder(mode: PayPalMode, o: { ref: string; brand: string; currency: string; items: PayPalItem[]; shipping: number; discount: number; ship: boolean }) {
+export async function createPayPalOrder(mode: PayPalMode, o: { ref: string; brand: string; currency: string; items: PayPalItem[]; shipping: number; tax: number; discount: number; ship: boolean }) {
   const cur = o.currency.toUpperCase();
   const itemTotal = o.items.reduce((n, i) => n + i.unit * i.quantity, 0);
-  const total = itemTotal + o.shipping - o.discount;
+  const total = itemTotal + o.shipping + o.tax - o.discount;
+  // PayPal only takes a discount up to the items' price; past that (a big gift card) send just the total
+  const detailed = o.discount <= itemTotal;
   const res = await call<{ id: string }>(
     mode,
     "/v2/checkout/orders",
@@ -72,13 +74,18 @@ export async function createPayPalOrder(mode: PayPalMode, o: { ref: string; bran
           amount: {
             currency_code: cur,
             value: usd(total),
-            breakdown: {
-              item_total: { currency_code: cur, value: usd(itemTotal) },
-              ...(o.shipping ? { shipping: { currency_code: cur, value: usd(o.shipping) } } : {}),
-              ...(o.discount ? { discount: { currency_code: cur, value: usd(o.discount) } } : {}),
-            },
+            ...(detailed
+              ? {
+                  breakdown: {
+                    item_total: { currency_code: cur, value: usd(itemTotal) },
+                    ...(o.shipping ? { shipping: { currency_code: cur, value: usd(o.shipping) } } : {}),
+                    ...(o.tax ? { tax_total: { currency_code: cur, value: usd(o.tax) } } : {}),
+                    ...(o.discount ? { discount: { currency_code: cur, value: usd(o.discount) } } : {}),
+                  },
+                }
+              : {}),
           },
-          items: o.items.map((i) => ({
+          items: (detailed ? o.items : []).map((i) => ({
             name: i.name.slice(0, 127),
             ...(i.description ? { description: i.description.slice(0, 127) } : {}),
             quantity: String(i.quantity),

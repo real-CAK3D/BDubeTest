@@ -124,6 +124,7 @@ export function OrderList({ initial, openId, status, canEmail, designs = [], par
                         {o.discount ? <li className="muted">Discount{o.promoCode ? ` (${o.promoCode})` : ""} −{money(o.discount, o.currency)}</li> : null}
                         {o.shipping ? <li className="muted">Shipping {money(o.shipping, o.currency)}</li> : null}
                         {o.tax ? <li className="muted">Tax {money(o.tax, o.currency)}</li> : null}
+                        {o.giftPaid ? <li className="muted">Gift card{o.giftCode ? ` (${o.giftCode})` : ""} −{money(o.giftPaid, o.currency)}</li> : null}
                       </ul>
                       {o.paymentMethod ? <p className="muted small">{o.status === "awaiting" ? "Paying with" : "Paid with"} {o.paymentMethod}</p> : null}
                       {o.giftNote ? <div className="engrave">Gift message: <strong>&ldquo;{o.giftNote}&rdquo;</strong></div> : null}

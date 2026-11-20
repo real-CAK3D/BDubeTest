@@ -42,3 +42,17 @@ export async function setPrivate<T>(name: string, value: T) {
   const data = Buffer.concat([c.update(JSON.stringify(value), "utf8"), c.final()]);
   await kv.set(name, { sealed: 1, iv: iv.toString("base64"), tag: c.getAuthTag().toString("base64"), data: data.toString("base64") } satisfies Sealed);
 }
+
+/** Locks any value with the same key as customer details (for backup copies kept elsewhere). */
+export function seal(value: unknown): Sealed {
+  const iv = randomBytes(12);
+  const c = createCipheriv("aes-256-gcm", key(), iv);
+  const data = Buffer.concat([c.update(JSON.stringify(value), "utf8"), c.final()]);
+  return { sealed: 1, iv: iv.toString("base64"), tag: c.getAuthTag().toString("base64"), data: data.toString("base64") };
+}
+export function unseal<T>(raw: unknown): T {
+  if (!isSealed(raw)) return raw as T;
+  const d = createDecipheriv("aes-256-gcm", key(), Buffer.from(raw.iv, "base64"));
+  d.setAuthTag(Buffer.from(raw.tag, "base64"));
+  return JSON.parse(Buffer.concat([d.update(Buffer.from(raw.data, "base64")), d.final()]).toString("utf8")) as T;
+}

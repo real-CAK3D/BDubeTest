@@ -15,9 +15,14 @@ by Lóránt Czibik, MIT License:
 [payment-icons](https://github.com/richiehug/payment-icons) by Richie Hug, free to use on websites;
 please respect each brand's usage guidelines.
 
-**Gift card and invoice badges** (`pay/gift-card.svg`, `pay/invoice.svg`) from
+**Gift card, invoice and Discover badges** (`pay/gift-card.svg`, `pay/invoice.svg`, `pay/discover.svg`) from
 [payment-logos](https://github.com/datatrans/payment-logos) by Datatrans, licensed
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Used unmodified.
 
-`pay/venmo.svg`, `pay/cash-app.svg`, `pay/zelle.svg` and `pay/cash.svg` are simple badges made for
-this shop in the same style. All brand names and logos belong to their owners.
+**Brand shapes** from [Simple Icons](https://simpleicons.org) (CC0 1.0, public domain): the Venmo,
+Cash App, Zelle and American Express marks in `pay/venmo.svg`, `pay/cash-app.svg`, `pay/zelle.svg` and
+`pay/american-express.svg` (placed on a card in the same style as the others), and the Google, Etsy,
+Snapchat, Threads, WhatsApp and Amazon shapes in `components/LinkIcon.tsx`. The four-color Google "G"
+follows Google's published logo. `pay/cash.svg` was drawn for this shop.
+
+All brand names and logos belong to their owners; follow each brand's usage guidelines.

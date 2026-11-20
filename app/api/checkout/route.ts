@@ -5,12 +5,14 @@ import { isEmail } from "@/lib/guard";
 import { isPriceError, priceCart, type CartBody } from "@/lib/cart-price";
 import type { SiteSettings } from "@/lib/types";
 import { siteUrl, stripe } from "@/lib/stripe";
+import { orderTotals } from "@/lib/checkout-total";
+import { taxMode } from "@/lib/tax-calc";
 
 export async function POST(req: Request) {
   const s = await stripe();
   if (!s) return NextResponse.json({ error: "Card checkout isn't switched on yet. Please pick another way to pay, or check back soon." }, { status: 503 });
 
-  const body = (await req.json().catch(() => ({ items: [] }))) as CartBody & { giftCard?: GiftCardBuy };
+  const body = (await req.json().catch(() => ({ items: [] }))) as CartBody & { giftCard?: GiftCardBuy; codes?: string[] };
   if (body.giftCard) {
     const settings = await getSettings();
     if (!settings.storeOpen) return NextResponse.json({ error: settings.closedMessage }, { status: 400 });
@@ -20,7 +22,14 @@ export async function POST(req: Request) {
   if (isPriceError(priced)) return NextResponse.json({ error: priced.error }, { status: priced.status });
   const { settings, bulk, cart, pickup, shipZip, abroad } = priced;
   if (!settings.payments.stripe) return NextResponse.json({ error: "Card checkout is switched off. Please pick another way to pay." }, { status: 400 });
-  const tax = settings.stripeTax ? { tax_behavior: "exclusive" as const } : {};
+  const t = await orderTotals(priced, body.codes, { forCard: true });
+  if (t.errors.length) return NextResponse.json({ error: t.errors[0] }, { status: 400 });
+  if (t.total <= 0) return NextResponse.json({ error: "Your gift card covers the whole order. Use \"Place order\" instead." }, { status: 400 });
+  if (t.total < 50) return NextResponse.json({ error: "Card payments need to be at least $0.50. Pick another way to pay the rest." }, { status: 400 });
+  // Stripe Tax on Stripe's page, unless a gift card is used (then the shop worked the tax out above)
+  const autoTax = taxMode(settings) === "stripe" && !t.giftCard;
+  const tax = autoTax ? { tax_behavior: "exclusive" as const } : {};
+  const off = t.discount + t.gift;
   const lines: Stripe.Checkout.SessionCreateParams.LineItem[] = priced.lines.map((l) => ({
     quantity: l.qty,
     price_data:
@@ -40,7 +49,20 @@ export async function POST(req: Request) {
             },
           },
   }));
+  if (t.tax > 0) lines.push({ quantity: 1, price_data: { currency: settings.currency, unit_amount: t.tax, product_data: { name: t.taxLabel || "Sales tax", metadata: { kind: "tax" } } } });
   const quote = priced.shipping;
+  // a promo code or gift card typed in the cart: one coupon for exactly that amount, good for this checkout only
+  const coupon = off
+    ? await s.coupons
+        .create({ amount_off: off, currency: settings.currency, duration: "once", max_redemptions: 1, redeem_by: Math.floor(Date.now() / 1000) + 26 * 3600, name: [t.promo ? `Code ${t.promo.code}` : "", t.giftCard ? "Gift card" : ""].filter(Boolean).join(" + ").slice(0, 40), metadata: { kind: "cart" } })
+        .catch((e) => {
+          console.error("coupon:", e);
+          return null;
+        })
+    : null;
+  if (off && !coupon) return NextResponse.json({ error: "The code couldn't be added. Please try again in a minute." }, { status: 500 });
+  // Stripe's own promo box: only when no code was used in the cart and the tax isn't worked out by the shop
+  const stripeCodes = !coupon && settings.allowPromoCodes && taxMode(settings) !== "rates";
   const countries = priced.countries as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[];
   const base = siteUrl(req);
 
@@ -63,7 +85,7 @@ export async function POST(req: Request) {
                   type: "fixed_amount",
                   display_name: quote.label.slice(0, 100),
                   fixed_amount: { amount: quote.amount, currency: settings.currency },
-                  ...(settings.stripeTax ? { tax_behavior: "exclusive" as const } : {}),
+                  ...tax,
                 },
               },
             ],
@@ -77,14 +99,21 @@ export async function POST(req: Request) {
         ? {
             // the checkout runs out after this long; Stripe then hands us a link back to it
             expires_at: Math.floor(Date.now() / 1000) + Math.max(1, settings.discounts.reminders.hours) * 3600,
-            after_expiration: { recovery: { enabled: true, allow_promotion_codes: settings.allowPromoCodes } },
+            after_expiration: { recovery: { enabled: true, allow_promotion_codes: stripeCodes } },
             consent_collection: { promotions: "auto" as const },
           }
         : {}),
-      allow_promotion_codes: settings.allowPromoCodes || undefined,
+      ...(coupon ? { discounts: [{ coupon: coupon.id }] } : { allow_promotion_codes: stripeCodes || undefined }),
       // needs Stripe Tax set up first (Stripe > Settings > Tax)
-      ...(settings.stripeTax ? { automatic_tax: { enabled: true } } : {}),
-      metadata: { cart: JSON.stringify(cart).slice(0, 499), delivery: pickup ? "pickup" : quote ? "ship" : "none", shipZip: abroad ? "" : shipZip, bulk: String(bulk) },
+      ...(autoTax ? { automatic_tax: { enabled: true } } : {}),
+      metadata: {
+        cart: JSON.stringify(cart).slice(0, 499),
+        delivery: pickup ? "pickup" : quote ? "ship" : "none",
+        shipZip: abroad ? "" : shipZip,
+        bulk: String(bulk),
+        ...(t.promo ? { promoId: t.promo.promoId, promoCode: t.promo.code, promoOff: String(t.discount) } : {}),
+        ...(t.giftCard ? { giftId: t.giftCard.giftId, giftCode: t.giftCard.code, giftOff: String(t.gift) } : {}),
+      },
       success_url: `${base}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/cart`,
     });

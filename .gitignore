@@ -2,8 +2,10 @@ node_modules
 .next
 .data
 public/uploads
+# real secrets never go to GitHub (the list of names is .env.example)
 .env
-.env.local
+.env.*
+!.env.example
 *.tsbuildinfo
 next-env.d.ts
 .vercel

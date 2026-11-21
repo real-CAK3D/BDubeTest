@@ -9,6 +9,8 @@ This is the step-by-step list for taking the shop live. Every step says exactly 
 
 The live shop is **https://bdubetest.vercel.app** and the dashboard is **https://bdubetest.vercel.app/admin**.
 
+**Every secret, key and password** the shop uses is listed in **[.env.example](.env.example)**: what each one is for, where to get it, where to paste it, and whether it's done yet. Real values are never stored on GitHub (this repository is public). They live in Vercel's Environment Variables or the dashboard's **Accounts & keys**, and a copy of each belongs in a password manager.
+
 Everything below is on free plans. The only costs are the usual payment fees (Stripe or PayPal, about 3% per sale) and, later, a domain name (about $10 to $20 a year).
 
 ---

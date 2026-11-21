@@ -82,7 +82,7 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
               <>
                 <h3 className="sub">Shipping by distance</h3>
                 <p className="hint">Customers enter their ZIP code in the cart and see the price before they pay. Distance is measured in a straight line from your ZIP.</p>
-                <label className="f"><span>Your ZIP code (ship from)</span><input inputMode="numeric" maxLength={5} value={s.shipFromZip} onChange={(e) => set({ shipFromZip: e.target.value.replace(/\D/g, "").slice(0, 5) })} placeholder="e.g. 73501" /></label>
+                <label className="f"><span>Your ZIP code (ship from) <em className="muted">also sets your state for sales tax</em></span><input inputMode="numeric" maxLength={5} value={s.shipFromZip} onChange={(e) => set({ shipFromZip: e.target.value.replace(/\D/g, "").slice(0, 5) })} placeholder="e.g. 73501" /></label>
                 <div className="tiers">
                   {s.shippingTiers.map((t, i) => (
                     <div key={i} className="tier">
@@ -142,7 +142,7 @@ export function SettingsForm({ initial, vapidKey, deviceCount, stripeTest, hasRe
           { id: "payments", label: "Payments & tax", content: (
             <>
               <PaymentsPanel value={s.payments} onChange={(payments) => set({ payments })} ready={payReady} />
-              <TaxPanel value={s.tax.mode === "off" && s.stripeTax ? { ...s.tax, mode: "stripe" } : s.tax} onChange={(tax) => set({ tax })} homeState={stateOfZip(s.shipFromZip)} />
+              <TaxPanel value={s.stripeTax && s.tax.mode !== "rates" ? { ...s.tax, mode: "stripe" } : s.tax} onChange={(tax) => set({ tax })} homeState={stateOfZip(s.shipFromZip || s.shipFrom?.zip || "")} />
             </>
           ) },
           { id: "checkout", label: "Checkout & emails", content: (

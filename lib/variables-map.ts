@@ -67,7 +67,7 @@ export function variablesToSettings(v: SiteVariables): FileSettings {
     linkPage: cleanLinkPage(v.linkPage),
     payments: cleanPayments(v.payments),
     verify: { google: v.verify?.google ?? "", meta: v.verify?.meta ?? "", pinterest: v.verify?.pinterest ?? "", bing: v.verify?.bing ?? "" },
-    tax: v.tax ? cleanTax(v.tax) : { mode: v.store.salesTaxByStripe ? "stripe" : "off", rates: [] },
+    tax: v.tax ? cleanTax(v.tax) : { mode: v.store.salesTaxByStripe ? "stripe" : "rates", rates: [] },
     showCustomOrders: v.customOrders.show,
     customOrderHeading: v.customOrders.heading,
     customOrderIntro: v.customOrders.intro,

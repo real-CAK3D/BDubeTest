@@ -279,7 +279,7 @@ export function variablesFile(v: SiteVariables): string {
     L.push(`  payments: ${JSON.stringify(v.payments, null, 2).replace(/"(\w+)":/g, "$1:").replace(/\n/g, "\n  ")},`);
   }
   if (v.tax) {
-    sec("Sales tax", ["mode: off, rates (your own rate per state; the state comes from the ship-to ZIP) or stripe (Stripe Tax, exact local rates).", "rates: state (2 letters), rate in percent, shipping: true if that state taxes shipping. Only collect where you're registered."]);
+    sec("Sales tax", ["mode: rates = Automatic (your state, from the shop ZIP, at its typical rate; the state of each order comes from its ship-to ZIP),", "off = no tax, stripe = Stripe Tax (exact local rates). rates: extra states or your own rate: state (2 letters), rate in percent", "(0 = the typical rate in lib/tax.ts), shipping: true if that state taxes shipping. Only collect where you're registered."]);
     L.push(`  tax: ${JSON.stringify(v.tax).replace(/"(\w+)":/g, "$1: ")},`);
   }
   if (v.verify && Object.values(v.verify).some(Boolean)) {

@@ -8,8 +8,8 @@ import { paypalKeys } from "./paypal";
 import { MANUAL_INFO } from "./payments";
 import { kv, storageMode } from "./store";
 import { stripe } from "./stripe";
-import { taxMode } from "./tax-calc";
-import { stateOfZip } from "./tax";
+import { homeState, taxMode } from "./tax-calc";
+import { collectStates, typicalRate } from "./tax";
 
 /*
  * EDIT-POINT: SITE-HEALTH
@@ -61,8 +61,12 @@ export async function runChecks(deep = true): Promise<Check[]> {
       add(r?.ok ? { id: "paypal", label: "PayPal", level: s.payments.paypalMode === "sandbox" ? "warn" : "ok", detail: s.payments.paypalMode === "sandbox" ? "Connected in Sandbox (practice money)." : "Connected." } : { id: "paypal", label: "PayPal", level: "bad", detail: "PayPal didn't accept the keys.", fix: "Check the keys and Live/Sandbox (Settings > Payments & tax).", href: "/admin/keys" });
     }
   }
-  if (taxMode(s) === "rates" && !s.tax.rates.some((r) => r.rate > 0)) add({ id: "tax", label: "Sales tax", level: "warn", detail: "\"My own rates\" is on but no state has a rate.", href: "/admin/settings" });
-  if (taxMode(s) !== "off" && !stateOfZip(s.shipFromZip)) add({ id: "taxzip", label: "Sales tax for pickup", level: "warn", detail: "Your shop's ZIP isn't filled in, so pickup orders aren't taxed.", href: "/admin/settings" });
+  const home = homeState(s);
+  if (taxMode(s) !== "off" && !home) add({ id: "tax", label: "Sales tax", level: "warn", detail: "Your shop's ZIP isn't filled in, so the shop doesn't know your state and adds no sales tax.", fix: "Type it in Settings > Store (Ship from ZIP).", href: "/admin/settings" });
+  else if (taxMode(s) === "rates") {
+    const list = collectStates(s.tax, home);
+    add({ id: "tax", label: "Sales tax", level: "ok", detail: `Automatic: ${list.map((r) => `${r.state} ${r.rate > 0 ? r.rate : typicalRate(r.state)}%`).join(", ")}. Orders to other states: no tax.` });
+  }
 
   add((await emailReady(s.emailFrom)) ? { id: "email", label: "Customer emails", level: "ok", detail: `Sent from ${s.emailFrom}.` } : { id: "email", label: "Customer emails", level: "warn", detail: "Emails to customers (gift cards, how-to-pay, sign-in codes, shipping) aren't switched on.", fix: "Add a Resend key on Accounts & keys and a sender address in Settings.", href: "/admin/keys" });
   add(process.env.NEXT_PUBLIC_SITE_URL ? { id: "url", label: "Site address", level: "ok", detail: process.env.NEXT_PUBLIC_SITE_URL } : { id: "url", label: "Site address", level: "warn", detail: "NEXT_PUBLIC_SITE_URL isn't set, so links in emails and shares guess the address.", fix: "Add it in Vercel (e.g. https://dubefamilycreations.com)." });

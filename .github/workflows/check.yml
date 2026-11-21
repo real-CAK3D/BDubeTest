@@ -1,0 +1,22 @@
+# Checks every change still builds (types + a full Next.js build) before you rely on it.
+# Changes saved from the dashboard ("[dashboard sync]") are skipped: they only touch site-variables.ts.
+name: Check the shop builds
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  build:
+    if: ${{ !contains(github.event.head_commit.message, '[dashboard sync]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high

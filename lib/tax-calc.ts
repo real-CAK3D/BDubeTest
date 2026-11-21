@@ -7,16 +7,21 @@ import type { SiteSettings } from "./types";
 export type TaxResult = { amount: number; label: string; state: string; note?: string };
 const NONE: TaxResult = { amount: 0, label: "", state: "" };
 
-/** off / rates / stripe (older shops only had the "Sales tax by Stripe" switch). */
+/** off / rates ("Automatic") / stripe (older shops only had the "Sales tax by Stripe" switch). */
 export function taxMode(s: SiteSettings): TaxSettings["mode"] {
-  return s.tax?.mode && s.tax.mode !== "off" ? s.tax.mode : s.stripeTax ? "stripe" : "off";
+  if (s.stripeTax && s.tax?.mode !== "rates") return "stripe";
+  return s.tax?.mode ?? "rates";
 }
+
+/** The shop's own ZIP: "Ship from ZIP" in Settings > Store, or the ship-from address. */
+export const shopZip = (s: SiteSettings) => String(s.shipFromZip || s.shipFrom?.zip || "").replace(/\D/g, "").slice(0, 5);
+export const homeState = (s: SiteSettings) => stateOfZip(shopZip(s));
 
 /** Which state the tax is for: where it ships, or the shop's own state for pickup. */
 export function taxState(p: PricedCart) {
   if (p.abroad) return "";
   if (p.shipping) return stateOfZip(p.shipZip);
-  return stateOfZip(p.settings.shipFromZip); // pickup, or nothing shipped
+  return homeState(p.settings); // pickup, or nothing shipped
 }
 
 /**
@@ -30,12 +35,12 @@ export async function computeTax(p: PricedCart, discount: number, opts: { forCar
   if (mode === "off" || !state) return NONE;
   const taxable = Math.max(0, p.subtotal - discount);
   const shipping = p.shipping?.amount ?? 0;
-  if (mode === "rates") return taxByRate(s.tax, state, taxable, shipping) ?? { ...NONE, state };
+  if (mode === "rates") return taxByRate(s.tax, state, taxable, shipping, homeState(s)) ?? { ...NONE, state };
   // Stripe Tax
   if (opts.forCard) return { ...NONE, state, note: "stripe-page" };
   if (opts.estimate) return { ...NONE, state, note: "later" };
   const st = await stripe();
-  const zip = p.shipping ? p.shipZip : String(s.shipFromZip ?? "").slice(0, 5);
+  const zip = p.shipping ? p.shipZip : shopZip(s);
   if (st && /^\d{5}$/.test(zip)) {
     try {
       const calc = await st.tax.calculations.create({
@@ -50,6 +55,6 @@ export async function computeTax(p: PricedCart, discount: number, opts: { forCar
     }
   }
   // Stripe Tax isn't reachable: fall back to your own rate for that state, if there is one
-  const fallback = taxByRate(s.tax, state, taxable, shipping);
+  const fallback = taxByRate(s.tax, state, taxable, shipping, homeState(s));
   return fallback ? { ...fallback, note: "fallback" } : { ...NONE, state, note: "missed" };
 }

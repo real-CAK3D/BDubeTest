@@ -206,9 +206,10 @@ export const SITE_VARIABLES = {
   },
 
   // Sales tax
-  // mode: off, rates (your own rate per state; the state comes from the ship-to ZIP) or stripe (Stripe Tax, exact local rates).
-  // rates: state (2 letters), rate in percent, shipping: true if that state taxes shipping. Only collect where you're registered.
-  tax: {mode: "off",rates: []},
+  // mode: rates = Automatic (your state, from the shop ZIP, at its typical rate; the state of each order comes from its ship-to ZIP),
+  // off = no tax, stripe = Stripe Tax (exact local rates). rates: extra states or your own rate: state (2 letters), rate in percent
+  // (0 = the typical rate in lib/tax.ts), shipping: true if that state taxes shipping. Only collect where you're registered.
+  tax: {mode: "rates",rates: []},
 
   // Link page
   // The Socials page (/socials), a link-in-bio page. "" = use the usual (business name, tagline, logo, theme colors).

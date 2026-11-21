@@ -5,7 +5,7 @@ This is the step-by-step list for taking the shop live. Every step says exactly 
 - **Part 1** is for **CAK3D** (the builder) before handing over. About 15 minutes.
 - **Parts 2 to 6** are for **the owner**. Most of it happens inside the shop's own dashboard, on a phone or computer.
 - **Part 7** is for later, when the shop gets its own web address (domain).
-- **Part 8** is for later, if the shop moves onto the owner's own accounts.
+- **Part 8** is for later: the owner makes his own copy on his own GitHub and Vercel, named however he likes.
 
 The live shop is **https://bdubetest.vercel.app** and the dashboard is **https://bdubetest.vercel.app/admin**.
 
@@ -46,7 +46,7 @@ The database is created, but the website needs its secret key. Supabase never le
 7. Click **Save**.
 8. Don't redeploy yet. Step 2 changes another variable, so redeploy once after both.
 
-> Never paste this key anywhere else (chat, email, code). It opens the whole database.
+> Also save it in a password manager as "Dube shop Supabase secret key" (Part 8 needs it). Never paste it anywhere else (chat, email, code): it opens the whole database.
 
 ### 2. Set a fresh login secret, and keep a copy (3 minutes)
 
@@ -245,28 +245,59 @@ Buying a domain isn't part of this handover. Once you have one, here's where it 
 
 ---
 
-## Part 8: Moving everything onto the owner's own accounts (when ready)
+## Part 8: Moving the shop onto the owner's own accounts (when ready)
 
-Until then, the shop runs on CAK3D's accounts and the owner runs everything from the dashboard. When it's time to fully own it, do these in order. Customers see no downtime.
+Until then, the shop runs on CAK3D's accounts and the owner runs everything from the dashboard. When it's time, the owner makes **his own copy** with one link: Vercel copies the shop into a new repository on his GitHub, builds it on his Vercel, and he picks the name. About 15 minutes, and customers notice nothing.
 
-**Needed from Part 1:** the **AUTH_SECRET** copy saved in the password manager. Without it, the stored customer details can't be read on the new account.
+**Before you start, have ready** (from the password manager): the **AUTH_SECRET** saved in Part 1 and the **Supabase secret key**. With those, the new copy uses the same database, so every order, customer, gift card and saved key comes along. (Products, photos, words and settings come with the files either way.)
 
-1. **Accounts:** the owner makes free accounts at **github.com**, **vercel.com** (choose **Continue with GitHub**) and **supabase.com**.
-2. **Database (Supabase).** The owner, in Supabase: his organization › **Team** › invite CAK3D's email as **Owner**. CAK3D accepts. Then CAK3D: project **Dube Family Creations** › **Project Settings** › **General** › **Transfer project** › pick the owner's organization › **Transfer Project**. The data, address and keys stay the same.
-3. **Files (GitHub).** CAK3D: repository **bdubetest** › **Settings** › **Danger Zone** › **Transfer** › **Specify an organization or username** › the owner's username › type `bdubetest` › **I understand, transfer this repository**. The owner accepts the email within a day.
-4. **Website (Vercel).** The free plan can't move projects between people, so the owner sets up his own copy (10 minutes):
-   1. Owner's Vercel › **Add New** › **Project** › **Import** `bdubetest`.
-   2. Open **Environment Variables** and add (CAK3D's Vercel shows the names; take the values from the password manager or Supabase):
-      - `AUTH_SECRET`: the saved copy (Secret)
-      - `ADMIN_PASSWORD`: any starter password (Secret)
-      - `SUPABASE_URL`: `https://pffizytlxaxskgyjrbgl.supabase.co`
-      - `SUPABASE_SECRET_KEY`: from Supabase › **Project Settings** › **API Keys** (Secret)
-      - `NEXT_PUBLIC_SITE_URL`: the shop's address
-      - `CRON_SECRET`: any new long random text (Secret)
-   3. **Deploy**. Sign in to the new address's `/admin`: everything is there.
-   4. If there's a domain: remove it from CAK3D's project (**Settings** › **Domains** › **Remove**), add it to the new one (Part 7, step 1), then do Part 7, steps 2 and 3.
-   5. Make a new GitHub token from the owner's account (Part 1, step 4, with the owner as **Resource owner**) and save it in **Accounts & keys**.
-   6. CAK3D can then delete the old Vercel project.
+> Do the switch when nobody is editing the shop. From the moment you start, make changes only on the new address.
+
+### 1. Make the accounts (5 minutes)
+
+- **GitHub:** sign up at **https://github.com/signup**.
+- **Vercel:** sign up at **https://vercel.com/signup** › **Continue with GitHub** (this links the two). Choose the free **Hobby** plan.
+
+### 2. Make your copy and name it (5 minutes)
+
+1. Open this link while signed in to Vercel:
+   **[Copy the shop to my GitHub and Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Freal-CAK3D%2FBDubeTest&project-name=dube-family-creations&repository-name=dube-family-creations&env=ADMIN_PASSWORD%2CAUTH_SECRET&envDescription=ADMIN_PASSWORD+is+the+starter+dashboard+password.+AUTH_SECRET+must+be+the+saved+copy+from+the+password+manager.)**
+2. **Git Scope / Create Git Repository:** your GitHub account. **Repository Name:** the name you want, e.g. `dube-family-creations` (no spaces). Click **Create**.
+3. Vercel asks for two values:
+   - **ADMIN_PASSWORD:** a starter password for the dashboard.
+   - **AUTH_SECRET:** paste the **saved copy** from the password manager (not a new one, or the stored customer details can't be read).
+4. Click **Deploy** and wait about 2 minutes. Your shop gets the address **`your-project-name.vercel.app`** (if the name is taken, Vercel adds a few letters; change it under **Settings** › **Domains** › **Edit**).
+
+### 3. Connect it to the shop's data (3 minutes)
+
+1. Your new Vercel project › **Settings** › **Environment Variables** › **Add Environment Variable**, one at a time (type **Secret** for the secret ones):
+   - `SUPABASE_URL` = `https://pffizytlxaxskgyjrbgl.supabase.co`
+   - `SUPABASE_SECRET_KEY` = the saved Supabase secret key (Secret)
+   - `NEXT_PUBLIC_SITE_URL` = your new address, e.g. `https://dube-family-creations.vercel.app` (or your domain)
+   - `CRON_SECRET` = any new long random text (Secret)
+2. **Deployments** › **⋯** next to the newest › **Redeploy**.
+3. Open your new address with `/admin` on the end and sign in. Everything is there: products, orders, customers, settings.
+
+### 4. Point the outside services at the new address (5 minutes)
+
+1. **Accounts & keys:** press **Connect Stripe webhook** (Stripe now sends orders to the new address).
+2. **GitHub token:** make a new one from **your** GitHub account (Part 1, step 4), choosing **your** new repository, and save it in **Accounts & keys**. Dashboard changes then save to your repository.
+3. **Domain** (if you have one): CAK3D removes it from the old project (**Settings** › **Domains** › **Remove**); you add it to yours (Part 7, step 1) and set `NEXT_PUBLIC_SITE_URL` to it (Part 7, step 2).
+4. Update **UptimeRobot**, your **social media bios** (copy from **Link page**) and **Google / Meta** (on **Sell online**) if the address changed.
+
+### 5. Turn off the old copy (CAK3D, 2 minutes)
+
+Only one copy should run (both would share the database and run the daily check).
+1. CAK3D's Vercel › project **bdtest** › **Settings** › **General** › bottom › **Delete Project**.
+2. Optional: archive the old GitHub repository (**Settings** › **Danger Zone** › **Archive this repository**).
+
+### 6. Own the database too (optional, 5 minutes)
+
+The database keeps working where it is. To own it as well:
+1. Owner: sign up at **https://supabase.com** and create an organization. **Team** › invite CAK3D's email as **Owner**.
+2. CAK3D accepts, then: project **Dube Family Creations** › **Project Settings** › **General** › **Transfer project** › pick the owner's organization › **Transfer Project**. The address and keys stay the same, so nothing else changes.
+
+> **Starting completely fresh instead?** Use a new AUTH_SECRET, and in Vercel connect a new database (**Storage** › **Create Database** › **Supabase**) instead of step 3. Products, photos, words and settings still come along (they're in the files), but orders, customers, gift cards and saved keys start empty, and keys get pasted again on **Accounts & keys**.
 
 ---
 

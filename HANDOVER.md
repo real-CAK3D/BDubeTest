@@ -1,106 +1,140 @@
 # Handover: getting Dube Family Creations ready to sell
 
-This is the step-by-step list for taking the shop live. Every step says exactly where to go, what to click, and what to paste.
+This is the step-by-step list for putting the shop on the owner's own accounts and taking it live. Every step says exactly where to go, what to click, and what to paste.
 
-- **Part 1** is for **CAK3D** (the builder) before handing over. About 15 minutes.
-- **Parts 2 to 6** are for **the owner**. Most of it happens inside the shop's own dashboard, on a phone or computer.
+- **Part 0** is for **CAK3D** (the builder): handing over the code, and cleaning up afterwards.
+- **Part 1** is for **the owner**: his own GitHub, Supabase (database) and Vercel (website), connected to each other. About 30 minutes, once.
+- **Parts 2 to 6**: the owner fills in the shop and connects payments. Almost all of it happens inside the shop's own dashboard.
 - **Part 7** is for later, when the shop gets its own web address (domain).
-- **Part 8** is for later: the owner makes his own copy on his own GitHub and Vercel, named however he likes.
 
-The live shop is **https://bdubetest.vercel.app** and the dashboard is **https://bdubetest.vercel.app/admin**.
-
-**Every secret, key and password** the shop uses is listed in **[.env.example](.env.example)**: what each one is for, where to get it, where to paste it, and whether it's done yet. Real values are never stored on GitHub (this repository is public). They live in Vercel's Environment Variables or the dashboard's **Accounts & keys**, and a copy of each belongs in a password manager.
+**Every secret, key and password** the shop uses is listed in **[.env.example](.env.example)**: what each one is for, where to get it, and where to paste it. Real values never go on GitHub. They go in Vercel's Environment Variables or the dashboard's **Accounts & keys**, and a copy of each belongs in a password manager (Bitwarden, 1Password, iCloud Keychain or Google Password Manager).
 
 Everything below is on free plans. The only costs are the usual payment fees (Stripe or PayPal, about 3% per sale) and, later, a domain name (about $10 to $20 a year).
 
----
+### What comes with the code
 
-## What's already done
-
-These are set up and working. Nothing to do.
-
-- The website, hosted on **Vercel** (project `bdtest`), saved on **GitHub** (`real-CAK3D/bdubetest`).
-- The **database** on **Supabase** (project "Dube Family Creations"): table, photo storage and security rules are created. It only needs its key connected (Part 1, step 1).
-- **Security settings** on Vercel: the login secret, the dashboard password, the site address and a secret that protects the daily self-check (`CRON_SECRET`).
-- **GitHub**: every change is checked automatically (it must build and pass a security audit). Dependabot opens a pull request each week when a package the shop uses gets a security fix.
-- **Daily self-check**: every day the shop checks itself, sends the owner's phone a notification if something important is broken, and saves a weekly backup.
-- **Sales tax**: automatic. Once the shop's ZIP is typed in (Part 2), the shop knows its state and charges that state's typical rate on orders shipped there. Orders to other states get no tax. The rate can be changed in one box.
+- The whole shop: pages, products, photos, words, settings, the dashboard.
+- **Automatic checks on GitHub**: every change must build and pass a security audit, and Dependabot opens a pull request each week when a package the shop uses gets a security fix.
+- **A daily self-check** (it sends the owner's phone a notification if something important breaks) and a weekly backup.
+- **Automatic sales tax**: once the shop's ZIP is typed in (Part 2), the shop knows its state and charges that state's typical rate on orders shipped there; other states get no tax.
 
 ---
 
-## Part 1: CAK3D, before handing over (about 15 minutes)
+## Part 0: CAK3D (the builder)
 
-### 1. Connect the database key (2 minutes)
+### Before handing over: test on your own accounts (optional)
 
-The database is created, but the website needs its secret key. Supabase never lets software read that key, so it's a quick copy and paste.
+Your test copy runs at **https://bdubetest.vercel.app** with a test database on your Supabase ("Dube Family Creations"). To make it save to that database, paste its secret key into your Vercel once: supabase.com/dashboard › **Dube Family Creations** › **Project Settings** › **API Keys** › copy the **secret key** (`sb_secret_...`) › vercel.com › project **bdtest** › **Settings** › **Environment Variables** › **Add Environment Variable**: key `SUPABASE_SECRET_KEY`, the value, **Save** › **Deployments** › **⋯** › **Redeploy**. **Site health** in the dashboard then says "Saved in Supabase".
 
-1. Go to **https://supabase.com/dashboard** and sign in.
-2. Click the project **Dube Family Creations**.
-3. In the left sidebar, click the gear icon **Project Settings**, then **API Keys**.
-4. Under **Secret keys**, copy the key that starts with `sb_secret_` (click the copy icon; create one if there isn't one yet). If you only see the older keys, copy the **service_role** key instead.
-5. Go to **https://vercel.com/dashboard**, click the project **bdtest**, then **Settings**, then **Environment Variables**.
-6. Click **Add Environment Variable** and fill it in:
-   - **Key:** `SUPABASE_SECRET_KEY`
-   - **Value:** paste the key
-   - Type **Secret** (Sensitive), environments **Production** and **Preview**
-7. Click **Save**.
-8. Don't redeploy yet. Step 2 changes another variable, so redeploy once after both.
+### Handing over the code (2 minutes)
 
-> Also save it in a password manager as "Dube shop Supabase secret key" (Part 8 needs it). Never paste it anywhere else (chat, email, code): it opens the whole database.
+1. Get the owner's **GitHub username** (after he does Part 1, step 1).
+2. On GitHub, open the repository **real-CAK3D/bdubetest** › **Settings** (top of the repository) › scroll to the bottom, **Danger Zone** › **Transfer**.
+3. **New owner:** choose **Specify an organization or username** and type his username.
+4. Type `bdubetest` to confirm › **I understand, transfer this repository**.
+5. He gets an email and must accept it **within one day**. You stay on as a collaborator; GitHub redirects the old address to the new one.
 
-### 2. Set a fresh login secret, and keep a copy (3 minutes)
+### After his shop is live (5 minutes)
 
-`AUTH_SECRET` locks the customer details stored in the database. Vercel never shows it again after it's saved. Without a copy, the shop could never be moved to the owner's own Vercel account (Part 8). The database is brand new and empty, so now is the right moment to set one you keep.
-
-1. Make a long random secret. On a computer, open **https://www.random.org/strings/?num=1&len=20&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new** twice and join the two results together (40 characters). Or use your password manager's generator (40+ characters, letters and numbers).
-2. **Save it in a password manager** (Bitwarden, 1Password, iCloud Keychain, Google Password Manager) named "Dube shop AUTH_SECRET". Give the owner a copy the same way, never by text or email in plain view.
-3. In Vercel › **bdtest** › **Settings** › **Environment Variables**, find **AUTH_SECRET**, click **⋯** › **Edit**, paste the new value, and **Save**.
-4. While you're there, check **ADMIN_PASSWORD**. This is the **starter password** the owner uses the very first time he signs in (he then picks his own). Edit it to something you'll give him, and save.
-5. Go to **Deployments**, click **⋯** next to the newest one, then **Redeploy**, then **Redeploy** again. Wait about 2 minutes.
-
-### 3. Check it worked (1 minute)
-
-1. Open **https://bdubetest.vercel.app/admin**. Sign in with your name and the starter password (you'll be asked to choose your own password: do it).
-2. In the menu, open **Site health**. **Saving data** should say "Saved in Supabase." with a green check.
-
-> Accounts, test orders and test settings made before this point were in temporary storage and are gone; that's expected. Products, photos and words come from the GitHub file and are still there.
-
-### 4. Let the dashboard save to GitHub (3 minutes)
-
-Changes made in the dashboard (prices, words, products) are saved back into the GitHub repository so nothing is ever lost. That needs a GitHub token from the account that owns the repository (yours, for now).
-
-1. On GitHub, click your profile picture (top right) › **Settings**.
-2. In the left sidebar, at the bottom, click **Developer settings**.
-3. Click **Personal access tokens** › **Fine-grained tokens** › **Generate new token**.
-4. Fill in:
-   - **Token name:** `Dube shop dashboard`
-   - **Expiration:** the longest offered, or No expiration
-   - **Resource owner:** you
-   - **Repository access:** **Only select repositories**, then pick `real-CAK3D/bdubetest`
-   - **Permissions** › **Repository permissions** › **Contents:** **Read and write**
-5. Click **Generate token** and copy it (it starts with `github_pat_`). It is shown only once.
-6. In the shop dashboard, open **Accounts & keys**, find **GitHub token**, paste, and **Save**.
-
-### 5. Give the owner access (2 minutes)
-
-- **Shop dashboard:** send him **https://bdubetest.vercel.app/admin**, the starter password from step 2, and tell him to sign in with his first name.
-- **GitHub** (so he can see the files; optional): repository **real-CAK3D/bdubetest** › **Settings** › **Collaborators** › **Add people** › type his GitHub username › **Add**. He accepts the email invite.
-- **Supabase** (optional): **https://supabase.com/dashboard** › your organization **CAK3D** › **Team** › invite his email as **Developer**. The invite lasts 24 hours.
-- **Vercel:** inviting people needs a paid Vercel plan, and he doesn't need it. Everything he does is in the shop dashboard.
+Delete your test copies so only his runs:
+1. Vercel › project **bdtest** › **Settings** › **General** › bottom › **Delete Project**.
+2. Supabase › project **Dube Family Creations** › **Project Settings** › **General** › bottom › **Delete project**. (Unpause Arachnotes afterwards if you want it back: Supabase › **Arachnotes** › **Restore project**.)
+3. In GitHub, he can remove you as a collaborator if he likes: repository › **Settings** › **Collaborators**.
 
 ---
 
-## Part 2: The owner, first sign-in and shop details (15 minutes)
+## Part 1: The owner, your own accounts (about 30 minutes, once)
 
-### 1. Sign in
+Use the same email for all three accounts. Keep a note open in your password manager as you go: you'll save a few values there.
 
-1. Open **https://bdubetest.vercel.app/admin** (bookmark it, or add it to your home screen: in Safari tap **Share** › **Add to Home Screen**; in Chrome tap **⋮** › **Add to Home screen**).
-2. **Your name:** your first name. **Password:** the starter password you were given.
-3. Choose your own password (8+ characters) and add your email (used if you ever forget the password). Press **Save and continue**.
+### 1. Make your three free accounts (10 minutes)
+
+1. **GitHub** (stores the shop's code): **https://github.com/signup**. Pick a username and send it to CAK3D.
+2. **Supabase** (the database: orders, customers, photos): **https://supabase.com/dashboard/sign-up** › **Continue with GitHub**.
+3. **Vercel** (runs the website): **https://vercel.com/signup** › choose **Hobby** (free) › **Continue with GitHub**. This links Vercel to your GitHub so it can see your code.
+
+### 2. Accept the shop's code (1 minute)
+
+1. Watch for an email from GitHub: "**CAK3D** wants to transfer **bdubetest** to you".
+2. Click the link and **accept** (it expires after one day).
+3. The repository now shows under your account: `https://github.com/YOUR-USERNAME/bdubetest`.
+
+### 3. Create the database in Supabase (5 minutes)
+
+1. Go to **https://supabase.com/dashboard** › **New project**.
+2. Fill in:
+   - **Organization:** your own (it was made when you signed up).
+   - **Project name:** `Dube Family Creations`
+   - **Database Password:** click **Generate a password**, then **copy it into your password manager** as "Dube shop database password" (you'll rarely need it, but keep it).
+   - **Region:** **East US** (closest to most US customers and to the website).
+3. Click **Create new project** and wait about 2 minutes until it's ready.
+4. **Make the shop's table.** In the left sidebar, click **SQL Editor** › **New query**. Open the file [`supabase/schema.sql`](supabase/schema.sql) in your GitHub repository, click the **copy** icon (top right of the file), paste it into the editor, and click **Run**. It should say **Success. No rows returned.** (Safe to run again if unsure.)
+5. **Copy the two values the website needs** (save both in your password manager):
+   - **Project URL:** click **Connect** at the top of the project. Copy the URL that looks like `https://abcdefgh.supabase.co`.
+   - **Secret key:** left sidebar › gear icon **Project Settings** › **API Keys**. Under **Secret keys**, copy the key that starts with `sb_secret_` (create one if there isn't one). If you only see the older keys, copy the **service_role** key.
+
+> The secret key opens the whole database. Paste it only into Vercel (next step) and your password manager. Never in a text, email or chat.
+
+### 4. Make two passwords for the website (2 minutes)
+
+In your password manager, generate and save:
+- **AUTH_SECRET:** 40+ random letters and numbers (use the password generator, length 40+, no symbols). It locks logins and the customer details. **Never change it once there are real orders**, and keep the copy: Vercel never shows it again.
+- **CRON_SECRET:** another 40+ random letters and numbers (protects the daily self-check).
+
+And pick a **starter password** for the dashboard (**ADMIN_PASSWORD**). You use it once, the first time you sign in, then choose your own.
+
+### 5. Put the website on Vercel and connect the database (5 minutes)
+
+1. Go to **https://vercel.com/new**.
+2. Under **Import Git Repository**, find **bdubetest** and click **Import**. (Not listed? Click **Adjust GitHub App Permissions** › allow access to **bdubetest** › back to Vercel.)
+3. **Project Name:** type the name you want, e.g. `dube-family-creations`. Your web address becomes `dube-family-creations.vercel.app` (Vercel adds a few letters if it's taken).
+4. Leave **Framework Preset** (Next.js) and the build settings as they are.
+5. Open **Environment Variables** and add these one at a time (type the **Key**, paste the **Value**, click **Add**):
+
+   | Key | Value |
+   | --- | --- |
+   | `ADMIN_PASSWORD` | your starter password |
+   | `AUTH_SECRET` | from your password manager |
+   | `CRON_SECRET` | from your password manager |
+   | `SUPABASE_URL` | the Project URL from Supabase |
+   | `SUPABASE_SECRET_KEY` | the secret key from Supabase |
+
+6. Click **Deploy** and wait about 2 minutes. You'll see "Congratulations" and your web address.
+7. **Tell the shop its address:** project › **Settings** › **Environment Variables** › **Add Environment Variable**: key `NEXT_PUBLIC_SITE_URL`, value your address with `https://` (e.g. `https://dube-family-creations.vercel.app`) › **Save**. Then **Deployments** › **⋯** next to the newest › **Redeploy** › **Redeploy**.
+
+That's the only back and forth: **Vercel needs the two values from Supabase**, and Supabase needs nothing from Vercel.
+
+### 6. First sign-in and check it all connected (3 minutes)
+
+1. Open your address with **`/admin`** on the end, e.g. `https://dube-family-creations.vercel.app/admin`. Bookmark it, or add it to your home screen (Safari: **Share** › **Add to Home Screen**; Chrome: **⋮** › **Add to Home screen**).
+2. **Your name:** your first name. **Password:** your starter password.
+3. Choose your own password (8+ characters) and add your email (used if you ever forget it). **Save and continue**.
+4. Menu › **Site health**: **Saving data** should say **Saved in Supabase** with a green check. (If it says it can't save, check the two Supabase values in Vercel for typos, then redeploy. If it mentions the table, run step 3.4 again.)
 
 > The shop's **Help** button (the **?** at the top) explains every page. **Setup** in the menu shows these steps with green checkmarks as you finish them.
 
-### 2. Your shop's location (this sets your sales tax)
+### 7. Let the dashboard save to your GitHub (3 minutes)
+
+Changes made in the dashboard (prices, words, products) are saved back into your GitHub repository, so nothing is ever lost.
+
+1. On GitHub, click your profile picture (top right) › **Settings**.
+2. Left sidebar, at the bottom › **Developer settings** › **Personal access tokens** › **Fine-grained tokens** › **Generate new token**.
+3. Fill in:
+   - **Token name:** `Dube shop dashboard`
+   - **Expiration:** the longest offered, or No expiration
+   - **Resource owner:** you
+   - **Repository access:** **Only select repositories** › pick **bdubetest**
+   - **Permissions** › **Repository permissions** › **Contents:** **Read and write**
+4. **Generate token** and copy it (starts with `github_pat_`; shown only once).
+5. Dashboard › **Accounts & keys** › **GitHub token** › paste › **Save**.
+
+> Tip: making the repository **private** (repository › **Settings** › **General** › bottom › **Change visibility** › **Make private**) also turns on a weekly locked backup copy into it. Vercel keeps deploying either way.
+
+---
+
+## Part 2: Your shop's details (15 minutes)
+
+### 1. Your shop's location (this sets your sales tax)
 
 1. Menu › **Settings** › **Store**.
 2. **Your ZIP code (ship from):** type the ZIP code you ship from (your home or shop).
@@ -116,20 +150,20 @@ To check or fine-tune it: **Settings** › **Payments & tax** › **Sales tax**.
 
 > Ask a tax preparer once which states you need to collect in and whether your state taxes shipping (there's a **Tax shipping too** box per state).
 
-### 3. Your contact details and words
+### 2. Your contact details and words
 
 1. Menu › **Words & logos** › **Contact page**: your email, phone (use the Google Voice number from Part 4), and location (city, state).
 2. **Socials** (same page): paste your Facebook, Instagram, TikTok links; pick more under **Add a link**.
 3. Check the **About** tab (your story) and **Policies & footer** (the small print at the bottom).
 4. **Save changes**.
 
-### 4. Which state's laws apply to your terms
+### 3. Which state's laws apply to your terms
 
 Menu › **Words & logos** › **Policies & footer** › **State whose laws apply**: type your state, e.g. `Oklahoma`. **Save changes**.
 
 The shipping, returns, privacy and terms pages are already written for how this shop works. Read them once (they're linked at the bottom of the shop). For full peace of mind, have a local attorney look them over once.
 
-### 5. Your link page (for your Instagram/TikTok/Facebook bio)
+### 4. Your link page (for your Instagram/TikTok/Facebook bio)
 
 Menu › **Link page**: your picture, name, short bio and a look. Copy **Your link** and paste it in your social media bios. It shows how to do that on each app.
 
@@ -192,7 +226,7 @@ Keeps your personal number private. Calls and texts ring on your phone through t
 
 ### New orders on your phone
 
-1. Add the dashboard to your home screen (Part 2, step 1) and open it from there.
+1. Add the dashboard to your home screen (Part 1, step 6) and open it from there.
 2. Menu › **Settings** › **Notifications** › **Turn on notifications** › **Allow**.
 3. Press **Send a test**. You'll also see the number of unread notifications on the app icon.
 
@@ -203,7 +237,7 @@ The shop checks itself every day, but if the whole site is down it can't send an
 1. Sign up at **https://uptimerobot.com** (free plan).
 2. Click **New monitor** (or **+ Add New Monitor**).
 3. **Monitor type:** **HTTP(s)**.
-4. **URL:** `https://bdubetest.vercel.app/api/health` (also shown on the dashboard's **Site health** page with a **Copy** button).
+4. **URL:** `https://YOUR-SHOP.vercel.app/api/health` (also shown on the dashboard's **Site health** page with a **Copy** button).
 5. **Friendly name:** `Dube shop`. **Monitoring interval:** 5 minutes (the free plan's fastest).
 6. Under alert contacts / **How will we notify you?**, tick your **email**. Install the **UptimeRobot** app and sign in to get push alerts too (text messages cost extra).
 7. **Create monitor**. Make sure your email is ticked for this monitor, or no alerts are sent.
@@ -226,12 +260,12 @@ Menu › **Site health** › **Download a backup** about once a month, and keep 
 
 Buying a domain isn't part of this handover. Once you have one, here's where it goes and what to update, in this order.
 
-**Buy it.** Easiest: in Vercel (project **bdtest** › **Settings** › **Domains** › **Buy**). DNS is then done for you. Or buy at Namecheap, Cloudflare, Squarespace Domains or GoDaddy.
+**Buy it.** Easiest: in Vercel (your project › **Settings** › **Domains** › **Buy**). DNS is then done for you. Or buy at Namecheap, Cloudflare, Squarespace Domains or GoDaddy.
 
-1. **Point it at the shop.** Vercel › **bdtest** › **Settings** › **Domains** › **Add Existing** › type `yourshop.com` › **Add**. Accept adding `www.yourshop.com` too (redirect one to the other).
+1. **Point it at the shop.** Vercel › your project › **Settings** › **Domains** › **Add Existing** › type `yourshop.com` › **Add**. Accept adding `www.yourshop.com` too (redirect one to the other).
    - If you bought it in Vercel: nothing else to do.
    - If you bought it elsewhere: Vercel shows the exact records to add. Usually an **A** record for `yourshop.com` and a **CNAME** for `www`, with values Vercel shows for this project. Log in to where you bought the domain › **DNS** / **DNS records** › add them exactly as shown. It turns green in minutes to a few hours.
-2. **Tell the shop its new address.** Vercel › **bdtest** › **Settings** › **Environment Variables** › **NEXT_PUBLIC_SITE_URL** › **⋯ Edit** › `https://yourshop.com` › **Save**, then **Deployments** › **⋯** › **Redeploy**.
+2. **Tell the shop its new address.** Vercel › your project › **Settings** › **Environment Variables** › **NEXT_PUBLIC_SITE_URL** › **⋯ Edit** › `https://yourshop.com` › **Save**, then **Deployments** › **⋯** › **Redeploy**.
 3. **Stripe:** shop dashboard › **Accounts & keys** › **Connect Stripe webhook** (moves it to the new address). For Apple Pay: Stripe › **Settings** › **Payment methods** › **Apple Pay** › add the new domain.
 4. **Customer emails (Resend), now possible with a domain.** These let the shop email customers by itself: gift card codes, how-to-pay details, sign-in codes and tracking numbers.
    1. Sign up at **https://resend.com** (free plan).
@@ -245,73 +279,20 @@ Buying a domain isn't part of this handover. Once you have one, here's where it 
 
 ---
 
-## Part 8: Moving the shop onto the owner's own accounts (when ready)
-
-Until then, the shop runs on CAK3D's accounts and the owner runs everything from the dashboard. When it's time, the owner makes **his own copy** with one link: Vercel copies the shop into a new repository on his GitHub, builds it on his Vercel, and he picks the name. About 15 minutes, and customers notice nothing.
-
-**Before you start, have ready** (from the password manager): the **AUTH_SECRET** saved in Part 1 and the **Supabase secret key**. With those, the new copy uses the same database, so every order, customer, gift card and saved key comes along. (Products, photos, words and settings come with the files either way.)
-
-> Do the switch when nobody is editing the shop. From the moment you start, make changes only on the new address.
-
-### 1. Make the accounts (5 minutes)
-
-- **GitHub:** sign up at **https://github.com/signup**.
-- **Vercel:** sign up at **https://vercel.com/signup** › **Continue with GitHub** (this links the two). Choose the free **Hobby** plan.
-
-### 2. Make your copy and name it (5 minutes)
-
-1. Open this link while signed in to Vercel:
-   **[Copy the shop to my GitHub and Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Freal-CAK3D%2FBDubeTest&project-name=dube-family-creations&repository-name=dube-family-creations&env=ADMIN_PASSWORD%2CAUTH_SECRET&envDescription=ADMIN_PASSWORD+is+the+starter+dashboard+password.+AUTH_SECRET+must+be+the+saved+copy+from+the+password+manager.)**
-2. **Git Scope / Create Git Repository:** your GitHub account. **Repository Name:** the name you want, e.g. `dube-family-creations` (no spaces). Click **Create**.
-3. Vercel asks for two values:
-   - **ADMIN_PASSWORD:** a starter password for the dashboard.
-   - **AUTH_SECRET:** paste the **saved copy** from the password manager (not a new one, or the stored customer details can't be read).
-4. Click **Deploy** and wait about 2 minutes. Your shop gets the address **`your-project-name.vercel.app`** (if the name is taken, Vercel adds a few letters; change it under **Settings** › **Domains** › **Edit**).
-
-### 3. Connect it to the shop's data (3 minutes)
-
-1. Your new Vercel project › **Settings** › **Environment Variables** › **Add Environment Variable**, one at a time (type **Secret** for the secret ones):
-   - `SUPABASE_URL` = `https://pffizytlxaxskgyjrbgl.supabase.co`
-   - `SUPABASE_SECRET_KEY` = the saved Supabase secret key (Secret)
-   - `NEXT_PUBLIC_SITE_URL` = your new address, e.g. `https://dube-family-creations.vercel.app` (or your domain)
-   - `CRON_SECRET` = any new long random text (Secret)
-2. **Deployments** › **⋯** next to the newest › **Redeploy**.
-3. Open your new address with `/admin` on the end and sign in. Everything is there: products, orders, customers, settings.
-
-### 4. Point the outside services at the new address (5 minutes)
-
-1. **Accounts & keys:** press **Connect Stripe webhook** (Stripe now sends orders to the new address).
-2. **GitHub token:** make a new one from **your** GitHub account (Part 1, step 4), choosing **your** new repository, and save it in **Accounts & keys**. Dashboard changes then save to your repository.
-3. **Domain** (if you have one): CAK3D removes it from the old project (**Settings** › **Domains** › **Remove**); you add it to yours (Part 7, step 1) and set `NEXT_PUBLIC_SITE_URL` to it (Part 7, step 2).
-4. Update **UptimeRobot**, your **social media bios** (copy from **Link page**) and **Google / Meta** (on **Sell online**) if the address changed.
-
-### 5. Turn off the old copy (CAK3D, 2 minutes)
-
-Only one copy should run (both would share the database and run the daily check).
-1. CAK3D's Vercel › project **bdtest** › **Settings** › **General** › bottom › **Delete Project**.
-2. Optional: archive the old GitHub repository (**Settings** › **Danger Zone** › **Archive this repository**).
-
-### 6. Own the database too (optional, 5 minutes)
-
-The database keeps working where it is. To own it as well:
-1. Owner: sign up at **https://supabase.com** and create an organization. **Team** › invite CAK3D's email as **Owner**.
-2. CAK3D accepts, then: project **Dube Family Creations** › **Project Settings** › **General** › **Transfer project** › pick the owner's organization › **Transfer Project**. The address and keys stay the same, so nothing else changes.
-
-> **Starting completely fresh instead?** Use a new AUTH_SECRET, and in Vercel connect a new database (**Storage** › **Create Database** › **Supabase**) instead of step 3. Products, photos, words and settings still come along (they're in the files), but orders, customers, gift cards and saved keys start empty, and keys get pasted again on **Accounts & keys**.
-
----
-
 ## Where things are (quick reference)
+
+Replace `YOUR-SHOP` with your Vercel address (or your domain later).
 
 | What | Where |
 | --- | --- |
-| Shop | https://bdubetest.vercel.app |
-| Dashboard | https://bdubetest.vercel.app/admin |
-| Health check address (for UptimeRobot) | https://bdubetest.vercel.app/api/health |
-| Product list for Google / Facebook | https://bdubetest.vercel.app/feed.xml |
-| Link-in-bio page | https://bdubetest.vercel.app/socials |
-| Website hosting | Vercel › project `bdtest` |
-| Files | GitHub › `real-CAK3D/bdubetest` |
-| Database and photos | Supabase › project `Dube Family Creations` |
+| Shop | https://YOUR-SHOP.vercel.app |
+| Dashboard | https://YOUR-SHOP.vercel.app/admin |
+| Health check address (for UptimeRobot) | https://YOUR-SHOP.vercel.app/api/health |
+| Product list for Google / Facebook | https://YOUR-SHOP.vercel.app/feed.xml |
+| Link-in-bio page | https://YOUR-SHOP.vercel.app/socials |
+| Website hosting and its secrets | vercel.com › your project › **Settings** › **Environment Variables** |
+| Code | github.com › your **bdubetest** repository |
+| Database and photos | supabase.com › your project **Dube Family Creations** |
 | Keys (Stripe, PayPal, Resend, GitHub, Shippo, AI) | Dashboard › **Accounts & keys** (stored encrypted) |
 | Everything else (prices, words, tax, payments) | Dashboard |
+| List of every secret | [.env.example](.env.example) |

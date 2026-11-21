@@ -37,7 +37,7 @@ export const SETUP_STEPS: SetupStep[] = [
     check: "vercel",
     blocks: [
       { p: "The website is built and running, saved on GitHub and hosted on Vercel. You don't need accounts there to run the shop: everything happens in this dashboard." },
-      { tip: "The full click-by-click list (including moving everything onto your own accounts later, and adding your own web address) is in **HANDOVER.md** in the shop's GitHub repository." },
+      { tip: "The full click-by-click list (your own GitHub, Supabase and Vercel, connecting them, and adding your own web address later) is in **HANDOVER.md** in your GitHub repository." },
     ],
     links: [{ label: "Open HANDOVER.md", url: "https://github.com/real-CAK3D/bdubetest/blob/main/HANDOVER.md" }],
   },
@@ -55,18 +55,18 @@ export const SETUP_STEPS: SetupStep[] = [
   {
     id: "supabase",
     title: "Database (Supabase)",
-    time: "2 min",
+    time: "5 min",
     check: "database",
     blocks: [
-      { p: "Your orders, customers and photos are kept in a Supabase database. It's already created and locked so only this website can read it." },
+      { p: "Your orders, customers and photos are kept in your own Supabase database. Vercel needs two values from it; Supabase needs nothing back." },
       {
         steps: [
-          "If this step isn't green: open supabase.com/dashboard > project **Dube Family Creations** > **Project Settings** > **API Keys**, and copy the **secret key** (starts with `sb_secret_`).",
-          "In Vercel: project > **Settings** > **Environment Variables** > **Add Environment Variable**: key `SUPABASE_SECRET_KEY`, paste the value, type **Secret**, save.",
-          "Go to **Deployments**, click **⋯** on the newest one, then **Redeploy**.",
+          "supabase.com/dashboard > **New project** (name `Dube Family Creations`, **Generate a password** and save it, region **East US**) > **Create new project**.",
+          "**SQL Editor** > **New query** > paste the SQL shown under this step (also in `supabase/schema.sql`) > **Run**.",
+          "Copy the **Project URL** (**Connect** at the top) and the **secret key** (**Project Settings** > **API Keys**, starts with `sb_secret_`).",
+          "Vercel > your project > **Settings** > **Environment Variables**: add `SUPABASE_URL` and `SUPABASE_SECRET_KEY` with those values, then **Deployments** > **⋯** > **Redeploy**.",
         ],
       },
-      { tip: "If it shows an error about the table, open Supabase > **SQL Editor**, paste the SQL shown under this step, and press **Run**." },
     ],
     links: [{ label: "Supabase dashboard", url: "https://supabase.com/dashboard" }],
   },

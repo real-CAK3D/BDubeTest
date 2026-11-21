@@ -10,7 +10,7 @@ Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 
 1. [Your shop is online](#accounts), done
 2. [Check your login](#password), 1 min
-3. [Database (Supabase)](#supabase), 2 min
+3. [Database (Supabase)](#supabase), 5 min
 4. [Your ZIP, address and contact details](#your-info), 10 min
 
 **Payments**
@@ -50,7 +50,7 @@ Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 
 The website is built and running, saved on GitHub and hosted on Vercel. You don't need accounts there to run the shop: everything happens in this dashboard.
 
-> **Tip:** The full click-by-click list (including moving everything onto your own accounts later, and adding your own web address) is in **HANDOVER.md** in the shop's GitHub repository.
+> **Tip:** The full click-by-click list (your own GitHub, Supabase and Vercel, connecting them, and adding your own web address later) is in **HANDOVER.md** in your GitHub repository.
 
 Links: [Open HANDOVER.md](https://github.com/real-CAK3D/bdubetest/blob/main/HANDOVER.md)
 
@@ -66,13 +66,12 @@ To change the password later, use **Settings > Password**.
 <a id="supabase"></a>
 ### 3. Database (Supabase)
 
-Your orders, customers and photos are kept in a Supabase database. It's already created and locked so only this website can read it.
+Your orders, customers and photos are kept in your own Supabase database. Vercel needs two values from it; Supabase needs nothing back.
 
-1. If this step isn't green: open supabase.com/dashboard > project **Dube Family Creations** > **Project Settings** > **API Keys**, and copy the **secret key** (starts with `sb_secret_`).
-2. In Vercel: project > **Settings** > **Environment Variables** > **Add Environment Variable**: key `SUPABASE_SECRET_KEY`, paste the value, type **Secret**, save.
-3. Go to **Deployments**, click **⋯** on the newest one, then **Redeploy**.
-
-> **Tip:** If it shows an error about the table, open Supabase > **SQL Editor**, paste the SQL shown under this step, and press **Run**.
+1. supabase.com/dashboard > **New project** (name `Dube Family Creations`, **Generate a password** and save it, region **East US**) > **Create new project**.
+2. **SQL Editor** > **New query** > paste the SQL shown under this step (also in `supabase/schema.sql`) > **Run**.
+3. Copy the **Project URL** (**Connect** at the top) and the **secret key** (**Project Settings** > **API Keys**, starts with `sb_secret_`).
+4. Vercel > your project > **Settings** > **Environment Variables**: add `SUPABASE_URL` and `SUPABASE_SECRET_KEY` with those values, then **Deployments** > **⋯** > **Redeploy**.
 
 Links: [Supabase dashboard](https://supabase.com/dashboard)
 

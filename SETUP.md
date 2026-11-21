@@ -8,10 +8,10 @@ Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 
 **Get online**
 
-1. [Make your accounts](#accounts), 10 min
-2. [Take over the repository and put it online](#copy), 10 min
-3. [Check your login](#password), 1 min
-4. [Connect Supabase (your database and photo storage)](#supabase), 3 min
+1. [Your shop is online](#accounts), done
+2. [Check your login](#password), 1 min
+3. [Database (Supabase)](#supabase), 2 min
+4. [Your ZIP, address and contact details](#your-info), 10 min
 
 **Payments**
 
@@ -19,6 +19,7 @@ Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 6. [Webhook connected](#webhook), 1 click
 7. [Turn on Apple Pay and Google Pay](#wallets), 2 min
 8. [Turn on customer receipts](#receipts), 1 min
+18. [PayPal, Venmo, Cash App, Zelle (optional)](#paypal) (optional), 10 min
 
 **Products**
 
@@ -32,44 +33,29 @@ Handing the shop over to a new owner? Start with [HANDOFF.md](HANDOFF.md).
 **Extras**
 
 15. [Save dashboard edits to GitHub](#github-sync), 5 min
-16. [Customer emails](#email) (optional), 10 min
+20. [A free business phone number (Google Voice)](#business-phone) (optional), 10 min
+19. [Get told if the site goes down (UptimeRobot)](#uptime) (optional), 5 min
+21. [Sales tax](#tax) (optional), 10 min
 17. [Your own web address](#domain) (optional), 10 min
-19. [Sales tax](#tax) (optional), 10 min
+16. [Customer emails](#email) (optional), 10 min
 
 **Go live**
 
-20. [Go live](#live), 15 min
+22. [Go live](#live), 15 min
 
 ## Get online
 
 <a id="accounts"></a>
-### 1. Make your accounts
+### 1. Your shop is online
 
-You need three free accounts. Use the same email for all of them to keep things simple.
+The website is built and running, saved on GitHub and hosted on Vercel. You don't need accounts there to run the shop: everything happens in this dashboard.
 
-1. **GitHub** (stores the site's files): sign up at github.com and pick a username. Send that username to whoever built the site, so they can hand the shop's repository over to you.
-2. **Vercel** (runs the website): go to vercel.com, choose **Sign Up**, then **Continue with GitHub**. This links the two.
-3. **Stripe** (takes payments, including Apple Pay and Google Pay): sign up at stripe.com. You can test right away; Stripe asks for business and bank details before real payments.
+> **Tip:** The full click-by-click list (including moving everything onto your own accounts later, and adding your own web address) is in **HANDOVER.md** in the shop's GitHub repository.
 
-> **Tip:** Supabase (the database) doesn't need its own sign-up. Vercel creates it for you in step 4.
-
-Links: [GitHub sign up](https://github.com/signup), [Vercel sign up](https://vercel.com/signup), [Stripe sign up](https://dashboard.stripe.com/register)
-
-<a id="copy"></a>
-### 2. Take over the repository and put it online
-
-The shop's repository is transferred to your GitHub account, so it's fully yours (not a fork or a copy). Everything comes with it: every page, product, photo and setting.
-
-1. Watch for an email from GitHub saying a repository is being transferred to you, and click **Accept** (it expires after a day). The repository now shows under your account.
-2. In Vercel, click **Add New > Project**. Your repository is in the list (if not, click **Adjust GitHub App Permissions** and allow it). Click **Import**.
-3. Leave every setting as it is. Open **Environment Variables** and add **ADMIN_PASSWORD** with the password you'll use for the dashboard.
-4. Add **AUTH_SECRET** too: 40+ random characters (mash the keyboard). You'll never need to remember it.
-5. Click **Deploy** and wait about two minutes. You get a web address like `bdubetest.vercel.app`. To pick your own name, open the project's **Settings > Domains**, click **Add Domain** and type a name ending in `.vercel.app`.
-
-Links: [Vercel: import a project](https://vercel.com/new)
+Links: [Open HANDOVER.md](https://github.com/real-CAK3D/bdubetest/blob/main/HANDOVER.md)
 
 <a id="password"></a>
-### 3. Check your login
+### 2. Check your login
 
 Go to your new web address with `/admin` on the end and log in with your ADMIN_PASSWORD. You're in the dashboard you're reading now.
 
@@ -78,17 +64,28 @@ To change the password later, use **Settings > Password**.
 > **Tip:** If AUTH_SECRET shows a warning below, add it in Vercel > your project > Settings > Environment Variables, then redeploy (Deployments > ⋯ > Redeploy).
 
 <a id="supabase"></a>
-### 4. Connect Supabase (your database and photo storage)
+### 3. Database (Supabase)
 
-1. In Vercel, open your project and click the **Storage** tab.
-2. Click **Create Database**, choose **Supabase**, and follow the prompts (the free plan is plenty). Pick the region closest to you.
-3. When asked which project to connect, choose your shop and keep all environments ticked.
-4. Go to **Deployments**, click **⋯** on the newest one, then **Redeploy**.
-5. Come back to this page. The database and photo steps should turn green. The site creates its table and photo folder by itself on the first visit.
+Your orders, customers and photos are kept in a Supabase database. It's already created and locked so only this website can read it.
 
-> **Tip:** If the database step shows an error about the table, open Supabase (Vercel > Storage > your database > Open in Supabase), go to **SQL Editor**, paste the SQL shown under this step, and press **Run**.
+1. If this step isn't green: open supabase.com/dashboard > project **Dube Family Creations** > **Project Settings** > **API Keys**, and copy the **secret key** (starts with `sb_secret_`).
+2. In Vercel: project > **Settings** > **Environment Variables** > **Add Environment Variable**: key `SUPABASE_SECRET_KEY`, paste the value, type **Secret**, save.
+3. Go to **Deployments**, click **⋯** on the newest one, then **Redeploy**.
 
-Links: [Vercel dashboard](https://vercel.com/dashboard)
+> **Tip:** If it shows an error about the table, open Supabase > **SQL Editor**, paste the SQL shown under this step, and press **Run**.
+
+Links: [Supabase dashboard](https://supabase.com/dashboard)
+
+<a id="your-info"></a>
+### 4. Your ZIP, address and contact details
+
+1. **Settings > Store**: type your **ZIP code (ship from)**. This also sets your state for sales tax: orders shipped in your state (and local pickups) get its typical rate; other states get none.
+2. Same page, lower down: your **return address** for shipping labels.
+3. **Words & logos > Contact page**: email, phone, city. Add your Facebook/Instagram links under **Socials**.
+4. **Words & logos > Policies & footer**: **State whose laws apply**.
+5. Check the tax under **Settings > Payments & tax > Sales tax**. Type your exact local rate there if it's different.
+
+Links: Open Settings (dashboard, `/admin/settings`)
 
 ## Payments
 
@@ -221,7 +218,7 @@ Links: [Create a GitHub token](https://github.com/settings/personal-access-token
 
 Lets the shop email customers by itself: gift card codes, how-to-pay details for Cash App / Venmo / Zelle orders, sign-in codes for Your orders, and tracking numbers with one tap from an order.
 
-1. Sign up at resend.com (free for small shops) and add your domain under **Domains** (needs a custom domain, below).
+1. Needs your own web address first (below): Resend only sends from a domain you own. Sign up at resend.com (free) and add it under **Domains** (a subdomain like `mail.yourshop.com` is best), then add the records it shows to your DNS and press **Verify**.
 2. Create an API key under **API Keys** and save it on the **Keys** page as **Resend API key**.
 3. In **Settings > Checkout & emails**, set the sender, e.g. `Your Shop <orders@yourshop.com>`.
 
@@ -232,14 +229,37 @@ Links: [Resend](https://resend.com/signup)
 <a id="domain"></a>
 ### 17. Your own web address (optional)
 
-1. Buy a domain (for example in Vercel > Domains, or any registrar).
-2. In Vercel, open your project > **Settings > Domains**, add it, and follow the instructions to point it at Vercel.
-3. After it works, open **Keys** and press **Connect Stripe webhook** again from the new address.
+1. Buy a domain: easiest in Vercel (project > **Settings > Domains > Buy**, DNS is done for you), or at any registrar.
+2. Vercel > project > **Settings > Domains > Add Existing** > type it. If you bought it elsewhere, add the A and CNAME records Vercel shows at your registrar's DNS page.
+3. Vercel > **Settings > Environment Variables** > edit **NEXT_PUBLIC_SITE_URL** to `https://yourshop.com`, then **Deployments > ⋯ > Redeploy**.
+4. Here on **Accounts & keys**, press **Connect Stripe webhook** again. Then set up customer emails (Resend, the step above) and update your social bios and UptimeRobot with the new address.
 
 Links: [Vercel domains](https://vercel.com/domains)
 
+## Payments
+
+<a id="paypal"></a>
+### 18. PayPal, Venmo, Cash App, Zelle (optional) (optional)
+
+1. PayPal: with a PayPal **Business** account, go to developer.paypal.com > **Log in to Dashboard** > switch to **Live** > **Apps & Credentials** > **Create App** (or the Default Application). Copy the **Client ID** and **Secret**.
+2. Paste both on **Accounts & keys** (PayPal & Venmo), then tick **PayPal, Venmo and Pay Later** in **Settings > Payments & tax**.
+3. Cash App / Venmo / Zelle / cash: in **Settings > Payments & tax** tick each one and type your $cashtag, @username or Zelle email/phone.
+
+Links: [PayPal developer dashboard](https://developer.paypal.com/dashboard/)
+
+## Extras
+
+<a id="uptime"></a>
+### 19. Get told if the site goes down (UptimeRobot) (optional)
+
+1. Sign up free at uptimerobot.com.
+2. **New monitor** > type **HTTP(s)** > URL: your shop address followed by `/api/health` (copy it from **Site health**) > every 5 minutes.
+3. Tick your email as the alert contact (and install the UptimeRobot app for push alerts) > **Create monitor**.
+
+Links: [UptimeRobot](https://uptimerobot.com), Site health (dashboard, `/admin/health`)
+
 <a id="business-phone"></a>
-### 18. A free business phone number (Google Voice) (optional)
+### 20. A free business phone number (Google Voice) (optional)
 
 Give customers a separate number for calls and texts instead of your personal cell. Google Voice gives you a free US number that rings and texts on your own phone through the Google Voice app (iPhone and Android), with voicemail that's typed out for you. You can set business hours so it doesn't ring at night.
 
@@ -253,7 +273,7 @@ Give customers a separate number for calls and texts instead of your personal ce
 Links: [Google Voice](https://voice.google.com)
 
 <a id="tax"></a>
-### 19. Sales tax (optional)
+### 21. Sales tax (optional)
 
 Sales tax is added by where each order ships, with every way to pay. In **Settings > Payments & tax** choose **My own rates** (type the rate for each state you're registered in) or **Stripe Tax** (exact city and county rates; set it up in Stripe under **Settings > Tax** first; small fee per order).
 
@@ -266,7 +286,7 @@ Links: [Stripe Tax](https://dashboard.stripe.com/settings/tax)
 ## Go live
 
 <a id="live"></a>
-### 20. Go live
+### 22. Go live
 
 1. In Stripe, finish **Activate payments** (business details and bank account).
 2. Switch off **Test mode**, go to **Developers > API keys** and copy the live **Secret key** (`sk_live_`).
